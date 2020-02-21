@@ -1,9 +1,93 @@
 \chapter{基于HTTPS流量的HTTPS流量应用多视图特征识别方法的研究}\label{chap:AIBMF}
 
-
 \section{引入}
+Our insights of \emph{AIBMF} into encrypted application identification is three-fold:
+%
+\emph{(i)} SSL/TLS protocol is essentially a language of communication between mobile app client and server, the specific manifestation of this language is network flow, \emph{i.e.}, a series of packets;
+%
+\emph{(ii)} Because protocol state machine is an overall abstract description of the network flows, application fingerprints can be constructed from different protocol state information;
+%
+\emph{(iii)} Although SSL/TLS hides the payload of network flows, side-channel protocol state information is still leaked from encrypted connections. 
 
 \section{多视图特征}
+Three views are incorporated in our model which are named as packet size (PS) view, packet content type (CT) view and packet payload byte (PB) view respectively. 
+%
+This framework includes three modules: preprocessing, feature learning, and identification.
+
+
+This module first organizes raw network traffic into flows (\emph{i.e.}, the sample objects to be classified). 
+%
+The collection of the whole flows can be indicated as $D = \{{\{f_i\}}_{i=1}^{i=N}\}_{j=1}^{j=C}$ where $f_i$ means the $i^{th}$ flow. 
+%
+% In this paper, the flow objects defined by the $\{SRC_{IP}, SRC_{port}, DEST_{IP}, DEST_{port},$ $Transport Protocol\}$ tuple.
+%
+% and an inactivity timeout, with a default value of 60s.
+%
+As we already have the flow objects, we can turn to the numerical vector representation of flow.
+%
+\emph{(i)} For PS view, we form a $16$ dimensional vector $v_{ps}$ by computing the packet size of the first 16 packets (padded with -1).
+%
+\emph{(ii)} For CT view, we form a $16$ dimensional vector $v_{ct}$ by extacting the value content type field the first 16 packets (padded with -1), and it ranges ranges from 0 to 255.
+%
+\emph{(iii)} For PB view, we form a $16\times64 = 1024$  dimensional vector $v_{pb}$ by regarding payload byte value as the corresponding ASCII code, and further convert into a integer of 0-255 (padded with -1). 
+\begin{itemize}
+
+	\item \textbf{Feature learning from PB view:} 
+	%
+	We use a 1D-CNN network architecture to process the input numerical vector $v_{pb}$.
+	%
+	In the 1D-CNN, two-layer convolutional are used, the number of convolution kernels used in each layer is 64, and the size of the convolution kernel is $1 \times 3$, max pooling layer used. 
+	%
+	Therefore, raw payload byte sequence is transformed into a 64-dimensional vector $\alpha$.
+	%
+	\begin{equation}
+		\alpha = \mathit{1\!D\!-\!C\!N\!N}(v_{pb})
+	\end{equation}
+	%
+	% We let $v_{i:i+j^{pb}}$ refer to the concatenation of ASCII code of payload $v_i,v_{i+1},...,v_{i+j}$.
+	% %
+	% The convolution kernel is defined in the real space. 
+	% %
+	% Here, $h=3,k=1$, each feature $c_i$ is calculated from a sequence window $v_{i:i+h-1}^{pb}$:
+	% %
+	% 	\begin{equation}
+	% 		c_i=f(w \cdot v_{i:i+h-1}+b)
+	% 	\end{equation}
+	% %
+	% Here is a bias term and $f$ is a nonlinear function. The convolution kernel is applied to all windows $\{x_{1:h}, x_{2:h+1},...,x_{n-h+1:n}\}$ of the packet payload and packet size sequence in the flow to produce a feature map.
+	% %
+	% Here $n=1024$ is the input length. Then we apply max pooling on the result of the convolution calculation and take the maximum  as the result of the convolution calculation.
+	% %
+	% After two-layers convolution, payload is transformed into a 64-long vector.
+	%
+	\item \textbf{Feature learning from PS view:}
+	%
+	The vector $v_{ps}$ is processed by 1D-CNN the same as payload byte sequence, the differences are that the input vector is packet size sequence and the input length is 16 here.
+	%
+	After 1D-CNN feature learning, packet size sequence is transformed into a 64-dimensional vector $\beta$.
+	%
+	\begin{equation}
+		\beta = \mathit{1D\!-\!C\!N\!N}(v_{ps})
+	\end{equation}
+	%
+	\item \textbf{Feature learning from CT view:} 
+	%
+	The content type is originally a discrete variable represented by a 257-dimensional one-hot vector which is very sparse, so we introduce the embedding operation which maps the sparse representation to a 16-dimensional real vector which incorporates contextual information about the content type.
+	%
+	% Embedding mathetextbfcally represents a mapping: $f:X \to Y$, which satisfies two properties: injective and structure-preserving.
+	%
+	The Embedding layer needs to learn a transform matrix whose shape is $ (vocab\_size, embedding\_dim) $.
+	%
+	The embedding layer is basically a matrix which can be considered a transformation from discrete and sparse 1-hot-vector into a continuous and dense latent space. 
+	%
+	Formally, 
+	%
+	\begin{equation}
+		\gamma = \mathit{R\!N\!N}(Embedding(v_{ct}))
+	\end{equation}
+	%
+\end{itemize}
+
 \subsection{payload部分}
 
 \subsection{parameter部分}
@@ -22,7 +106,38 @@
 	\label{fig:AIBMF_Architecture}
 \end{figure}
 
-
+\subsubsection{Identification Module:}
+%
+Three different abstract features are concatenated together to form a 192-dimensional vector
+% 
+\begin{equation}
+	\delta = \alpha \oplus \beta \oplus \gamma
+\end{equation}
+%
+which is then input to the fully connected layer. 
+%
+The output of the fully connected layer, \emph{i.e.}, $x$, will be used as the input of the softmax regression to identify the flow. 
+%
+% A flow can be identified into $C$ classes, where $M=K$ denotes all type of apps. 
+%
+Three different abstract features jointly optimize the same category target, jointly calculate the multi-class cross entropy loss, and update the parameters of the three neural networks through the back propagation algorithm\cite{rumelhart1986learning}.
+%
+Mathematically, the probability that an output prediction $Y$ is app $a_j$, is determined by: 
+\begin{equation}
+p(Y=j|x,W,b)=\mathit{softmax_j}(\emph{\textbf{W}}x + \emph{\textbf{b}})
+% =\frac{e^{w_i^TZ+b_i}}{\sum_je^{w_j^TZ+b_j}}
+\end{equation}
+where $W$ is a weight matrix between the fully connected layer and the softmax layer, and the $b$ is the bais vector.
+% 
+Then the model's prediction $y_{pd} $ is the class whose probability is maximal:
+%
+\begin{equation}
+%
+y_{pd}=argmax(p(Y=j|x,W,b)),\forall j \in \{1,2,3,...,C\}
+\end{equation} 
+%
+Our neural network selects the cross entropy \cite{Boer2005A} as the loss function. 
+%
 
 
 \section{多视图识别模型评估}
@@ -133,7 +248,7 @@ In the test phase, \emph{Precision(P)} that shows how many flows predicted to ap
 % =================================
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.80\textwidth]{comparation.png}
+	\includegraphics[width=0.80\textwidth]{AIBMF-Other-comparation.eps}
 	\bicaption{不同深度学习模型的评估}{model comparation}
 	\label{fig:AIBMF_comparation}
 \end{figure}

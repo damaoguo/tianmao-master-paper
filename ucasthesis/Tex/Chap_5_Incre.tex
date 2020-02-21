@@ -79,6 +79,13 @@ Note that after this operation, the removed samples are never used again.
 
 \subsubsection{迁移学习效果}
 
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.90\textwidth]{AIBMF-Fine-tuning.pdf}
+	\bicaption{AIBMF 微调}{AIBMF Fine tuning}
+	\label{fig:AIBMF-Fine-tuning}
+\end{figure}
+
 \subsubsection{增量学习表现}
 
 
@@ -92,12 +99,27 @@ Note that after this operation, the removed samples are never used again.
 
 
 \begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{Time-cost-incre.pdf}
-	\bicaption{IncreAIBMF时间消耗}{Time Cost}
-	\label{fig:Incre time cost}
+    \centering
+    \begin{subfigure}[b]{0.3\textwidth}
+      \includegraphics[width=\textwidth]{Full-comparation.eps}
+      \caption{}
+      \label{fig:oaspl_a}
+    \end{subfigure}%
+    ~% add desired spacing
+    \begin{subfigure}[b]{0.3\textwidth}
+      \includegraphics[width=\textwidth]{Incre-comparation.eps}
+      \caption{}
+      \label{fig:oaspl_b}
+    \end{subfigure}
+    ~% add desired spacing
+    \begin{subfigure}[b]{0.3\textwidth}
+      \includegraphics[width=\textwidth]{Time-cost-incre.eps}
+      \caption{}
+      \label{fig:oaspl_c}
+    \end{subfigure}%
+    \bicaption{总声压级。(a) 这是子图说明信息，(b) 这是子图说明信息，(c) 这是子图说明信息，(d) 这是子图说明信息。}{OASPL.(a) This is the explanation of subfig, (b) This is the explanation of subfig, (c) This is the explanation of subfig, (d) This is the explanation of subfig.}
+    \label{fig:oaspl}
 \end{figure}
-
 
 
 \section{小节}
