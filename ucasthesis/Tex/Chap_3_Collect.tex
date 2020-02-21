@@ -1,0 +1,304 @@
+\chapter{Android应用流量自动化/半自动化采集的研究}\label{chap:collect}
+\section{Android应用安装包数据集}
+\section{对于Android程序UI遍历的研究（脚本，自动运行）}
+\section{数据清洗（对于背景流量的研究）}
+\subsection{背景流量的生成（不包含应用test）}
+\subsection{流量的过滤（在test中去除背景流量）}
+\subsection{去除交集（剩下的流量将会互斥）}
+\subsection{基于Android程序进程的清洗}
+\section{小结}
+
+
+这一章主要从流量抓取的角度分析，主要的目标是：标记每一帧对应的应用，同一个应用产生的流量到达的时间点需要被记录下来（ 目的是提取相关的时间特征，分析出流量随时间的分布。将同一个应用不同时间产生的流量进行归类。我们基于传统的方法对数据进行标记，例如基于规则，基于SNI等。当然，这种标记方法很有缺陷，并不能保证能够将所有的流量进行准确的分类，否则我们就没有后序工作的必要了。且在思维上，我们应该应该走出悖论，在我们标记的数据集上，我们学习到的方法是不能够超越我们定义的规则的，在这些数据上我们并不是要追求100\%的准确程度（理论上也达不到），我们学习新的方法的动机也不是处理已经标记的数据，因为这是没有意义的事情，我们的目的是当新的流量到来的时候，可能基于我们标记数据的规则不能够处理（如这一批流量中并没有SNI信息，并没有端口信息），有或者新来的数据使用这些规则并不能处理好，但是我们学习到的新的方法却非常契合。我们在采集数据的时候，主要是要考虑数据产生的真实性，完整性，可信性。不能够脱离真正的网络环境采集数据，那么面临的困难时如何就混杂情况下的数据区分出来，毕竟各种方案都有缺陷，在采集标注数据的时候这种缺陷是应该被容忍的。
+
+这一章主要从流量抓取的角度分析，主要的目标是：标记每一帧对应的应用，同一个应用产生的流量到达的时间点需要被记录下来（ 目的是提取相关的时间特征，分析出流量随时间的分布。将同一个应用不同时间产生的流量进行归类。在网络流中，流被定义为两个终端之间具有相同的五元组的连续数据包，五元组包括：源端口，目的端口，源ip地址，目的ip地址和传输层协议，单向流中数据的五元组完全相同，双向流五元组中的源地址、源端口和目的地址、目的端口互换。对于网络流中的数据包进行识别是本文的研究目标，涉及到根据应用负载进行识别，这类数据即为TCP数据段中的应用数据部分。一般情况下，我们认为三次握手中的第一个SYN数据包的到达时间即为TCP流的开始时间，而TCP流的结束时间则认为是FIN数据包或者RST数据包到达的时间。在数据进行标注的时候，可以采用多元组来对数据进行标记，例如<源地址，源端口，目的地址，目的端口，协议，SNI>等进行标记。相关工作中有尝试：数据集主要捕获于某高校的教育网出口处以及内网节点，捕获之初的数据是混合数据集，为了获得纯净的数据集，需要利用现有的技术对其进行标注。
+
+我们以流为单位进行研究和标记，离线的数据流结构如下：
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{flow_offline}
+	\bicaption{离线流数据}{}
+	\label{fig:flow_offline}
+\end{figure}
+
+
+
+
+
+
+数据采集的流程如下：
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Data-collect.pdf}
+	\bicaption{数据采集}{}
+	\label{fig:data_collect}
+\end{figure}
+
+
+
+\section{问题？}
+主要问题是传统的方法存在缺陷：基于端口的方法识别准确率越来越低，因为许多服务采用的是动态端口，另外端口可以被手动指定，进一步降低端口识别技术的精度。基于DPI(深度包)的方法只能够识别明文流量，一旦服务采用了加密的方式，就会隐去载荷部分的特征，不再可见。Moore等人在2005年提出使用机器学习的方法进行网络流量分类，并且提出了248中特征。
+
+
+\section{Android应用}
+Android Malware Genome Project
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{softwares}
+	\bicaption{Android软件，湖南大学}{}
+	\label{fig:softwares}
+\end{figure}
+
+
+
+\section{抓包工具的选择}
+
+
+\subsection{wireshark}
+\subsection{fiddler}
+
+\section{PC端HTTPS流量抓取}
+\subsection{单一进程或者程序产生的流量采集}
+\subsection{自动化的流量产生工具}
+借助自动化的工具产生大量的流量，避免使用人工进行采集。
+
+\subsubsection{Selenium}
+Selenium的使用：\url{https://www.seleniumhq.org},这一款工具主要是用来自动运行浏览器。可以在多种平台多种浏览器下运行，还支持多种编程语言和测试工具。
+
+\subsubsection{UIcrawler}
+
+
+\subsubsection{AppCrawler}
+
+\subsubsection{AndroGenerator}
+
+湖南大学的《安卓手机应用流量分析恶意行为检测技术研究》
+首先下载了10,000个应用，系统由三部分构成：执行组件，流量解析器，网络流量生成器。
+
+基于广告服务器域名的方法提取广告库网络流量
+
+\subsubsection{基于深度优先的路径识别算法}
+首先从Android应用的Manifest文件中提取应用启动的时候显示的Activity，将这些作为可执行路径的起点。。。
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{data_collect_algo1}
+	\bicaption{深度优先搜索Android程序的执行路径}{}
+	\label{fig:data_collect_algo_1}
+\end{figure}
+
+\subsection{移动终端应用与行为识别与技术研究——肖新光}
+使用爬虫爬取应用商店的应用的apk文件，之后得到一些配置文件，之后使用命令来控制手机端的tcpdump运行抓取流量，将抓取的流量保存在手机的路径下。见图4.5《西电硕士论文》
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{data_collect_algo_2}
+	\bicaption{西电硕士论文}{}
+	\label{fig:data_collect_algo_2}
+\end{figure}
+
+
+\subsection{自动化的标注}
+一种思路是一次性仅仅标注一个或者非常有限的程序，这样可以借助一些特定的规则，比如端口号，SNI进行标注。或者借助认为的判断，但是对于应用程序很多的情况而言，这种方案不现实。所以在产生数据的时候更加倾向于一次性开启很少的程序，虚拟化网卡，在这个网卡上抓取应用产生的流量，这样可以避免其他程序，如操作系统带来的干扰。或者使用如iptable的技术来控制ip，当然这样做的前提还是局限在单次抓取的流量很少的情况。
+
+对于混合流量，尝试使用L7-filter和GT工具来标注混合数据集。L7-filter的实现是基于特征的关键字匹配，采用正则表达式的方式来对关键字进行描述和匹配，这种方法对于协议的识别有着更高的效率和准确率。GT是一款开源的网络流分析工具，主要包括四个部分：(1)gt客户端进程：运行在每个被监控的网络节点上，从主机内核获取每一个应用的名称，并且记录每一个应用所存在的数据流信息(2)数据包捕获用来在网络的路由器处捕获所有被监控的主机的数据包(3)数据库服务器用来存储gt客户端上应用名和对应的数据流信息(4)数据集标记：将捕获的应用数据根据应用名和对应的数据流信息进行标记，并且根据具体的应用将数据流进行分区。
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{gt_structure}
+	\bicaption{开源的gt工具}{}
+	\label{fig:gt_structure}
+\end{figure}
+\url{http://netweb.ing.unibs.it/~ntw/tools/gt/}
+
+开源的数据集：\href{http://tstat.tlc.polito.it/}{TCP STatistic and Analysis Tool}，\href{http://mawi.wide.ad.jp/mawi/samplepoint-F/2018/201809021400.html}{pcap格式抓包数据}
+
+\section{Android端HTTPS流量抓取}
+android端的流量抓取和pc端存在一定的差别。
+\subsection{android手机应用的自动安装}
+使用爬虫分类别爬取下载手机apk文件，然后进行安装。（在我们的实验中应该首先研究少量的app，在这个研究基础上做更加深入的研究）
+
+
+
+\begin{longtable}{c|c|c|c}
+    \bicaption{Android应用}{Android apps}\\
+	\hline
+	\textbf{应用名} & \textbf{开发商} & \textbf{应用类别} & \textbf{应用数量} \\
+	\hline
+	\endfirsthead
+	\multicolumn{4}{c}%
+        {\bfseries\small \tablename\ \thetable\ {续表。}}\\
+	\hline
+	\textbf{应用名} & \textbf{开发商} & \textbf{应用类别} & \textbf{应用数量} \\
+	\hline
+	\endhead
+	\hline \multicolumn{4}{r}{\textit{续表见下页}}\\
+	\endfoot
+	\hline
+	\endlastfoot
+	Baidu Map & Baidu.com & Travel \& Local & 6777\\
+	\hline
+	Baidu Post Bar & Baidu.com & Social & 3234\\
+	\hline
+	Netease cloud music & Netease.com & Music \& Audio & 9888\\
+	\hline
+	iQIYI &  iQIYI & Music \& Audio & 2634\\
+	\hline
+	JingDong & JD & Shopping & 7956\\
+	\hline
+	Jinritoutiao & ByteDance & News \& Magazines & 5321\\
+	\hline
+	Meituan & Meituan.com& Lifestyle & 12469\\
+	\hline
+	QQ & Tencent & Communication & 1246\\
+	\hline
+	QQ music & Tencent & Music \& Audio & 1155\\
+	\hline
+	QQ reader & Tencent & Books \& Reference & 1563\\
+	\hline
+	Taobao & Taobao & Shopping & 3431\\
+	\hline
+	Weibo & Sina & Social & 3097\\
+	\hline
+	CTRIP & CTRIP & Lifestyle & 2141\\
+	\hline
+	Zhihu & Zhihu.com & Social & 2011\\
+	\hline
+	Tik Tok & Douyin.com & Social & 7441 \\
+	\hline
+	Ele.me & Ele.me & Lifestyle & 16053\\
+	\hline
+	gtja & gtja.com & Finance & 7734\\
+	\hline
+	QQ mail & Tencent & Tools & 4879\\
+	\hline
+	Tencent News & Tencent & News \& Magazines & 5679\\
+	\hline
+	Alipay & Alipay.com & Finance & 2301\\
+	\hline
+	快手 & com.smile.gifmaker & & \\
+	\hline
+	百度手机卫士& & & \\
+	\hline
+	墨迹天气& & & \\
+	\hline
+	西瓜视频& & & \\
+	\hline
+	京东商城& & & \\
+	\hline
+	Alipay& & & \\
+	\hline
+	手机淘宝& & & \\
+	\hline
+	Momo& & & \\
+	\hline
+	今日头条& & & \\
+	\hline
+	暴风影音& & & \\
+	\hline
+	美团& & & \\
+	\hline
+	百度网盘& & & \\
+	\hline
+	PP视频& & & \\
+	\hline
+	酷我& & & \\
+	\hline
+	携程旅行& & & \\
+	\hline
+	今日頭條& & & \\
+	\hline
+	Amap& & & \\
+	\hline
+	BeautyCam& & & \\
+	\hline
+	中国建设银行& & & \\
+	\hline
+	QQ浏览器& ---- & --- & --- \\
+	\hline
+	搜狐视频& & & \\
+	\hline
+	Bilibili& & & \\
+	\hline
+	乐尔& & & \\
+	\hline
+	酷云& & & \\
+	\hline
+	Faceu激萌& & & \\
+	\hline
+	QQ空间& & & \\
+	\hline
+	Zapya& & & \\
+	\hline
+	千千音乐& & & \\
+	\hline
+	土豆视频& & & \\
+	\hline
+	美拍& & & \\
+	\hline
+	猎豹安全大师& & & \\
+	\hline
+	PhoneGenius& & & \\
+	\hline
+	Sogou Search& & & \\
+	\hline
+	斗鱼直播& & & \\
+	\hline
+	车轮驾考通& & & \\
+	\hline
+	酷音铃声& & & \\
+	\hline
+	ImgoTV& & & \\
+	\hline
+	Migu Video& & & \\
+	\hline
+	书神器破解版& & & \\
+	\hline
+	花椒直播& & & \\
+	\hline
+	\hline
+	\textbf{Total} & - & - & \textbf{107010}\\
+	\hline
+\end{longtable}
+
+
+
+\subsection{monkey自动运行程序}
+
+
+\subsection{VPN的HTTPS流量抓取}
+
+
+\subsection{使用anyproxy拦截https请求}
+利用中间人攻击的方法，前提是需要客户端提前信任anyproxy产生的证书。参考 \url{anyproxy.io.cn}当代理服务器收到https请求时，AnyProxy可以替换证书，对请求做明文解析。调用规则模块beforeDealHttpsRequest方法，如果返回true，会明文解析这个请求，其他请求不处理。被明文解析后的https请求，处理流程同http一致。未明文解析请求不会再进入规则模块做处理。
+
+\section{抓取的文件导出为XML文件}
+将文件保存为键值对的形式，便于使用相关的工具进行处理，提取信息。主要的字段包括：
+
+<packet>
+	<proto name="" pos="" showname="" size=>
+		<field name="" pos="" show="" showname="" value= size= >
+			<field name="" pos="" ...>
+			...
+		</field>
+		...
+	</proto>
+	...
+</packet>
+
+各个字段相互嵌套，没一条记录了的第一个字段name是我们解析后用来分析数据的主键。一个packet包含了多个proto，一个proto中又包含了多个字段filed ,保存的时候选择保存为PDML XML将会保存完整的信息。使用XML相关工具，提取XML的结构和字段信息。主要是为了弄清楚没一个proto可能包含的字段，从整体上对https流量进行分析。主要的一些字段包括：
+SNI： 
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{SNI_extensions_server_name}
+	\bicaption{client hello中的SNI}{}
+	\label{fig:datagram}
+\end{figure}
+
+时间戳：
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{time_stamp}
+	\bicaption{时间戳}{}
+	\label{fig:datagram}
+\end{figure}
+

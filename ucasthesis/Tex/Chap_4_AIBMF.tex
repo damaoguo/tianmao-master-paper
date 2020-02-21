@@ -1,0 +1,222 @@
+\chapter{基于HTTPS流量的HTTPS流量应用多视图特征识别方法的研究}\label{chap:AIBMF}
+
+
+\section{引入}
+
+\section{多视图特征}
+\subsection{payload部分}
+
+\subsection{parameter部分}
+\citep{wiana2019}
+
+\subsection{packet size部分}
+
+\subsection{神经网络结构}
+% =================================
+% Fig. 03: Model architecture
+% =================================
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{AIBMF-model.pdf}
+	\bicaption{AIBMF网络结构}{AIBMF Architecture}
+	\label{fig:AIBMF_Architecture}
+\end{figure}
+
+
+
+
+\section{多视图识别模型评估}
+\subsection{评估标准}
+% =================================
+% EQUATION:
+% =================================
+\begin{equation}
+ACC=\frac{TP+TN}{TP+TN+FP+FN}	
+\end{equation}
+
+
+% =================================
+% EQUATION:
+% =================================
+\begin{subequations}
+	\begin{equation}
+	P=\frac{TP}{TP+FP}
+	\end{equation}
+	
+	\begin{equation}
+	Macro\ Precision=\frac{1}{20}\sum_{i=1}^{20}P_i
+	\end{equation}
+	
+\end{subequations}
+
+% =================================
+% EQUATION:08
+% =================================
+\begin{subequations}
+	\begin{equation}
+	R=\frac{TP}{TP+FN}	
+	\end{equation}
+	
+	\begin{equation}
+	Macro\ Recall=\frac{1}{20}\sum_{i=1}^{20}R_i
+	\end{equation}
+\end{subequations}
+
+
+% =================================
+% EQUATION:09
+% =================================
+\begin{subequations}
+	\begin{equation}
+	F_1=2\frac{P\times R}{P+R}
+	\end{equation}
+	
+	\begin{equation}
+	Macro\ F_1=\frac{1}{20}\sum_{i=1}^{20}F_{1i}
+	\end{equation}
+\end{subequations}
+
+
+
+
+\subsection{超参数的确定}
+\subsubsection{单个样本packet数目确定}
+% =================================
+% Fig. 03: Model architecture
+% =================================
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{pkts_count.png}
+	\bicaption{单个样本packet数目}{packet count comparation}
+	\label{fig:packet count}
+\end{figure}
+
+
+
+\subsubsection{单个packet的payload字节数确定}
+
+% =================================
+% Fig. 03: Model architecture
+% =================================
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{pkt_size_acc.png}
+	\bicaption{packet size}{view comparation}
+	\label{fig:packet size}
+\end{figure}
+
+
+
+\subsection{不同视图选择的评估}
+% =================================
+% Fig. 03: Model architecture
+% =================================
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{acc_loss.png}
+	\bicaption{不同视图比较}{view comparation}
+	\label{fig:view comparation}
+\end{figure}
+
+
+
+\subsection{不同深度学习模型的评估}
+
+% =================================
+% Fig. 03: Model architecture
+% =================================
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{comparation.png}
+	\bicaption{不同深度学习模型的评估}{model comparation}
+	\label{fig:AIBMF_comparation}
+\end{figure}
+
+
+
+\subsection{传统方法和研究方法的对比}
+% ===========
+% Table 01:Statistics
+% ===========
+\begin{table}
+	\caption{HTTPS Statistics}
+	\setlength{\tabcolsep}{7mm}
+	\begin{center}
+		\begin{tabular}{c}
+			\hline
+			\textbf{Statistics}\\
+			\hline
+			\hline
+			Packet counts\\
+			\hline
+			TTL max\\
+			TTL min\\
+			TTL mean\\
+			TTL median\\
+			TTL var\\
+			\hline
+			packet\_length max\\
+			packet\_length min\\
+			packet\_length mean\\
+			packet\_length median\\
+			packet\_length var\\
+			\hline	
+			window max\\
+			window min\\
+			window mean\\
+			window median\\
+			window var\\
+			\hline
+			session\_id\_length max\\
+			\hline	
+			client\_extensions\_length max\\
+			client\_extensions\_length min\\
+			client\_extensions\_length mean\\
+			client\_extensions\_length median\\
+			client\_extensions\_length var\\
+			\hline
+			client\_ciphers counts\\
+			\hline
+			server\_cipher\\
+			\hline
+		\end{tabular}
+		\label{tab1}
+	\end{center}
+\end{table}
+
+\begin{table}
+	\caption{traffic identification based on statistical features only}
+	\begin{center}
+		\begin{tabular}{|c||c||c||c|}
+			\hline
+			\textbf{Machine learning algorithm} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+			\hline
+			\hline
+			Random Forest & 0.8805 & 0.8172 & 0.8407 \\
+			\hline
+			SVM-RBF & 0.9214 & 0.5754 & 0.6676 \\
+			\hline
+			DNN & 0.7362 & 0.6293 & 0.6562 \\
+			\hline
+			\textbf{AIBMF} & \textbf{0.918} & \textbf{0.909} & \textbf{0.913} \\
+			\hline
+		\end{tabular}
+		\label{tab4}
+	\end{center}
+\end{table}
+
+
+
+\section{在混合模式下的效果}
+% =================================
+% Fig. 03: Model architecture
+% =================================
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{AIBMF-confusematrix.png}
+	\bicaption{AIBMF识别混淆矩阵}{AIBMF classification confusematrix}
+	\label{fig:AIBMF_confusematrix}
+\end{figure}
+
+
+\section{小结}
