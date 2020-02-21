@@ -27,17 +27,24 @@
 
 \section{多视图识别模型评估}
 \subsection{评估标准}
-% =================================
-% EQUATION:
-% =================================
+In order to make a reasonable and effective quantitative evaluation of the identification performance of AIBMF on the traffic data, this paper introduces some basic metrics: True positives (TP), False negatives (FN), True negatives (TN), and False positives (FP). TP is the number of flows classified to app $i$ exactly belong to app $i$. FN is the Number of flows classified  to app $i$ exactly belong to app $j$. TN is the Number of flows classified  to app $j$ exactly belong to app $i$. FP is the number of flows classified  to app $j$ exactly belong to app $j$.
+
+
+In the training phase, the \emph{Accuracy(ACC)} is used to indicate the improvement of the model identification ability, and the performance of the comprehensive display model in identifying HTTPS traffic is improved. The accuracy rate is the proportion of all the correct sample sizes to the training data during the iterative training, which is calculated according to formula (7). 
+
+
+% ===========
+% EQUATION:06
+% ===========
 \begin{equation}
 ACC=\frac{TP+TN}{TP+TN+FP+FN}	
 \end{equation}
 
+In the test phase, \emph{Precision(P)} that shows how many flows predicted to app $i$ are actual app $i$, \emph{Recall(R)} that shows the percentage of flows that are correctly predicted versus all flows that belong to app $i$, and the comprehensive evaluation index \emph{F1} value for HTTPS traffic are used as the evaluation criteria. \emph{P} is calculated according to formula (8a); \emph{R} is calculated according to formula (9a); the F1 value is a comprehensive evaluation index that combines two indicators, and is calculated according to formula (10a). To evaluate our method on all 20 apps, we introduce the average of $P$, $R$, $F_1$ --- $Macro\ Precision$, $Macro\ Recall$, $Macro\ F_1$ as the overall metrics according to formula (8b), (9b), (10b). 
 
-% =================================
-% EQUATION:
-% =================================
+
+% ===========
+% EQUATION:07
 \begin{subequations}
 	\begin{equation}
 	P=\frac{TP}{TP+FP}
@@ -49,9 +56,9 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 	
 \end{subequations}
 
-% =================================
+% ===========
 % EQUATION:08
-% =================================
+% ===========
 \begin{subequations}
 	\begin{equation}
 	R=\frac{TP}{TP+FN}	
@@ -63,9 +70,9 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \end{subequations}
 
 
-% =================================
+% ===========
 % EQUATION:09
-% =================================
+% ===========
 \begin{subequations}
 	\begin{equation}
 	F_1=2\frac{P\times R}{P+R}
@@ -75,7 +82,6 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 	Macro\ F_1=\frac{1}{20}\sum_{i=1}^{20}F_{1i}
 	\end{equation}
 \end{subequations}
-
 
 
 
@@ -142,42 +148,58 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 	\caption{HTTPS Statistics}
 	\setlength{\tabcolsep}{7mm}
 	\begin{center}
-		\begin{tabular}{c}
+		\begin{tabular}{| c | c | c |}
 			\hline
-			\textbf{Statistics}\\
+			\textbf{统计特征} & \textbf{含义} & \textbf{是否特有？}\\
 			\hline
 			\hline
-			Packet counts\\
+			Packet counts & Packet数量& 否\\
 			\hline
-			TTL max\\
-			TTL min\\
-			TTL mean\\
-			TTL median\\
-			TTL var\\
+			TTL max & TTL最大值 & 否\\
 			\hline
-			packet\_length max\\
-			packet\_length min\\
-			packet\_length mean\\
-			packet\_length median\\
-			packet\_length var\\
+			TTL min & TTL最小值 & 否\\
+			\hline
+			TTL mean & TTL平均值 & 否\\
+			\hline
+			TTL median & TTL中位数 & 否\\
+			\hline
+			TTL var & TTL方差 & 否\\
+			\hline
+			packet\_length max & packet长度最大值 & 否\\
+			\hline
+			packet\_length min & packet长度最小值 & 否\\
+			\hline
+			packet\_length mean & packet长度平均值 & 否\\
+			\hline
+			packet\_length median & packet长度中位数 & 否\\
+			\hline
+			packet\_length var & packet长度方差 & 否\\
 			\hline	
-			window max\\
-			window min\\
-			window mean\\
-			window median\\
-			window var\\
+			window max & 窗口最大值 & 否\\
 			\hline
-			session\_id\_length max\\
+			window min & 窗口最小值 & 否\\
+			\hline
+			window mean & 窗口平均值 & 否\\
+			\hline
+			window median & 窗口中位数 & 否\\
+			\hline
+			window var & 窗口方差 & 否\\
+			\hline
+			session\_id\_length max & session id长度 & 否\\
 			\hline	
-			client\_extensions\_length max\\
-			client\_extensions\_length min\\
-			client\_extensions\_length mean\\
-			client\_extensions\_length median\\
-			client\_extensions\_length var\\
+			client\_extensions\_length max & client extensions长度最大值 & 是\\
 			\hline
-			client\_ciphers counts\\
+			client\_extensions\_length min & client extensions长度最小值 & 是\\
 			\hline
-			server\_cipher\\
+			client\_extensions\_length mean & client extensions长度平均值 & 是\\
+			\hline
+			client\_extensions\_length median & client extensions长度中位数 & 是\\
+			\hline
+			client\_extensions\_length var & client extensions长度方差 & 是\\
+			\hline
+			client\_ciphers counts & 客户端加密组件种类 & 是\\
+			\hline
+			server\_cipher & 服务端加密组建类型 & 是\\
 			\hline
 		\end{tabular}
 		\label{tab1}
