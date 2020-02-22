@@ -1,4 +1,4 @@
-\chapter{基于HTTPS流量的应用识别技术及其介绍}\label{chap:https}
+\chapter{相关研究及概述}\label{chap:https}
 
 \section{TLS综述}
 TLS/SSL的功能实现主要是依赖于三类基本的算法：非对称加密、对称加密以及散列算法。非对称加密主要用于密钥协商的阶段，非对称加密和解密的过程比较困难，因为这涉及到求解最大素数。对称加密重要用于密钥协商好之后的加密通信，这个密钥主要是client发起的（ 即客户端产生的Pre-master，于是，客户端和服务端之间的通信是一对一的加密通信），在这个过程中，多次使用了hash算法，hash算法将不同长度的信息计算为等长的信息，这个过程是不可逆的，目的是为了验证数据的完整性。
@@ -104,64 +104,9 @@ Pre-master由客户端产生，采用RSA或Diffie-Hellman等加密算法生成�
 SNI(Server Name Indication)定义在RFC 4366，是一项用于改善SSL/TLS的技术，在SSL3.0/TLS1.0中被启用。它允许客户端在发起SSL握手请求时(具体说来，是客户端发出SSL请求中的ClientHello阶段)，就提交请求的Host信息，使得服务器能够切换到正确的域并返回相应的证书。
 
 
-\subsection{基于Openssl的demo}
-\url{https://blog.csdn.net/sardden/article/details/42705897}
-
-1.安装openssl库:
-sudo sudo apt-get install libssl-dev
-
-2.服务器端实现代码
-
-3. 编译方式:
-gcc \-o ssl\_server ssl\_server.c \-Wall \-g \-lssl \-lcrypto
-gcc \-o ssl\_client ssl\_client.c \-Wall \-g \-lssl \-lcrypto
-
-4. 生产私钥和证书
-openssl genrsa -out privkey.pem 1024
-openssl req -new -x509 -key privkey.pem -out CAcert.pem -days 1095
-生成的私钥是server来保存和使用的，在产生证书的时候也需要添加私钥。客户端是不需要这个私钥的。
-
-
-5. 程序运行方式:
-%./ssl\_server 7838 1 CAcert.pem privkey.pem
-%./ssl\_client 127.0.0.1 7838
-
-分别在两台机器上启动client和server，使用tcpdump指定了host，这样运行起来之后的结果为：
-
-
-
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{openssl_demo_server_wireshark}
-	\bicaption{SSL通信(握手及应用数据传输)）}{}
-	\label{fig:openssl_demo_server_wireshark}
-\end{figure}
-
-在client hello阶段包含的信息较为丰富，主要关注的是extension扩展，例如重要的字段server name扩展下的SNI，对于我们进行流量识别有很大帮助。
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.60\textwidth]{openssl_demo_client_hello}
-	\bicaption{client hello}{}
-	\label{fig:openssl_demo_client_hello}
-\end{figure}
-
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{openssl_demo_client}
-	\bicaption{客户端完整过程 }{}
-	\label{fig:openssl_demo_client}
-\end{figure}
-
-
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{openssl_demo_application_data}
-	\bicaption{应用数据的传输被加密}{}
-	\label{fig:openssl_demo_application_data}
-\end{figure}
-
-
-\section{应用流量分析关键技术}
+\section{细粒度的应用识别技术}
+\subsection{传统的统计特征应用识别}
+\subsubsection{基于SNI的识别方法}
 \citet{Shbair2016Improving}实现基于SNI给流量添加标签。这篇文章主要的思路是：利用域名数据集（ 两个数据集：\href{https://scans.io/series/443-https-tls-alexa_top1mil}{数据集1},\href{https://cs.uwaterloo.ca/ t55wang/wf.html}{数据集2}),使用爬虫工具进行访问，获取到在建立握手的Client hello过程中返回的SNI（ 其实是一个扩展extension，名称为server name），为了识别SNI是否是真是的又结合了DNS解析SNI的结果和真实的ip进行比较。
 \begin{figure}[!htbp]
 	\centering
@@ -169,10 +114,6 @@ openssl req -new -x509 -key privkey.pem -out CAcert.pem -days 1095
 	\bicaption{SNI结合DNS验证}{}
 	\label{fig:SNI_vertification}
 \end{figure}
-
-
-\section{细粒度的应用识别技术}
-\subsection{传统的统计特征应用识别}
 \subsection{存在的问题}
 
 \section{小结}

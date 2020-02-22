@@ -1,76 +1,29 @@
-\chapter{Android应用流量自动化/半自动化采集的研究}\label{chap:collect}
-\section{Android应用安装包数据集}
-\section{对于Android程序UI遍历的研究（脚本，自动运行）}
-\section{数据清洗（对于背景流量的研究）}
-\subsection{背景流量的生成（不包含应用test）}
-\subsection{流量的过滤（在test中去除背景流量）}
-\subsection{去除交集（剩下的流量将会互斥）}
-\subsection{基于Android程序进程的清洗}
-\section{小结}
+\chapter{数据集和数据预处理}\label{chap:collect}zai
+在课题研究过程中，需要大量的数据支持。需要在大量的数据上训练移动应用流量识别模型以及验证模型的效果。然而，当前所公布的开源数据，分类的粒度都较为粗糙。
 
 
-这一章主要从流量抓取的角度分析，主要的目标是：标记每一帧对应的应用，同一个应用产生的流量到达的时间点需要被记录下来（ 目的是提取相关的时间特征，分析出流量随时间的分布。将同一个应用不同时间产生的流量进行归类。我们基于传统的方法对数据进行标记，例如基于规则，基于SNI等。当然，这种标记方法很有缺陷，并不能保证能够将所有的流量进行准确的分类，否则我们就没有后序工作的必要了。且在思维上，我们应该应该走出悖论，在我们标记的数据集上，我们学习到的方法是不能够超越我们定义的规则的，在这些数据上我们并不是要追求100\%的准确程度（理论上也达不到），我们学习新的方法的动机也不是处理已经标记的数据，因为这是没有意义的事情，我们的目的是当新的流量到来的时候，可能基于我们标记数据的规则不能够处理（如这一批流量中并没有SNI信息，并没有端口信息），有或者新来的数据使用这些规则并不能处理好，但是我们学习到的新的方法却非常契合。我们在采集数据的时候，主要是要考虑数据产生的真实性，完整性，可信性。不能够脱离真正的网络环境采集数据，那么面临的困难时如何就混杂情况下的数据区分出来，毕竟各种方案都有缺陷，在采集标注数据的时候这种缺陷是应该被容忍的。
+\section{流量采集}
+在本文章中介绍一种针对Android应用流量的自动化/半自动化的流量采集方法。数据采集的流程如图所示，该系统主要由APP爬虫、应用调度、App运行环境、事件注入和守护进程五个模块构成。
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Data-collect.pdf}
+	\bicaption{数据采集}{Data collect}
+	\label{fig:data_collect}
+\end{figure}
 
-这一章主要从流量抓取的角度分析，主要的目标是：标记每一帧对应的应用，同一个应用产生的流量到达的时间点需要被记录下来（ 目的是提取相关的时间特征，分析出流量随时间的分布。将同一个应用不同时间产生的流量进行归类。在网络流中，流被定义为两个终端之间具有相同的五元组的连续数据包，五元组包括：源端口，目的端口，源ip地址，目的ip地址和传输层协议，单向流中数据的五元组完全相同，双向流五元组中的源地址、源端口和目的地址、目的端口互换。对于网络流中的数据包进行识别是本文的研究目标，涉及到根据应用负载进行识别，这类数据即为TCP数据段中的应用数据部分。一般情况下，我们认为三次握手中的第一个SYN数据包的到达时间即为TCP流的开始时间，而TCP流的结束时间则认为是FIN数据包或者RST数据包到达的时间。在数据进行标注的时候，可以采用多元组来对数据进行标记，例如<源地址，源端口，目的地址，目的端口，协议，SNI>等进行标记。相关工作中有尝试：数据集主要捕获于某高校的教育网出口处以及内网节点，捕获之初的数据是混合数据集，为了获得纯净的数据集，需要利用现有的技术对其进行标注。
-
-我们以流为单位进行研究和标记，离线的数据流结构如下：
+\section{预处理}
+我们以流为单位进行研究和标记，离线的数据流结构如图，我们在采集流量的时候，保存的同一个pcap文件是由多条流构成的。
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.80\textwidth]{flow_offline}
 	\bicaption{离线流数据}{}
 	\label{fig:flow_offline}
 \end{figure}
+\subsection{基于splitcap抽取流}
+\subsection{基于Scapy抽取流}
 
+\section{小结}
 
-
-
-
-
-数据采集的流程如下：
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{Data-collect.pdf}
-	\bicaption{数据采集}{}
-	\label{fig:data_collect}
-\end{figure}
-
-
-
-\section{问题？}
-主要问题是传统的方法存在缺陷：基于端口的方法识别准确率越来越低，因为许多服务采用的是动态端口，另外端口可以被手动指定，进一步降低端口识别技术的精度。基于DPI(深度包)的方法只能够识别明文流量，一旦服务采用了加密的方式，就会隐去载荷部分的特征，不再可见。Moore等人在2005年提出使用机器学习的方法进行网络流量分类，并且提出了248中特征。
-
-
-\section{Android应用}
-Android Malware Genome Project
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{softwares}
-	\bicaption{Android软件，湖南大学}{}
-	\label{fig:softwares}
-\end{figure}
-
-
-
-\section{抓包工具的选择}
-
-
-\subsection{wireshark}
-\subsection{fiddler}
-
-\section{PC端HTTPS流量抓取}
-\subsection{单一进程或者程序产生的流量采集}
-\subsection{自动化的流量产生工具}
-借助自动化的工具产生大量的流量，避免使用人工进行采集。
-
-\subsubsection{Selenium}
-Selenium的使用：\url{https://www.seleniumhq.org},这一款工具主要是用来自动运行浏览器。可以在多种平台多种浏览器下运行，还支持多种编程语言和测试工具。
-
-\subsubsection{UIcrawler}
-
-
-\subsubsection{AppCrawler}
-
-\subsubsection{AndroGenerator}
 
 湖南大学的《安卓手机应用流量分析恶意行为检测技术研究》
 首先下载了10,000个应用，系统由三部分构成：执行组件，流量解析器，网络流量生成器。
@@ -108,7 +61,7 @@ Selenium的使用：\url{https://www.seleniumhq.org},这一款工具主要是用
 	\bicaption{开源的gt工具}{}
 	\label{fig:gt_structure}
 \end{figure}
-\url{http://netweb.ing.unibs.it/~ntw/tools/gt/}
+\url{http://netweb.ing.unibs.it/~ntw/实用工具/gt/}
 
 开源的数据集：\href{http://tstat.tlc.polito.it/}{TCP STatistic and Analysis Tool}，\href{http://mawi.wide.ad.jp/mawi/samplepoint-F/2018/201809021400.html}{pcap格式抓包数据}
 
@@ -117,6 +70,10 @@ android端的流量抓取和pc端存在一定的差别。
 \subsection{android手机应用的自动安装}
 使用爬虫分类别爬取下载手机apk文件，然后进行安装。（在我们的实验中应该首先研究少量的app，在这个研究基础上做更加深入的研究）
 
+我们基于HTTPS协议创建流量数据集。 数据集包含20个流行应用程序的100,000多个HTTPS流。 我们在多个真实的Android设备和Android模拟器中都执行一个应用程序。 该应用由Android工具monkeyrunner\cite{developers2015monkeyrunner}自动驱动。 我们会同时在不同设备上执行同一应用，并通过限制android设备中其他应用的权限来确保没有应用在后台运行。 我们一次捕获一个应用程序的流量，以确保它是事实。 为了避免受到网络环境的影响，我们在一个月的时间里，一直在手动和自动方式下通过Wireshark \cite{wu2018wireshark}和tcpdump \cite{jacobson2003tcpdump}来捕获流量。
+
+
+共采集了旅行交通、社交、影音视听、时尚购物新闻资讯、居家生活、聊天、图书阅读、金融理财、实用工具、游戏共计11种类型，50个应用的流量，使用sliptcap切分后得到20万多万条流量样本。
 
 
 \begin{longtable}{c|c|c|c}
@@ -135,108 +92,108 @@ android端的流量抓取和pc端存在一定的差别。
 	\endfoot
 	\hline
 	\endlastfoot
-	Baidu Map & Baidu.com & Travel \& Local & 6777\\
+	百度地图 & Baidu.com & 旅行交通 & 6777\\
 	\hline
-	Baidu Post Bar & Baidu.com & Social & 3234\\
+	百度贴吧 & Baidu.com & 社交 & 3234\\
 	\hline
-	Netease cloud music & Netease.com & Music \& Audio & 9888\\
+	网易云音乐 & Netease.com & 影音视听 & 9888\\
 	\hline
-	iQIYI &  iQIYI & Music \& Audio & 2634\\
+	爱奇艺 &  iQIYI & 影音视听 & 2634\\
 	\hline
-	JingDong & JD & Shopping & 7956\\
+	京东 & JD & 购物 & 7956\\
 	\hline
-	Jinritoutiao & ByteDance & News \& Magazines & 5321\\
+	今日头条 & ByteDance & 新闻资讯 & 5321\\
 	\hline
-	Meituan & Meituan.com& Lifestyle & 12469\\
+	美团 & Meituan.com& 居家生活 & 12469\\
 	\hline
-	QQ & Tencent & Communication & 1246\\
+	QQ & Tencent & 聊天 & 1246\\
 	\hline
-	QQ music & Tencent & Music \& Audio & 1155\\
+	QQ音乐 & Tencent & 影音视听 & 1155\\
 	\hline
-	QQ reader & Tencent & Books \& Reference & 1563\\
+	QQ阅读 & Tencent & 图书阅读 & 1563\\
 	\hline
-	Taobao & Taobao & Shopping & 3431\\
+	淘宝 & Taobao & 购物 & 3431\\
 	\hline
-	Weibo & Sina & Social & 3097\\
+	微博 & Sina & 社交 & 3097\\
 	\hline
-	CTRIP & CTRIP & Lifestyle & 2141\\
+	携程 & CTRIP & 居家生活 & 2141\\
 	\hline
-	Zhihu & Zhihu.com & Social & 2011\\
+	知乎 & Zhihu.com & 社交 & 2011\\
 	\hline
-	Tik Tok & Douyin.com & Social & 7441 \\
+	抖音 & Douyin.com & 社交 & 7441 \\
 	\hline
-	Ele.me & Ele.me & Lifestyle & 16053\\
+	饿了么 & Ele.me & 居家生活 & 16053\\
 	\hline
-	gtja & gtja.com & Finance & 7734\\
+	国泰君安 & gtja.com & 金融理财 & 7734\\
 	\hline
-	QQ mail & Tencent & Tools & 4879\\
+	QQ邮箱 & Tencent & 实用工具 & 4879\\
 	\hline
-	Tencent News & Tencent & News \& Magazines & 5679\\
+	腾讯新闻 & Tencent & 新闻资讯 & 5679\\
 	\hline
-	Alipay & Alipay.com & Finance & 2301\\
+	支付宝 & Alipay.com & 金融理财 & 2301\\
 	\hline
-	ALiJianKang & alihealth.cn & Lifestyle & 22904\\
+	阿里健康 & alihealth.cn & 居家生活 & 22904\\
 	\hline
-	AnJuKe & anjuke.com & Lifestyle & 2340\\
+	安居客 & anjuke.com & 居家生活 & 2340\\
 	\hline
-	BaiCiZhan & baicizhan.com & Tools & 674\\
+	百词斩 & baicizhan.com & 实用工具 & 674\\
 	\hline
-	BaiHeHunLian &  baihe.com & Lifestyle & 2452\\
+	百合婚恋 &  baihe.com & 居家生活 & 2452\\
 	\hline
-	BeiKeZhangFang & bj.ke.com & Lifestyle & 7520\\
+	贝壳找房 & bj.ke.com & 居家生活 & 7520\\
 	\hline
-	DangDangYueDu & dangdang.com & Books \& Reference & 2588\\
+	当当阅读 & dangdang.com & 图书阅读 & 2588\\
 	\hline
-	DingDing & dingtalk.com & Lifestyle & 3468\\
+	钉钉 & dingtalk.com & 居家生活 & 3468\\
 	\hline
-	DingXiang & dxy.cn & Lifestyle & 4654\\
+	丁香 & dxy.cn & 居家生活 & 4654\\
 	\hline
-	DouBan & douban.com & Social & 3998\\
+	豆瓣 & douban.com & 社交 & 3998\\
 	\hline
-	VigoVideo & huoshan.com & Music \& Audio & 2924\\
+	火山小视频 & huoshan.com & 影音视听 & 2924\\
 	\hline
-	Keep & www.gotokeep.com & Lifestyle & 9646\\
+	Keep & www.gotokeep.com & 居家生活 & 9646\\
 	\hline
-	MiaoPai & miaopai.com & Social & 340\\
+	秒拍 & miaopai.com & 社交 & 340\\
 	\hline
-	csair App & China Southern Airlines & Travel \& Local & 7656\\
+	中国南方航空 & China Southern Airlines & 旅行交通 & 7656\\
 	\hline
-	PinDuoDuo & pinduoduo.com & Shopping & 2660\\
+	拼多多 & pinduoduo.com & 购物 & 2660\\
 	\hline
-	QingTing FM & Music \& Audio & Social & 2312 \\
+	蜻蜓FM & 影音视听 & 社交 & 2312 \\
 	\hline
-	QuNaEr & qunar.com & Lifestyle & 3294\\
+	去哪儿 & qunar.com & 居家生活 & 3294\\
 	\hline
-	Soul & soulapp.cn & Communication & 4406\\
+	Soul & soulapp.cn & 聊天 & 4406\\
 	\hline
-	TianYa & tianya.cn & Communication & 1058\\
+	天涯 & tianya.cn & 聊天 & 1058\\
 	\hline
-	TianYanCha & tianyancha.com & Tools & 6146\\
+	天眼查 & tianyancha.com & 实用工具 & 6146\\
 	\hline
-	TongHuaShun & 10jqka.com.cn & Finance & 5928\\
+	同花顺 & 10jqka.com.cn & 金融理财 & 5928\\
 	\hline
-	Arena of Valor & Tencent & Game & 2524\\
+	王者荣耀 & Tencent & 游戏 & 2524\\
 	\hline
-	XianYu & 2.taobao.com & Shopping & 3226\\
+	闲鱼 & 2.taobao.com & 购物 & 3226\\
 	\hline
-	XiaoMiYunDong & huami.com & Lifestyle & 2364\\
+	小米运动 & huami.com & 居家生活 & 2364\\
 	\hline
-	XinLangCaiJing & finance.sina.com.cn & Finance & 3608\\
+	新浪财经 & 金融理财.sina.com.cn & 金融理财 & 3608\\
 	\hline
-	YangShiXinWen & news.cctv.com & Social & 1534 \\
+	央视新闻 & news.cctv.com & 社交 & 1534 \\
 	\hline
-	YouDaoYunBiJi & note.youdao.com & Tools & 2396\\
+	有道云笔记 & note.youdao.com & 实用工具 & 2396\\
 	\hline
-	ZhangShangShengHuo & cmbchina.com & Finance & 4838\\
+	掌上生活 & cmbchina.com & 金融理财 & 4838\\
 	\hline
-	ZhiBoBa & zhibo8.cc & Tools & 4368\\
+	直播吧 & zhibo8.cc & 实用工具 & 4368\\
 	\hline
-	airchina App & Air China & News \& Travel \& Local & 3343\\
+	中国国际航空 & 中国国际航空 & 旅行交通 & 3343\\
 	\hline
-	ZuoYeBang & Zybang.com/ & Tools & 4692\\
+	作业帮 & Zybang.com & 实用工具 & 4692\\
 	\hline
 	\hline
-	\textbf{Total} & - & - & \textbf{107010}\\
+	\textbf{总计} & - & - & \textbf{236871}\\
 	\hline
 \end{longtable}
 

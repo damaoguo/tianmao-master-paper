@@ -16,11 +16,11 @@
 
 
 \subsubsection{构建训练集}
-This phase prepares the training data to be used in the next training phase. The training set is composed of a portion of the representative samples of the old class (exemplars from the old classes stored in the representative memory) and the samples of the new app class. As our approach uses two loss functions, i.e., classification and distillation, we need two labels for each sample, associated with the two losses. For classification, we use the one-hot vector which indicates the app appearing in the all app classes. For distillation, we use the distillation labels produced by every identification module with old app classes. Therefore, we have as many distillation labels per sample as identification module with old app classes. To better understand, where we are performing the third incremental step of our IncreAIBMF. At this point the two identification module will operate on old apps, and one identification module processes the new apps. When a sample is evaluated, the distillation labels produced by the two identication modules with the old apps are used for distillation, and the the distillation labels produced by the three identification modules are used for classification.
+此阶段准备训练数据以用于下一个训练阶段。训练集由旧类的代表性样本的一部分（代表存储器中存储的旧类的示例）和新的app类的样本组成。由于我们的方法使用了两个损失函数，即分类和蒸馏，因此每个样本都需要两个标签，与这两个损失相关联。为了进行分类，我们使用一键向量来指示应用程序出现在所有应用程序类中。对于蒸馏，我们使用每个识别模块使用旧的应用程序类生成的蒸馏标签。因此，每个样品的蒸馏标签与具有旧应用程序类的识别模块一样多。为了更好地理解，我们在哪里执行IncreAIBMF的第三步增量。此时，两个标识模块将在旧应用程序上运行，一个标识模块将处理新应用程序。对样品进行评估时，将使用旧应用程序的两个识别模块生成的蒸馏标签用于蒸馏，将使用三个识别模块生成的蒸馏标签用于分类。
 
 
 \subsubsection{训练过程}
-The training phase takes the augmented training set with its corresponding labels as input for cross-distilled loss computing, and updates all parameters of the entire network architecture. The cross-distilled loss function L(!) is defined as:
+训练阶段将带有相应标签的增强训练集作为交叉蒸馏损失计算的输入，并更新整个网络体系结构的所有参数。 交叉蒸馏损失函数L（！）定义为：
 \begin{equation}
 	\label{eq:cdl}
 	L(\omega)=L_{C}(\omega)+\lambda\sum_{f=1}^{F} L_{D_{f}}(\omega)
@@ -100,25 +100,28 @@ Note that after this operation, the removed samples are never used again.
 
 \begin{figure}[!htbp]
     \centering
-    \begin{subfigure}[b]{0.3\textwidth}
+    \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{Full-comparation.eps}
       \caption{}
       \label{fig:oaspl_a}
     \end{subfigure}%
     ~% add desired spacing
-    \begin{subfigure}[b]{0.3\textwidth}
+    \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{Incre-comparation.eps}
       \caption{}
       \label{fig:oaspl_b}
     \end{subfigure}
     ~% add desired spacing
-    \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{Time-cost-incre.eps}
-      \caption{}
-      \label{fig:oaspl_c}
-    \end{subfigure}%
-    \bicaption{总声压级。(a) 这是子图说明信息，(b) 这是子图说明信息，(c) 这是子图说明信息，(d) 这是子图说明信息。}{OASPL.(a) This is the explanation of subfig, (b) This is the explanation of subfig, (c) This is the explanation of subfig, (d) This is the explanation of subfig.}
+
+    \bicaption{总声压级。(a) 这是子图说明信息，(b) 这是子图说明信息。}{OASPL.(a) This is the explanation of subfig, (b) This is the explanation of subfig.}
     \label{fig:oaspl}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.90\textwidth]{Time-cost-incre.eps}
+	\bicaption{AIBMF和IncreAIBM时间消耗对比 }{Time cost comparation between AIBMF and IncreAIBMF}
+	\label{fig:Time-cost-incre}
 \end{figure}
 
 

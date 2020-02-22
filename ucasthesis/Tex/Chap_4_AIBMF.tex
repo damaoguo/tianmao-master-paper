@@ -1,35 +1,37 @@
 \chapter{基于HTTPS流量的HTTPS流量应用多视图特征识别方法的研究}\label{chap:AIBMF}
 
 \section{引入}
-Our insights of \emph{AIBMF} into encrypted application identification is three-fold:
-%
-\emph{(i)} SSL/TLS protocol is essentially a language of communication between mobile app client and server, the specific manifestation of this language is network flow, \emph{i.e.}, a series of packets;
-%
-\emph{(ii)} Because protocol state machine is an overall abstract description of the network flows, application fingerprints can be constructed from different protocol state information;
-%
-\emph{(iii)} Although SSL/TLS hides the payload of network flows, side-channel protocol state information is still leaked from encrypted connections. 
+我们对\ emph {AIBMF}对加密应用程序标识的见解有三方面：
+％
+\emph{（i）} SSL /TLS协议本质上是移动应用程序客户端和服务器之间通信的一种语言，这种语言的具体表现是网络流\emph{i.e。}，它是一系列数据包；
+％
+\emph{（ii）}因为协议状态机是对网络流的总体抽象描述，所以可以从不同的协议状态信息中构造应用程序指纹。
+％
+\emph {（iii）}尽管SSL / TLS隐藏了网络流的有效负载，但仍然从加密连接中泄漏了旁信道协议状态信息。
 
 \section{多视图特征}
-Three views are incorporated in our model which are named as packet size (PS) view, packet content type (CT) view and packet payload byte (PB) view respectively. 
-%
-This framework includes three modules: preprocessing, feature learning, and identification.
+模型中包含了三个视图，分别称为数据包大小（PS）视图，数据包内容类型（CT）视图和数据包有效载荷字节（PB）视图。
+
+该框架包括三个模块：预处理，特征学习和识别。
 
 
 This module first organizes raw network traffic into flows (\emph{i.e.}, the sample objects to be classified). 
 %
-The collection of the whole flows can be indicated as $D = \{{\{f_i\}}_{i=1}^{i=N}\}_{j=1}^{j=C}$ where $f_i$ means the $i^{th}$ flow. 
+整个流程的集合可以表示为 $D = \{{\{f_i\}}_{i=1}^{i=N}\}_{j=1}^{j=C}$ where $f_i$ means the $i^{th}$ flow. 
 %
 % In this paper, the flow objects defined by the $\{SRC_{IP}, SRC_{port}, DEST_{IP}, DEST_{port},$ $Transport Protocol\}$ tuple.
 %
 % and an inactivity timeout, with a default value of 60s.
 %
-As we already have the flow objects, we can turn to the numerical vector representation of flow.
+由于已经有了流程对象，因此可以转向流程的数字矢量表示。
 %
 \emph{(i)} For PS view, we form a $16$ dimensional vector $v_{ps}$ by computing the packet size of the first 16 packets (padded with -1).
 %
 \emph{(ii)} For CT view, we form a $16$ dimensional vector $v_{ct}$ by extacting the value content type field the first 16 packets (padded with -1), and it ranges ranges from 0 to 255.
 %
-\emph{(iii)} For PB view, we form a $16\times64 = 1024$  dimensional vector $v_{pb}$ by regarding payload byte value as the corresponding ASCII code, and further convert into a integer of 0-255 (padded with -1). 
+\emph{(iii)} For PB view, we form a $16\times64 = 1024$  dimensional vector $v_{pb}$ by regarding payload byte value as the corresponding ASCII code, and further convert into a integer of 0-255 (padded with -1).
+
+
 \begin{itemize}
 
 	\item \textbf{Feature learning from PB view:} 
@@ -43,23 +45,7 @@ As we already have the flow objects, we can turn to the numerical vector represe
 	\begin{equation}
 		\alpha = \mathit{1\!D\!-\!C\!N\!N}(v_{pb})
 	\end{equation}
-	%
-	% We let $v_{i:i+j^{pb}}$ refer to the concatenation of ASCII code of payload $v_i,v_{i+1},...,v_{i+j}$.
-	% %
-	% The convolution kernel is defined in the real space. 
-	% %
-	% Here, $h=3,k=1$, each feature $c_i$ is calculated from a sequence window $v_{i:i+h-1}^{pb}$:
-	% %
-	% 	\begin{equation}
-	% 		c_i=f(w \cdot v_{i:i+h-1}+b)
-	% 	\end{equation}
-	% %
-	% Here is a bias term and $f$ is a nonlinear function. The convolution kernel is applied to all windows $\{x_{1:h}, x_{2:h+1},...,x_{n-h+1:n}\}$ of the packet payload and packet size sequence in the flow to produce a feature map.
-	% %
-	% Here $n=1024$ is the input length. Then we apply max pooling on the result of the convolution calculation and take the maximum  as the result of the convolution calculation.
-	% %
-	% After two-layers convolution, payload is transformed into a 64-long vector.
-	%
+
 	\item \textbf{Feature learning from PS view:}
 	%
 	The vector $v_{ps}$ is processed by 1D-CNN the same as payload byte sequence, the differences are that the input vector is packet size sequence and the input length is 16 here.
@@ -108,19 +94,17 @@ As we already have the flow objects, we can turn to the numerical vector represe
 
 \subsubsection{Identification Module:}
 %
-Three different abstract features are concatenated together to form a 192-dimensional vector
+将三个不同的抽象特征连接在一起以形成192维向量。
 % 
 \begin{equation}
 	\delta = \alpha \oplus \beta \oplus \gamma
 \end{equation}
 %
-which is then input to the fully connected layer. 
+然后将其输入到完全连接的层。
 %
-The output of the fully connected layer, \emph{i.e.}, $x$, will be used as the input of the softmax regression to identify the flow. 
-%
-% A flow can be identified into $C$ classes, where $M=K$ denotes all type of apps. 
-%
-Three different abstract features jointly optimize the same category target, jointly calculate the multi-class cross entropy loss, and update the parameters of the three neural networks through the back propagation algorithm\cite{rumelhart1986learning}.
+完全连接层的输出\emph {i.e。}，$ x $，将用作softmax回归的输入，以识别流量。
+
+三种不同的抽象特征共同优化同一类别目标，共同计算多类交叉熵损失，并通过反向传播算法更新三个神经网络的参数\cite{rumelhart1986learning}.
 %
 Mathematically, the probability that an output prediction $Y$ is app $a_j$, is determined by: 
 \begin{equation}
@@ -142,10 +126,10 @@ Our neural network selects the cross entropy \cite{Boer2005A} as the loss functi
 
 \section{多视图识别模型评估}
 \subsection{评估标准}
-In order to make a reasonable and effective quantitative evaluation of the identification performance of AIBMF on the traffic data, this paper introduces some basic metrics: True positives (TP), False negatives (FN), True negatives (TN), and False positives (FP). TP is the number of flows classified to app $i$ exactly belong to app $i$. FN is the Number of flows classified  to app $i$ exactly belong to app $j$. TN is the Number of flows classified  to app $j$ exactly belong to app $i$. FP is the number of flows classified  to app $j$ exactly belong to app $j$.
+为了对AIBMF在交通数据上的识别性能进行合理有效的定量评估，本文介绍了一些基本指标：真阳性（TP），假阴性（FN），真阴性（TN）和假阳性（ FP）。 TP是分类为应用程序$ i $的流量确切属于应用程序$ i $的数量。 FN是分类为应用程序$ i $的流数，完全属于应用程序$ j $。 TN是分类为应用程序$ j $的流数，完全属于应用程序$ i $。 FP是分类为应用程序$ j $的流数，完全属于应用程序$ j $。
 
 
-In the training phase, the \emph{Accuracy(ACC)} is used to indicate the improvement of the model identification ability, and the performance of the comprehensive display model in identifying HTTPS traffic is improved. The accuracy rate is the proportion of all the correct sample sizes to the training data during the iterative training, which is calculated according to formula (7). 
+在训练阶段，\ emph {Accuracy（ACC）}用于指示模型识别能力的提高，并且改进了综合显示模型在识别HTTPS流量方面的性能。 准确率是在迭代训练过程中所有正确样本量与训练数据的比率，该比率是根据公式（7）计算的。
 
 
 % ===========
@@ -155,7 +139,7 @@ In the training phase, the \emph{Accuracy(ACC)} is used to indicate the improvem
 ACC=\frac{TP+TN}{TP+TN+FP+FN}	
 \end{equation}
 
-In the test phase, \emph{Precision(P)} that shows how many flows predicted to app $i$ are actual app $i$, \emph{Recall(R)} that shows the percentage of flows that are correctly predicted versus all flows that belong to app $i$, and the comprehensive evaluation index \emph{F1} value for HTTPS traffic are used as the evaluation criteria. \emph{P} is calculated according to formula (8a); \emph{R} is calculated according to formula (9a); the F1 value is a comprehensive evaluation index that combines two indicators, and is calculated according to formula (10a). To evaluate our method on all 20 apps, we introduce the average of $P$, $R$, $F_1$ --- $Macro\ Precision$, $Macro\ Recall$, $Macro\ F_1$ as the overall metrics according to formula (8b), (9b), (10b). 
+在测试阶段，\ emph {Precision（P）}显示预测到应用程序$ i $的流量是实际应用程序$ i $，\ emph {Recall（R）}显示预测正确的流量与 属于应用程序$ i $的所有流，以及HTTPS流量的综合评估索引\ emph {F1}值都用作评估标准。 \ emph {P}根据公式（8a）计算； \ emph {R}根据公式（9a）计算； F1值是结合两个指标的综合评价指标，是根据公式（10a）计算的。 为了在所有20个应用程序上评估我们的方法，我们将平均值$ P $，$ R $，$ F_1 $ --- $ Macro \ Precision $，$ Macro \ Recall $，$ Macro \ F_1 $作为整体指标 式（8b），（9b），（10b）。 
 
 
 % ===========

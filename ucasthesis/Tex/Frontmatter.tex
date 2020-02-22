@@ -17,7 +17,12 @@
 \setcounter{page}{1}% 开始页码
 \pagenumbering{Roman}% 页码符号
 
-本文是中国科学院大学学位论文模板ucasthesis的使用说明文档。主要内容为介绍\LaTeX{}文档类ucasthesis的用法，以及如何使用\LaTeX{}快速高效地撰写学位论文。
+HTTPS流量（合法的和恶意的）数量的不断增长对移动网络的安全性和管理提出了更大的挑战。 在这项工作中，我们提出了AIBMF（基于多视图特征的应用程序标识），这是一种按应用程序类型对HTTPS流量进行分类的细粒度方法。 AIBMF的关键思想是结合三种功能-有效载荷卷积功能，数据包大小序列和数据包内容类型序列。 基于这些不同的视图特征，构建了用于HTTPS流量识别任务的深度学习模型（使用CNN，嵌入和RNN）。 为了评估AIBMF的有效性，我们在一个真实的数据集（大约100,000个以上的流）上进行了一组全面的实验，这表明我们的方法达到了96.06\％的准确度，并且优于最新方法（3.6\％ F1分数的）。
+
+作为网络安全和管理领域的基本技术，移动应用程序标识面临着一个关键问题，即“加密流量”。经验证的加密流量识别方法具有一个主要缺点，那就是新应用程序继续遭受\textit{灾难性遗忘}的困扰，当逐步增加新的应用程序类别进行培训时，整体性能会急剧下降。这是由于当前模型需要整个数据集（包括来自旧类和新类的所有样本）来更新模型。随着应用程序数量的增长，更新要求变得不可持续，为了解决这个问题，我们建议使用\emph{IncreAIBMF}框架，以使用新的应用程序数据以及仅对应于旧应用程序样本的一小样本集逐步学习深度神经网络。\emph{IncreAIBMF}背后的关键思想是一个增量学习框架，它通过结合交叉蒸馏的损失而拥有新的应用程序识别能力，该学习框架不仅可以学习新的应用程序类别，而且可以保留与旧的应用程序类别相对应的先前知识。我们的实验结果表明，\emph{IncreAIBMF}在包含50个移动应用程序的真实世界跟踪中，分别在宏精度上达到87.3\％，在F1得分上达到87.8\％，在宏调用上达到88.9\％。预测，以及对应用程序类的规模很稳定。此外，\emph{IncreAIBMF}的基本变体，AIBMF在识别性能方面优于最新方法。
+
+
+
 
 \keywords{HTTPS流量识别, 深度学习,迁移学习}% 中文关键词
 %-
@@ -26,6 +31,10 @@
 \intobmk\chapter*{Abstract}% 显示在书签但不显示在目录
 
 The expanding volume of HTTPS traffic (both legitimate and malicious) creates even more challenges for mobile network security and management. In this work, we propose AIBMF(Application Identification Based on Multi-view Features), a fine-grained approach to classify HTTPS traffic by their application type. The key idea of AIBMF is to combine three kinds of features---payload convolution features, packet size sequence and packet content type sequence. Based on these different view features, a deep learning model (using CNN, embedding and RNN) is constructed for HTTPS traffic identification task. To evaluate the effectiveness of AIBMF, we run a comprehensive set of experiments on a real-world dataset (about 100,000+ flows), which shows that our approach achieves 96.06\% accuracy and outperforms the state-of-the-art method (3.6\% on F1 score). 
+
+Mobile application identification, as the fundamental technique in the field of network security and management, suffers from a critical problem, namely 'encrypted traffic’. The proven methods for encrypted traffic identification have a major drawback, which is new come applications continue to suffer from \textit{catastrophic forgetting}, a dramatic decrease in overall performance when training with new app classes added incrementally. This is due to the current model requiring the entire dataset, consisting of all the samples from the old and the new classes, to update the model. The updating requirement becomes easily unsustainable as the number of apps grows, To address the issue, we propose \emph{IncreAIBMF} framework to learn deep neural networks incrementally, using new apps data and only a small exemplar set corresponding to samples from the old apps. The key idea behind \emph{IncreAIBMF} is an incremental learning framework which possesses new application identification ability by incorporating the cross-distilled loss, which can not only learn the new app classes and also retain the previous knowledge corresponding to the old app classes. Our experiment results show that \emph{IncreAIBMF} achieves  87.3\% on Macro Precision, 87.8\% on F1 Score and 88.9\% on Macro Recall, respectively, on the real-world traces that consists of 50 mobile applications, supports the early prediction, and
+is robust to the scale of the app classes. Besides, the basic variant of \emph{IncreAIBMF}, AIBMF is superior to the state-of-the-art methods in terms of identification performance.
+
 
 \KEYWORDS{HTTPS, mobile application, CNN, embedding, RNN. }% 英文关键词
 %---------------------------------------------------------------------------%
