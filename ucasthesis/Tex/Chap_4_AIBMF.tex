@@ -191,12 +191,23 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 % Fig. 03: Model architecture
 % =================================
 \begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{pkts_count.png}
-	\bicaption{单个样本packet数目}{packet count comparation}
-	\label{fig:packet count}
-\end{figure}
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{Packet-count-all.eps}
+      \caption{}
+      \label{fig:oaspl_a}
+    \end{subfigure}%
+    ~% add desired spacing
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{Packet-count-acc.eps}
+      \caption{}
+      \label{fig:oaspl_b}
+    \end{subfigure}
+    ~% add desired spacing
 
+    \bicaption{总声压级。(a) 这是子图说明信息，(b) 这是子图说明信息。}{OASPL.(a) This is the explanation of subfig, (b) This is the explanation of subfig.}
+    \label{fig:oaspl}
+\end{figure}
 
 
 \subsubsection{单个packet的payload字节数确定}
@@ -206,9 +217,9 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 % =================================
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.80\textwidth]{pkt_size_acc.png}
+	\includegraphics[width=0.80\textwidth]{Payload-size-acc.eps}
 	\bicaption{packet size}{view comparation}
-	\label{fig:packet size}
+	\label{fig:payload size}
 \end{figure}
 
 
@@ -217,28 +228,27 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 % =================================
 % Fig. 03: Model architecture
 % =================================
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{acc_loss.png}
-	\bicaption{不同视图比较}{view comparation}
-	\label{fig:view comparation}
-\end{figure}
-
-
 
 \subsection{不同深度学习模型的评估}
 
-% =================================
-% Fig. 03: Model architecture
-% =================================
 \begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{AIBMF-Other-comparation.eps}
-	\bicaption{不同深度学习模型的评估}{model comparation}
-	\label{fig:AIBMF_comparation}
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{AIBMF-training-loss.png}
+      \caption{}
+      \label{fig:oaspl_a}
+    \end{subfigure}%
+    ~% add desired spacing
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{AIBMF-training-acc.png}
+      \caption{}
+      \label{fig:oaspl_b}
+    \end{subfigure}
+    ~% add desired spacing
+
+    \bicaption{总声压级。(a) 这是子图说明信息，(b) 这是子图说明信息。}{OASPL.(a) This is the explanation of subfig, (b) This is the explanation of subfig.}
+    \label{fig:oaspl}
 \end{figure}
-
-
 
 \subsection{传统方法和研究方法的对比}
 % ===========
