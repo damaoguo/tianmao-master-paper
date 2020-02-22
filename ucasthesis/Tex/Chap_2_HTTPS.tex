@@ -50,7 +50,23 @@ TLS1.3版本是对规范的重大修改，一些工作方式也非常不同：
 	\item 在TLS1.3连接中不再允许使用DSA证书。
 \end{itemize}
 
-\subsection{TLS安全机制}
+
+\subsection{SSL之扩展(extension)}
+\subsubsection{server name extension(SNI)}
+早期的SSL2.0根据经典的公钥基础设施PKI(Public Key Infrastructure)设计，它默认认为：一台服务器(或者说一个IP)只会提供一个服务，所以在SSL握手时，服务器端可以确信客户端申请的是哪张证书。
+
+但是让人万万没有想到的是，虚拟主机大力发展起来了，这就造成了一个IP会对应多个域名的情况。有一些解决办法，例如申请通配域名证书，对所有同一顶级域名下的二级子域名(*.yourdomain.com)都可以认证，但如果你还有一个yourdomain.net的域名，那就不行了。如果在同一个IP上配置多个HTTPS主机，会出现一个很普遍的问题：不论浏览器请求哪个主机，都只会收到默认主机www.example.com的证书。这是由SSL协议引起的——先建立SSL连接，再发送HTTP请求，所以nginx建立SSL连接时不知道所请求主机的名字，因此，它只会返回默认主机的证书。最古老的也是最稳定的解决方法就是每个HTTPS主机使用不同的IP地址，在同一个IP上，使用SNI配置多个HTTPS主机。
+
+在HTTP协议中，请求的域名作为主机头(Host)放在HTTP Header中，所以服务器端知道应该把请求引向哪个域名，但是早期的SSL做不到这一点，因为在SSL握手的过程中，根本不会有Host的信息，所以服务器端通常返回的是配置中的第一个可用证书。因而一些较老的环境，可能会产生多域名分别配好了证书，但返回的始终是同一个。既然问题的原因是在SSL握手时缺少主机头信息，那么补上就是了，即添加扩展。
+
+SNI(Server Name Indication)定义在RFC 4366，是一项用于改善SSL/TLS的技术，在SSL3.0/TLS1.0中被启用。它允许客户端在发起SSL握手请求时(具体说来，是客户端发出SSL请求中的ClientHello阶段)，就提交请求的Host信息，使得服务器能够切换到正确的域并返回相应的证书。
+
+
+
+
+
+\section{TLS安全机制}
+\subsection{HTTPS连接建立的过程}
 证书颁发机构的英文全称是Certificate Authority，一般简称为CA。证书颁发机构是采用PKI（Public Key Infrastructure）公开密钥基础架构技术，专门提供网络身份认证服务，负责签发和管理数字证书，且具有权威性和公正性的第三方信任机构。它的作用就像我们现实生活中颁发证件的公司，如护照办理机构。证书颁发机构 (CA) 是一个向单位、个人等颁发证书的可信实体。CA 受理证书申请，根据该 CA 的策略验证申请人的信息，然后使用它的私钥把其数字签名应用于证书。然后，CA 将该证书颁发给该证书的主体。由浏览器联盟维护着CA根证书列表，大型机构或政府机构可能拥有自己的CA.
 
 一个完整的 HTTPS 链接的建立大概需要以下四步：
@@ -81,6 +97,8 @@ TLS1.3版本是对规范的重大修改，一些工作方式也非常不同：
 
 7.加密通信，开始使用协商的密钥与算法进行加密通信。
 
+
+\subsection{SSL加密计算过程}
 SSL加密计算过程为：
 
 \begin{figure}[!htbp]
@@ -93,27 +111,13 @@ SSL加密计算过程为：
 Pre-master由客户端产生，采用RSA或Diffie-Hellman等加密算法生成，Pre-master结合random client和random server两个随机数通过PseudoRandomFunction(PRF)计算得到Master secret，Master secret结合两个随机数进行迭代计算得到Key material.
 
 
-\subsection{SSL之扩展(extension)}
-\subsubsection{server name extension(SNI)}
-早期的SSL2.0根据经典的公钥基础设施PKI(Public Key Infrastructure)设计，它默认认为：一台服务器(或者说一个IP)只会提供一个服务，所以在SSL握手时，服务器端可以确信客户端申请的是哪张证书。
+\section{相关机器学习/深度学习算法}
+\subsection{随机森林}
+\subsection{支持向量机}
+\subsection{深度学习算法}
+\subsection{迁移学习方法}
+\subsection{增量学习方法}
 
-但是让人万万没有想到的是，虚拟主机大力发展起来了，这就造成了一个IP会对应多个域名的情况。有一些解决办法，例如申请通配域名证书，对所有同一顶级域名下的二级子域名(*.yourdomain.com)都可以认证，但如果你还有一个yourdomain.net的域名，那就不行了。如果在同一个IP上配置多个HTTPS主机，会出现一个很普遍的问题：不论浏览器请求哪个主机，都只会收到默认主机www.example.com的证书。这是由SSL协议引起的——先建立SSL连接，再发送HTTP请求，所以nginx建立SSL连接时不知道所请求主机的名字，因此，它只会返回默认主机的证书。最古老的也是最稳定的解决方法就是每个HTTPS主机使用不同的IP地址，在同一个IP上，使用SNI配置多个HTTPS主机。
-
-在HTTP协议中，请求的域名作为主机头(Host)放在HTTP Header中，所以服务器端知道应该把请求引向哪个域名，但是早期的SSL做不到这一点，因为在SSL握手的过程中，根本不会有Host的信息，所以服务器端通常返回的是配置中的第一个可用证书。因而一些较老的环境，可能会产生多域名分别配好了证书，但返回的始终是同一个。既然问题的原因是在SSL握手时缺少主机头信息，那么补上就是了，即添加扩展。
-
-SNI(Server Name Indication)定义在RFC 4366，是一项用于改善SSL/TLS的技术，在SSL3.0/TLS1.0中被启用。它允许客户端在发起SSL握手请求时(具体说来，是客户端发出SSL请求中的ClientHello阶段)，就提交请求的Host信息，使得服务器能够切换到正确的域并返回相应的证书。
-
-
-\section{细粒度的应用识别技术}
-\subsection{传统的统计特征应用识别}
-\subsubsection{基于SNI的识别方法}
-\citet{Shbair2016Improving}实现基于SNI给流量添加标签。这篇文章主要的思路是：利用域名数据集（ 两个数据集：\href{https://scans.io/series/443-https-tls-alexa_top1mil}{数据集1},\href{https://cs.uwaterloo.ca/ t55wang/wf.html}{数据集2}),使用爬虫工具进行访问，获取到在建立握手的Client hello过程中返回的SNI（ 其实是一个扩展extension，名称为server name），为了识别SNI是否是真是的又结合了DNS解析SNI的结果和真实的ip进行比较。
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{SNI_vertification}
-	\bicaption{SNI结合DNS验证}{}
-	\label{fig:SNI_vertification}
-\end{figure}
-\subsection{存在的问题}
 
 \section{小结}
+通过对TLS/SSL协议的研究，可以发现，在HTTPS通信过程中，能够暴露出可以用于流量分析的特征。

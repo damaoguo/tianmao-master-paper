@@ -1,5 +1,5 @@
-\chapter{数据集和数据预处理}\label{chap:collect}zai
-在课题研究过程中，需要大量的数据支持。需要在大量的数据上训练移动应用流量识别模型以及验证模型的效果。然而，当前所公布的开源数据，分类的粒度都较为粗糙。
+\chapter{数据集和数据预处理}\label{chap:collect}
+在课题研究过程中，需要大量的数据支持。需要在大量的数据上训练移动应用流量识别模型以及验证模型的效果。然而，当前所公布的开源数据较少，数据量有限，分类的粒度较为粗糙。
 
 
 \section{流量采集}
@@ -21,55 +21,7 @@
 \end{figure}
 \subsection{基于splitcap抽取流}
 \subsection{基于Scapy抽取流}
-
-\section{小结}
-
-
-湖南大学的《安卓手机应用流量分析恶意行为检测技术研究》
-首先下载了10,000个应用，系统由三部分构成：执行组件，流量解析器，网络流量生成器。
-
-基于广告服务器域名的方法提取广告库网络流量
-
-\subsubsection{基于深度优先的路径识别算法}
-首先从Android应用的Manifest文件中提取应用启动的时候显示的Activity，将这些作为可执行路径的起点。。。
-
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{data_collect_algo1}
-	\bicaption{深度优先搜索Android程序的执行路径}{}
-	\label{fig:data_collect_algo_1}
-\end{figure}
-
-\subsection{移动终端应用与行为识别与技术研究——肖新光}
-使用爬虫爬取应用商店的应用的apk文件，之后得到一些配置文件，之后使用命令来控制手机端的tcpdump运行抓取流量，将抓取的流量保存在手机的路径下。见图4.5《西电硕士论文》
-
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{data_collect_algo_2}
-	\bicaption{西电硕士论文}{}
-	\label{fig:data_collect_algo_2}
-\end{figure}
-
-
-\subsection{自动化的标注}
-一种思路是一次性仅仅标注一个或者非常有限的程序，这样可以借助一些特定的规则，比如端口号，SNI进行标注。或者借助认为的判断，但是对于应用程序很多的情况而言，这种方案不现实。所以在产生数据的时候更加倾向于一次性开启很少的程序，虚拟化网卡，在这个网卡上抓取应用产生的流量，这样可以避免其他程序，如操作系统带来的干扰。或者使用如iptable的技术来控制ip，当然这样做的前提还是局限在单次抓取的流量很少的情况。
-
-对于混合流量，尝试使用L7-filter和GT工具来标注混合数据集。L7-filter的实现是基于特征的关键字匹配，采用正则表达式的方式来对关键字进行描述和匹配，这种方法对于协议的识别有着更高的效率和准确率。GT是一款开源的网络流分析工具，主要包括四个部分：(1)gt客户端进程：运行在每个被监控的网络节点上，从主机内核获取每一个应用的名称，并且记录每一个应用所存在的数据流信息(2)数据包捕获用来在网络的路由器处捕获所有被监控的主机的数据包(3)数据库服务器用来存储gt客户端上应用名和对应的数据流信息(4)数据集标记：将捕获的应用数据根据应用名和对应的数据流信息进行标记，并且根据具体的应用将数据流进行分区。
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{gt_structure}
-	\bicaption{开源的gt工具}{}
-	\label{fig:gt_structure}
-\end{figure}
-\url{http://netweb.ing.unibs.it/~ntw/实用工具/gt/}
-
-开源的数据集：\href{http://tstat.tlc.polito.it/}{TCP STatistic and Analysis Tool}，\href{http://mawi.wide.ad.jp/mawi/samplepoint-F/2018/201809021400.html}{pcap格式抓包数据}
-
-\section{Android端HTTPS流量抓取}
-android端的流量抓取和pc端存在一定的差别。
-\subsection{android手机应用的自动安装}
-使用爬虫分类别爬取下载手机apk文件，然后进行安装。（在我们的实验中应该首先研究少量的app，在这个研究基础上做更加深入的研究）
-
+\subsection{数据集概览}
 我们基于HTTPS协议创建流量数据集。 数据集包含20个流行应用程序的100,000多个HTTPS流。 我们在多个真实的Android设备和Android模拟器中都执行一个应用程序。 该应用由Android工具monkeyrunner\cite{developers2015monkeyrunner}自动驱动。 我们会同时在不同设备上执行同一应用，并通过限制android设备中其他应用的权限来确保没有应用在后台运行。 我们一次捕获一个应用程序的流量，以确保它是事实。 为了避免受到网络环境的影响，我们在一个月的时间里，一直在手动和自动方式下通过Wireshark \cite{wu2018wireshark}和tcpdump \cite{jacobson2003tcpdump}来捕获流量。
 
 
@@ -197,45 +149,40 @@ android端的流量抓取和pc端存在一定的差别。
 	\hline
 \end{longtable}
 
+\section{小结}
 
 
-\subsection{monkey自动运行程序}
+% 湖南大学的《安卓手机应用流量分析恶意行为检测技术研究》
 
 
-\subsection{VPN的HTTPS流量抓取}
+% \begin{figure}[!htbp]
+% 	\centering
+% 	\includegraphics[width=0.80\textwidth]{data_collect_algo1}
+% 	\bicaption{深度优先搜索Android程序的执行路径}{}
+% 	\label{fig:data_collect_algo_1}
+% \end{figure}
+
+% \subsection{移动终端应用与行为识别与技术研究——肖新光}
+
+% \begin{figure}[!htbp]
+% 	\centering
+% 	\includegraphics[width=0.80\textwidth]{data_collect_algo_2}
+% 	\bicaption{西电硕士论文}{}
+% 	\label{fig:data_collect_algo_2}
+% \end{figure}
 
 
-\subsection{使用anyproxy拦截https请求}
-利用中间人攻击的方法，前提是需要客户端提前信任anyproxy产生的证书。参考 \url{anyproxy.io.cn}当代理服务器收到https请求时，AnyProxy可以替换证书，对请求做明文解析。调用规则模块beforeDealHttpsRequest方法，如果返回true，会明文解析这个请求，其他请求不处理。被明文解析后的https请求，处理流程同http一致。未明文解析请求不会再进入规则模块做处理。
+% \subsection{自动化的标注}
+% 一种思路是一次性仅仅标注一个或者非常有限的程序，这样可以借助一些特定的规则，比如端口号，SNI进行标注。或者借助认为的判断，但是对于应用程序很多的情况而言，这种方案不现实。所以在产生数据的时候更加倾向于一次性开启很少的程序，虚拟化网卡，在这个网卡上抓取应用产生的流量，这样可以避免其他程序，如操作系统带来的干扰。或者使用如iptable的技术来控制ip，当然这样做的前提还是局限在单次抓取的流量很少的情况。
 
-\section{抓取的文件导出为XML文件}
-将文件保存为键值对的形式，便于使用相关的工具进行处理，提取信息。主要的字段包括：
+% 对于混合流量，尝试使用L7-filter和GT工具来标注混合数据集。L7-filter的实现是基于特征的关键字匹配，采用正则表达式的方式来对关键字进行描述和匹配，这种方法对于协议的识别有着更高的效率和准确率。GT是一款开源的网络流分析工具，主要包括四个部分：(1)gt客户端进程：运行在每个被监控的网络节点上，从主机内核获取每一个应用的名称，并且记录每一个应用所存在的数据流信息(2)数据包捕获用来在网络的路由器处捕获所有被监控的主机的数据包(3)数据库服务器用来存储gt客户端上应用名和对应的数据流信息(4)数据集标记：将捕获的应用数据根据应用名和对应的数据流信息进行标记，并且根据具体的应用将数据流进行分区。
+% \begin{figure}[!htbp]
+% 	\centering
+% 	\includegraphics[width=0.80\textwidth]{gt_structure}
+% 	\bicaption{开源的gt工具}{}
+% 	\label{fig:gt_structure}
+% \end{figure}
+% \url{http://netweb.ing.unibs.it/~ntw/实用工具/gt/}
 
-<packet>
-	<proto name="" pos="" showname="" size=>
-		<field name="" pos="" show="" showname="" value= size= >
-			<field name="" pos="" ...>
-			...
-		</field>
-		...
-	</proto>
-	...
-</packet>
-
-各个字段相互嵌套，没一条记录了的第一个字段name是我们解析后用来分析数据的主键。一个packet包含了多个proto，一个proto中又包含了多个字段filed ,保存的时候选择保存为PDML XML将会保存完整的信息。使用XML相关工具，提取XML的结构和字段信息。主要是为了弄清楚没一个proto可能包含的字段，从整体上对https流量进行分析。主要的一些字段包括：
-SNI： 
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{SNI_extensions_server_name}
-	\bicaption{client hello中的SNI}{}
-	\label{fig:datagram}
-\end{figure}
-
-时间戳：
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{time_stamp}
-	\bicaption{时间戳}{}
-	\label{fig:datagram}
-\end{figure}
+% 开源的数据集：\href{http://tstat.tlc.polito.it/}{TCP STatistic and Analysis Tool}，\href{http://mawi.wide.ad.jp/mawi/samplepoint-F/2018/201809021400.html}{pcap格式抓包数据}
 

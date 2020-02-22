@@ -12,6 +12,22 @@
 
 \subsection{基于深度学习的HTTPS流量识别}
 
+
+\subsection{细粒度的应用识别技术}
+\subsection{传统的统计特征应用识别}
+
+\citet{Shbair2016Improving}实现基于SNI给流量添加标签。这篇文章主要的思路是：利用域名数据集（ 两个数据集：\href{https://scans.io/series/443-https-tls-alexa_top1mil}{数据集1},\href{https://cs.uwaterloo.ca/ t55wang/wf.html}{数据集2}),使用爬虫工具进行访问，获取到在建立握手的Client hello过程中返回的SNI（ 其实是一个扩展extension，名称为server name），为了识别SNI是否是真是的又结合了DNS解析SNI的结果和真实的ip进行比较。
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{SNI_vertification}
+	\bicaption{SNI结合DNS验证}{}
+	\label{fig:SNI_vertification}
+\end{figure}
+\subsection{存在的问题}
+
+
+
+
 \section{论文主要研究内容}
 
 本文主要针对各种应用HTTPS流量进行分析，HTTPS应用流量分分析具有非常重要的意义：

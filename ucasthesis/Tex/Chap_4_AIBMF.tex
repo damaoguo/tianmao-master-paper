@@ -1,7 +1,7 @@
 \chapter{基于HTTPS流量的HTTPS流量应用多视图特征识别方法的研究}\label{chap:AIBMF}
 
 \section{引入}
-我们对\ emph {AIBMF}对加密应用程序标识的见解有三方面：
+我们对\emph{AIBMF}对加密应用程序标识的见解有三方面：
 ％
 \emph{（i）} SSL /TLS协议本质上是移动应用程序客户端和服务器之间通信的一种语言，这种语言的具体表现是网络流\emph{i.e。}，它是一系列数据包；
 ％
@@ -24,12 +24,13 @@ This module first organizes raw network traffic into flows (\emph{i.e.}, the sam
 % and an inactivity timeout, with a default value of 60s.
 %
 由于已经有了流程对象，因此可以转向流程的数字矢量表示。
-%
-\emph{(i)} For PS view, we form a $16$ dimensional vector $v_{ps}$ by computing the packet size of the first 16 packets (padded with -1).
-%
-\emph{(ii)} For CT view, we form a $16$ dimensional vector $v_{ct}$ by extacting the value content type field the first 16 packets (padded with -1), and it ranges ranges from 0 to 255.
-%
-\emph{(iii)} For PB view, we form a $16\times64 = 1024$  dimensional vector $v_{pb}$ by regarding payload byte value as the corresponding ASCII code, and further convert into a integer of 0-255 (padded with -1).
+
+
+\emph{（i）}对于PS视图，通过计算前16个数据包的大小（用-1填充），我们形成了$ 16 $维矢量$ v_ {ps} $。
+
+\emph{（ii）}对于CT视图，我们通过将值内容类型字段扩展为前16个数据包（用-1填充）来形成$ 16 $维矢量$ v_ {ct} $，其范围从0到255 。
+
+\emph{（iii）}对于PB视图，通过将有效载荷字节值视为相应的ASCII码，我们形成一个$ 16 \ times64 = 1024 $维向量$v_{pb}$，然后进一步转换为0-255（ 用-1填充）。
 
 
 \begin{itemize}
