@@ -1,3 +1,35 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 第一章
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@article{google2018google,
+  title={Google transparency report},
+  author={Google},
+  year={2018}
+}
+@techreport{cnnic2019,
+  title={The 43th China Staticstical Report on Internet Develop},
+  institution={China Internet Network Information Center, CNNIC},
+  year={2019}
+}
+%  Android Developer，谷歌报告
+@misc{android2018developer,
+    author={Google Developers},
+    title={{Security tips }},
+    url={https://developer.android.com/training/articles/security-ssl},
+    note={accessed 2018-11-01},
+}
+
+%  RFC protocol
+@techreport{freier2011secure,
+  title={The secure sockets layer (SSL) protocol version 3.0},
+  author={Freier, Alan and Karlton, Philip and Kocher, Paul},
+  year={2011}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 第二章
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 参数
 @misc{wiana2019,
 		howpublished = {\url{https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml/}},
 		note = {Accessed Novermber 28, 2019},
@@ -5,24 +37,87 @@
 		author = {Miguel Angel Reina Ortega, Pasi Eronen,Silke Holtmanns}
 }
 
-%SSL3.0协议%
-@techreport{freier2011secure,
-  title={The secure sockets layer (SSL) protocol version 3.0},
-  author={Freier, Alan and Karlton, Philip and Kocher, Paul},
-  year={2011}
+% 加密流量分析综述
+@article{velan2015survey,
+  title={A survey of methods for encrypted traffic classification and analysis},
+  author={Velan, Petr and {\v{C}}erm{\'a}k, Milan and {\v{C}}eleda, Pavel and Dra{\v{s}}ar, Martin},
+  journal={International Journal of Network Management},
+  volume={25},
+  number={5},
+  pages={355--374},
+  year={2015},
+  publisher={Wiley Online Library}
 }
 
 
+% 基于协议本身
+@inproceedings{pukkawanna2014classification,
+  title={Classification of SSL servers based on their SSL handshake for automated security assessment},
+  author={Pukkawanna, Sirikarn and Blanc, Gregory and Garcia-Alfaro, Joaquin and Kadobayashi, Youki and Debar, Herv{\'e}},
+  booktitle={2014 Third International Workshop on Building Analysis Datasets and Gathering Experience Returns for Security (BADGERS)},
+  pages={30--39},
+  year={2014},
+  organization={IEEE}
+}
 
-
-% SNI DNS %
-@inproceedings{Shbair2016Improving,
-  title={Improving SNI-Based HTTPS Security Monitoring},
-  author={Shbair, Wazen M. and Cholez, Thibault and François, Jérôme and Chrisment, Isabelle},
-  booktitle={IEEE  International Conference on Distributed Computing Systems Workshops},
-  pages={72-77},
+% SNI
+@inproceedings{shbair2016improving,
+  title={Improving sni-based https security monitoring},
+  author={Shbair, Wazen M and Cholez, Thibault and Fran{\c{c}}ois, J{\'e}r{\^o}me and Chrisment, Isabelle},
+  booktitle={2016 IEEE 36th International Conference on Distributed Computing Systems Workshops (ICDCSW)},
+  pages={72--77},
   year={2016},
+  organization={IEEE}
 }
+
+@inproceedings{korczynski2014markov,
+  title={Markov chain fingerprinting to classify encrypted traffic},
+  author={Korczy{\'n}ski, Maciej and Duda, Andrzej},
+  booktitle={IEEE INFOCOM 2014-IEEE Conference on Computer Communications},
+  pages={781--789},
+  year={2014},
+  organization={IEEE}
+}
+
+@inproceedings{liu2018mampf,
+  title={MaMPF: Encrypted Traffic Classification Based on Multi-Attribute Markov Probability Fingerprints},
+  author={Liu, Chang and Cao, Zigang and Xiong, Gang and Gou, Gaopeng and Yiu, Siu-Ming and He, Longtao},
+  booktitle={2018 IEEE/ACM 26th International Symposium on Quality of Service (IWQoS)},
+  pages={1--10},
+  year={2018},
+  organization={IEEE}
+}
+
+
+
+% 248种特征
+@inproceedings{Moore2005Internet,
+  title={Internet traffic classification using bayesian analysis techniques},
+  author={Moore, Andrew W. and Zuev, Denis},
+  booktitle={ACM SIGMETRICS International Conference on Measurement and Modeling of Computer Systems},
+  pages={50-60},
+  year={2005},
+}
+
+% 贝叶斯方法
+@inproceedings{Herrmann2009Website,
+  title={Website fingerprinting:attacking popular privacy enhancing technologies with the multinomial na&#239;ve-bayes classifier},
+  author={Herrmann, Dominik and Wendolsky, Rolf and Federrath, Hannes},
+  booktitle={CCS 2009, Cloud Computing Security Workshop},
+  pages={31-42},
+  year={2009},
+}
+
+%  使用SVM识别加密流量
+@inproceedings{alshammari2009machine,
+  title={Machine learning based encrypted traffic classification: Identifying ssh and skype},
+  author={Alshammari, Riyad and Zincir-Heywood, A Nur},
+  booktitle={2009 IEEE Symposium on Computational Intelligence for Security and Defense Applications},
+  pages={1--8},
+  year={2009},
+  organization={IEEE}
+}
+
 
 
 @article{shen2017classification,
@@ -35,6 +130,15 @@
   year={2017},
   publisher={IEEE}
 }
+
+% 粗糙的加密流量分类
+@article{Muehlstein2016Analyzing,
+  title={Analyzing HTTPS Encrypted Traffic to Identify User Operating System, Browser and Application},
+  author={Muehlstein, Jonathan and Zion, Yehonatan and Bahumi, Maor and Kirshenboim, Itay and Ran, Dubin and Dvir, Amit and Pele, Ofir},
+  year={2016},
+}
+
+
 
 @inproceedings{suarez2018towards,
   title={Towards accurate classification of HTTPS traffic in Software-Defined Networks},
@@ -56,16 +160,7 @@
   year={2017},
 }
 
-@article{velan2015survey,
-  title={A survey of methods for encrypted traffic classification and analysis},
-  author={Velan, Petr and {\v{C}}erm{\'a}k, Milan and {\v{C}}eleda, Pavel and Dra{\v{s}}ar, Martin},
-  journal={International Journal of Network Management},
-  volume={25},
-  number={5},
-  pages={355--374},
-  year={2015},
-  publisher={Wiley Online Library}
-}
+
 
 @misc{biersack2013data,
   title={Data traffic monitoring and analysis},
@@ -87,13 +182,7 @@
 
 
 
-@inproceedings{Moore2005Internet,
-  title={Internet traffic classification using bayesian analysis techniques},
-  author={Moore, Andrew W. and Zuev, Denis},
-  booktitle={ACM SIGMETRICS International Conference on Measurement and Modeling of Computer Systems},
-  pages={50-60},
-  year={2005},
-}
+
 
 @article{Wright2006On,
   title={On Inferring Application Protocol Behaviors in Encrypted Network Traffic.},
@@ -106,11 +195,7 @@
 }
 
 
-@article{Muehlstein2016Analyzing,
-  title={Analyzing HTTPS Encrypted Traffic to Identify User Operating System, Browser and Application},
-  author={Muehlstein, Jonathan and Zion, Yehonatan and Bahumi, Maor and Kirshenboim, Itay and Ran, Dubin and Dvir, Amit and Pele, Ofir},
-  year={2016},
-}
+
 
 @article{Kohout2017Network,
   title={Network traffic fingerprinting based on approximated kernel two-sample test},
@@ -142,107 +227,6 @@
 }
 
 
-@inproceedings{draper2016characterization,
-  title={Characterization of Encrypted and VPN Traffic using Time-related},
-  author={Draper-Gil, Gerard and Lashkari, Arash Habibi and Mamun, Mohammad Saiful Islam and Ghorbani, Ali A},
-  booktitle={Proceedings of the 2nd international conference on information systems security and privacy (ICISSP)},
-  pages={407--414},
-  year={2016}
-}
-
-
-@inproceedings{Chen2017Automatic,
-  title={Automatic Mobile Application Traffic Identification by Convolutional Neural Networks},
-  author={Chen, Zhengyang and Yu, Bowen and Zhang, Yu and Zhang, Jianzhong and Xu, Jingdong},
-  booktitle={Trustcom/bigdatase/i​spa},
-  pages={301-307},
-  year={2017},
-}
-
-
-@misc{vpnnovpn2017dataset,
-    author={UNB},
-    title={{ISCX VPN-nonVPN encrypted network traffic dataset}},
-    url={https://www.unb.ca/cic/datasets/vpn.html},
-    note={accessed 2018-11-01},
-}
-
-
-@inproceedings{Herrmann2009Website,
-  title={Website fingerprinting:attacking popular privacy enhancing technologies with the multinomial na&#239;ve-bayes classifier},
-  author={Herrmann, Dominik and Wendolsky, Rolf and Federrath, Hannes},
-  booktitle={CCS 2009, Cloud Computing Security Workshop},
-  pages={31-42},
-  year={2009},
-}
-
-
-@misc{tls2018parameters,
-  title={Transport Layer Security (TLS) Parameters},
-  author={Yoav Nir, Rich Salz, Nick Sullivan},
-  year={2018}
-}
-
-
-@article{Boer2005A,
-  title={A Tutorial on the Cross-Entropy Method},
-  author={Boer, Pieter Tjerk De and Kroese, Dirk P. and Mannor, Shie and Rubinstein, Reuven Y.},
-  journal={Annals of Operations Research},
-  volume={134},
-  number={1},
-  pages={19-67},
-  year={2005},
-}
-
-@article{rumelhart1986learning,
-  title={Learning representations by back-propagating errors},
-  author={Rumelhart, David E and Hinton, Geoffrey E and Williams, Ronald J},
-  journal={nature},
-  volume={323},
-  number={6088},
-  pages={533},
-  year={1986},
-  publisher={Nature Publishing Group}
-}
-
-
-@article{gehring2017convolutional,
-  title={Convolutional sequence to sequence learning},
-  author={Gehring, Jonas and Auli, Michael and Grangier, David and Yarats, Denis and Dauphin, Yann N},
-  journal={arXiv preprint arXiv:1705.03122},
-  year={2017}
-}
-
-
-@book{goodfellow2016deep,
-  title={Deep learning},
-  author={Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron and Bengio, Yoshua},
-  volume={1},
-  year={2016},
-  publisher={MIT press Cambridge}
-}
-
-@article{kim2014convolutional,
-  title={Convolutional neural networks for sentence classification},
-  author={Kim, Yoon},
-  journal={arXiv preprint arXiv:1408.5882},
-  year={2014}
-}
-
-
-@article{rumelhart1986learning,
-  title={Learning representations by back-propagating errors},
-  author={Rumelhart, David E and Hinton, Geoffrey E and Williams, Ronald J},
-  journal={nature},
-  volume={323},
-  number={6088},
-  pages={533},
-  year={1986},
-  publisher={Nature Publishing Group}
-}
-
-
-
 @article{Fahad2013Toward,
   title={Toward an efficient and scalable feature selection approach for internet traffic classification},
   author={Fahad, Adil and Tari, Zahir and Khalil, Ibrahim and Habib, Ibrahim and Alnuweiri, Hussein},
@@ -253,6 +237,51 @@
   year={2013},
 }
 
+
+@inproceedings{draper2016characterization,
+  title={Characterization of Encrypted and VPN Traffic using Time-related},
+  author={Draper-Gil, Gerard and Lashkari, Arash Habibi and Mamun, Mohammad Saiful Islam and Ghorbani, Ali A},
+  booktitle={Proceedings of the 2nd international conference on information systems security and privacy (ICISSP)},
+  pages={407--414},
+  year={2016}
+}
+
+
+% 深度学习方法
+@inproceedings{Chen2017Automatic,
+  title={Automatic Mobile Application Traffic Identification by Convolutional Neural Networks},
+  author={Chen, Zhengyang and Yu, Bowen and Zhang, Yu and Zhang, Jianzhong and Xu, Jingdong},
+  booktitle={Trustcom/bigdatase/i​spa},
+  pages={301-307},
+  year={2017},
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@book{goodfellow2016deep,
+  title={Deep learning},
+  author={Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron and Bengio, Yoshua},
+  volume={1},
+  year={2016},
+  publisher={MIT press Cambridge}
+}
+% 卷积神经网络
+@article{gehring2017convolutional,
+  title={Convolutional sequence to sequence learning},
+  author={Gehring, Jonas and Auli, Michael and Grangier, David and Yarats, Denis and Dauphin, Yann N},
+  journal={arXiv preprint arXiv:1705.03122},
+  year={2017}
+}
+% 卷积神经网络用于文本分类
+@article{kim2014convolutional,
+  title={Convolutional neural networks for sentence classification},
+  author={Kim, Yoon},
+  journal={arXiv preprint arXiv:1408.5882},
+  year={2014}
+}
+
+
+% RNN用于计算机视觉
 @inproceedings{mnih2014recurrent,
   title={Recurrent models of visual attention},
   author={Mnih, Volodymyr and Heess, Nicolas and Graves, Alex and others},
@@ -260,7 +289,7 @@
   pages={2204--2212},
   year={2014}
 }
-
+% RNN用于自然语言处理
 @article{bahdanau2014neural,
   title={Neural machine translation by jointly learning to align and translate},
   author={Bahdanau, Dzmitry and Cho, Kyunghyun and Bengio, Yoshua},
@@ -269,37 +298,80 @@
 }
 
 
-
-@article{Srivastava2014Dropout,
-  title={Dropout: a simple way to prevent neural networks from overfitting},
-  author={Srivastava, Nitish and Hinton, Geoffrey and Krizhevsky, Alex and Sutskever, Ilya and Salakhutdinov, Ruslan},
-  journal={Journal of Machine Learning Research},
-  volume={15},
-  number={1},
-  pages={1929-1958},
-  year={2014},
+% Random Forest
+@article{orsolic2017machine,
+  title={A machine learning approach to classifying YouTube QoE based on encrypted network traffic},
+  author={Orsolic, Irena and Pevec, Dario and Suznjevic, Mirko and Skorin-Kapov, Lea},
+  journal={Multimedia tools and applications},
+  volume={76},
+  number={21},
+  pages={22267--22301},
+  year={2017},
+  publisher={Springer}
 }
 
-%======================%
-% 公司，组织报告 %
-%======================%
-@article{google2018google,
-  title={Google transparency report},
-  author={Google},
-  year={2018}
-}
 
-% Android Developer %
-@misc{android2018developer,
-    author={Google Developers},
-    title={{Security tips }},
-    url={https://developer.android.com/training/articles/security-ssl},
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 第三章
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 数据集
+@misc{vpnnovpn2017dataset,
+    author={UNB},
+    title={{ISCX VPN-nonVPN encrypted network traffic dataset}},
+    url={https://www.unb.ca/cic/datasets/vpn.html},
     note={accessed 2018-11-01},
 }
 
-%======================%
-% 工具和框架 %
-%======================%
+
+%%%%%%%%%%%%%%%%
+% 工具
+%%%%%%%%%%%%%%%%
+@misc{biondiscapy,
+  author={Biondi, Philippe},
+  title={Scapy, 2012},
+  url={https://scapy.net/},
+  note={accessed 2018-11-01},
+}
+
+
+@misc{SplitCap2018NETRESEC,
+    author={NETRESEC},
+    title={{SplitCap}},
+    url={https://www.netresec.com/?page=SplitCap},
+    note={accessed 2018-11-01},
+}
+
+@misc{developers2015monkeyrunner,
+  title={Monkeyrunner},
+  author={Developers, Android},
+  year={2015}
+}
+
+@article{wu2018wireshark,
+  title={Wireshark.(2018)},
+  author={Wu, Peter},
+  journal={Retrieved April},
+  volume={16},
+  pages={2018},
+  year={2018}
+}
+
+@article{jacobson2003tcpdump,
+  title={TCPDUMP public repository},
+  author={Jacobson, Van and Leres, Craig and McCanne, Steven},
+  journal={Web page at http://www. tcpdump. org},
+  year={2003}
+}
+
+@article{chollet2018keras,
+  title={Keras: The python deep learning library},
+  author={Chollet, Fran{\c{c}}ois and others},
+  journal={Astrophysics Source Code Library},
+  year={2018}
+}
+
 @misc{tensorflow2015whitepaper,
 title={ {TensorFlow}: Large-Scale Machine Learning on Heterogeneous Systems},
 url={https://www.tensorflow.org/},
@@ -347,53 +419,65 @@ author={
     Xiaoqiang~Zheng},
   year={2015},
 }
-@article{chollet2018keras,
-  title={Keras: The python deep learning library},
-  author={Chollet, Fran{\c{c}}ois and others},
-  journal={Astrophysics Source Code Library},
-  year={2018}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 第四章
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  AIBMF
+@inproceedings{tian2019mobile,
+  title={Mobile Application Identification Over HTTPS Traffic Based on Multi-view Features},
+  author={Tian, Mao and Chang, Peng and Sang, Yafei and Zhang, Yongzheng and Li, Shuhao},
+  booktitle={2019 26th International Conference on Telecommunications (ICT)},
+  pages={73--79},
+  year={2019},
+  organization={IEEE}
 }
 
-@misc{biondiscapy,
-  author={Biondi, Philippe},
-  title={Scapy, 2012},
-  url={https://scapy.net/},
-  note={accessed 2018-11-01},
+% 交叉熵损失函数
+@article{Boer2005A,
+  title={A Tutorial on the Cross-Entropy Method},
+  author={Boer, Pieter Tjerk De and Kroese, Dirk P. and Mannor, Shie and Rubinstein, Reuven Y.},
+  journal={Annals of Operations Research},
+  volume={134},
+  number={1},
+  pages={19-67},
+  year={2005},
 }
 
-@misc{developers2015monkeyrunner,
-  title={Monkeyrunner},
-  author={Developers, Android},
-  year={2015}
+% 反向传播算法
+@article{rumelhart1986learning,
+  title={Learning representations by back-propagating errors},
+  author={Rumelhart, David E and Hinton, Geoffrey E and Williams, Ronald J},
+  journal={nature},
+  volume={323},
+  number={6088},
+  pages={533},
+  year={1986},
+  publisher={Nature Publishing Group}
 }
 
-@article{wu2018wireshark,
-  title={Wireshark.(2018)},
-  author={Wu, Peter},
-  journal={Retrieved April},
-  volume={16},
-  pages={2018},
-  year={2018}
-}
-
-@article{jacobson2003tcpdump,
-  title={TCPDUMP public repository},
-  author={Jacobson, Van and Leres, Craig and McCanne, Steven},
-  journal={Web page at http://www. tcpdump. org},
-  year={2003}
-}
-
-@misc{SplitCap2018NETRESEC,
-    author={NETRESEC},
-    title={{SplitCap}},
-    url={https://www.netresec.com/?page=SplitCap},
-    note={accessed 2018-11-01},
+@article{Srivastava2014Dropout,
+  title={Dropout: a simple way to prevent neural networks from overfitting},
+  author={Srivastava, Nitish and Hinton, Geoffrey and Krizhevsky, Alex and Sutskever, Ilya and Salakhutdinov, Ruslan},
+  journal={Journal of Machine Learning Research},
+  volume={15},
+  number={1},
+  pages={1929-1958},
+  year={2014},
 }
 
 
-% 增量学习方法
+@inproceedings{liu2019fs,
+  title={FS-Net: A Flow Sequence Network For Encrypted Traffic Classification},
+  author={Liu, Chang and He, Longtao and Xiong, Gang and Cao, Zigang and Li, Zhen},
+  booktitle={IEEE INFOCOM 2019-IEEE Conference on Computer Communications},
+  pages={1171--1179},
+  year={2019},
+  organization={IEEE}
+}
 
-% 增量学习起源
+% 
 @article{polikar2001learn++,
   title={Learn++: An incremental learning algorithm for supervised neural networks},
   author={Polikar, Robi and Upda, Lalita and Upda, Satish S and Honavar, Vasant},
@@ -406,7 +490,7 @@ author={
 }
 
 
-% 存在的问题
+%  
 @incollection{mccloskey1989catastrophic,
   title={Catastrophic interference in connectionist networks: The sequential learning problem},
   author={McCloskey, Michael and Cohen, Neal J},
@@ -417,7 +501,7 @@ author={
   publisher={Elsevier}
 }
 
-% 重点参考
+% 
 @inproceedings{castro2018end,
   title={End-to-end incremental learning},
   author={Castro, Francisco M and Mar{\'\i}n-Jim{\'e}nez, Manuel J and Guil, Nicol{\'a}s and Schmid, Cordelia and Alahari, Karteek},
@@ -425,6 +509,23 @@ author={
   pages={233--248},
   year={2018}
 },
+
+
+
+% 
+@article{shen2017classification,
+  title={Classification of encrypted traffic with second-order Markov chains and application attribute bigrams},
+  author={Shen, Meng and Wei, Mingwei and Zhu, Liehuang and Wang, Mingzhong},
+  journal={IEEE Transactions on Information Forensics and Security},
+  volume={12},
+  number={8},
+  pages={1830--1843},
+  year={2017},
+  publisher={IEEE}
+}
+
+
+
 @article{li2017learning,
   title={Learning without forgetting},
   author={Li, Zhizhong and Hoiem, Derek},
@@ -443,6 +544,7 @@ author={
   pages={2001--2010},
   year={2017}
 }
+
 @inproceedings{shmelkov2017incremental,
   title={Incremental learning of object detectors without catastrophic forgetting},
   author={Shmelkov, Konstantin and Schmid, Cordelia and Alahari, Karteek},
@@ -451,7 +553,55 @@ author={
   year={2017}
 }
 
-%  知识精馏
+
+
+%  Embedding
+@inproceedings{he2005neighborhood,
+  title={Neighborhood preserving embedding},
+  author={He, Xiaofei and Cai, Deng and Yan, Shuicheng and Zhang, Hong-Jiang},
+  booktitle={Tenth IEEE International Conference on Computer Vision (ICCV'05) Volume 1},
+  volume={2},
+  pages={1208--1213},
+  year={2005},
+  organization={IEEE}
+}
+
+@inproceedings{tang2015line,
+  title={Line: Large-scale information network embedding},
+  author={Tang, Jian and Qu, Meng and Wang, Mingzhe and Zhang, Ming and Yan, Jun and Mei, Qiaozhu},
+  booktitle={Proceedings of the 24th international conference on world wide web},
+  pages={1067--1077},
+  year={2015},
+  organization={International World Wide Web Conferences Steering Committee}
+}
+
+%  LSTM
+@article{hochreiter1997long,
+  title={Long short-term memory},
+  author={Hochreiter, Sepp and Schmidhuber, J{\"u}rgen},
+  journal={Neural computation},
+  volume={9},
+  number={8},
+  pages={1735--1780},
+  year={1997},
+  publisher={MIT Press}
+}
+@inproceedings{sak2014long,
+  title={Long short-term memory recurrent neural network architectures for large scale acoustic modeling},
+  author={Sak, Ha{\c{s}}im and Senior, Andrew and Beaufays, Fran{\c{c}}oise},
+  booktitle={Fifteenth annual conference of the international speech communication association},
+  year={2014}
+}
+@inproceedings{li2015constructing,
+  title={Constructing long short-term memory based deep recurrent neural networks for large vocabulary speech recognition},
+  author={Li, Xiangang and Wu, Xihong},
+  booktitle={2015 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
+  pages={4520--4524},
+  year={2015},
+  organization={IEEE}
+}
+
+
 @article{hinton2015distilling,
   title={Distilling the knowledge in a neural network},
   author={Hinton, Geoffrey and Vinyals, Oriol and Dean, Jeff},
@@ -459,7 +609,7 @@ author={
   year={2015}
 }
 
-%  采样
+
 @inproceedings{welling2009herding,
   title={Herding dynamical weights to learn},
   author={Welling, Max},
@@ -468,3 +618,7 @@ author={
   year={2009},
   organization={ACM}
 }
+
+
+
+

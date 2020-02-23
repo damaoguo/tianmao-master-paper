@@ -1,6 +1,9 @@
 \chapter{数据集和数据预处理}\label{chap:collect}
 在课题研究过程中，需要大量的数据支持。需要在大量的数据上训练移动应用流量识别模型以及验证模型的效果。然而，当前所公布的开源数据较少，数据量有限，分类的粒度较为粗糙。
 
+\section{公开流量数据集}
+
+本课题的目的在于通过对大量的应用的HTTPS流量数据进行分析，得到一种可靠准确的分析方法，以上提到的公开数据集，规模有限且对于数据的标注不符合我们的要求。
 
 \section{流量采集}
 在本文章中介绍一种针对Android应用流量的自动化/半自动化的流量采集方法。数据采集的流程如图所示，该系统主要由APP爬虫、应用调度、App运行环境、事件注入和守护进程五个模块构成。
@@ -22,7 +25,7 @@
 \subsection{基于splitcap抽取流}
 \subsection{基于Scapy抽取流}
 \subsection{数据集概览}
-我们基于HTTPS协议创建流量数据集。 数据集包含20个流行应用程序的100,000多个HTTPS流。 我们在多个真实的Android设备和Android模拟器中都执行一个应用程序。 该应用由Android工具monkeyrunner\cite{developers2015monkeyrunner}自动驱动。 我们会同时在不同设备上执行同一应用，并通过限制android设备中其他应用的权限来确保没有应用在后台运行。 我们一次捕获一个应用程序的流量，以确保它是事实。 为了避免受到网络环境的影响，我们在一个月的时间里，一直在手动和自动方式下通过Wireshark \cite{wu2018wireshark}和tcpdump \cite{jacobson2003tcpdump}来捕获流量。
+我们基于HTTPS协议创建流量数据集。 数据集包含20个流行应用程序的100,000多个HTTPS流。 我们在多个真实的Android设备和Android模拟器中都执行一个应用程序。 该应用由Android工具monkeyrunner\footnote{https://developer. android. com/studio/test/monkeyrunner/index.html}自动驱动。 我们会同时在不同设备上执行同一应用，并通过限制android设备中其他应用的权限来确保没有应用在后台运行。 我们一次捕获一个应用程序的流量，以确保它是事实。 为了避免受到网络环境的影响，我们在一个月的时间里，一直在手动和自动方式下通过Wireshark \footnote{https://www.wireshark.org/}和TcpDump\footnote{http://www.tcpdump.org}来捕获流量。
 
 
 共采集了旅行交通、社交、影音视听、时尚购物新闻资讯、居家生活、聊天、图书阅读、金融理财、实用工具、游戏共计11种类型，50个应用的流量，使用sliptcap切分后得到20万多万条流量样本。
