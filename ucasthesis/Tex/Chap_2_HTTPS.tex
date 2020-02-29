@@ -82,7 +82,14 @@ SNI(Server Name Indication)定义在RFC 4366，是一项用于改善SSL/TLS的�
 
 
 \subsection{HTTPS握手过程}
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.90\textwidth]{HTTPS-handshake.pdf}
+	\bicaption{HTTTPS握手过程}{HTTPS handshake}
+	\label{fig:https-handshake}
+\end{figure}
 \begin{itemize}
+    % https://segmentfault.com/a/1190000016636897
 	\item \textbf{client hello：}客户端首先主动发起请求，以明文传输请求信息：包括版本信息，加密套件候选列表，压缩算法候选列表，随机数，扩展字段信息。相关信息如下：版本信息：当前基本已经不再使用TLSv1的版本；客户端的加密套件ciphersuites列表：每个加密套件对应着四个主要的功能组合---认证算法AU（身份验证）、密钥交换算法keyExchange密钥协商、对称加密算法Enc信息加密、和信息摘要Mac信息完整性校验。支持的压缩算法列表用于后续的压缩计算，随机数用于后续的密钥生成。扩展字段包含的信息比较丰富，是我们识别过程中应该重点关注的对象，比如extension中的server name是SNI，我们可以提取出主机名称。注意传输过程是明文传输，所以对抓包非常有作用。
 	
 	\item \textbf{server hello + server certificate + server hello done：}server hello服务器返回协商的信息，主要和client hello比较类似，区别在于服务器端对于cipher suite进行了选择，压缩算法进行了选择；server certificate服务器端配置对应的证书链，用于身份验证和密钥交换；server hello done，通知客户端server hello信息发送结束。这个过程也是通过明文进行传输的，我们通过抓包，可以获取到加密套件cipher suite.server hello done通知客户端srver hello信息发送结束。
@@ -177,16 +184,62 @@ Pre-master由客户端产生，采用RSA或Diffie-Hellman等加密算法生成�
         \label{fig:oaspl}
     \end{figure}
 
-    \item \textbf{循环神经网络}    
+    \item \textbf{循环神经网络} 
+    如图2所示为Hidden Layer的层级展开图. t-1, t, t+1表示时间序列. X表示输入的样本. St表示样本在时间t处的的记忆,St = f(W*St-1 +U*Xt). W表示输入的权重,其中,f和g均为激活函数. 其中f可以是tanh,relu,sigmoid等激活函数，g通常是softmax也可以是其他。这里的W,U,V在每个时刻都是相等的(权重共享). U表示此刻输入的样本的权重, V表示输出的样本权重.单纯的RNN因为无法处理随着递归，权重指数级爆炸或梯度消失问题，难以捕捉长期时间关联；而结合不同的LSTM可以很好解决这个问题。和RNN不同的是: RNN中,就是个简单的线性求和的过程. 而LSTM可以通过“门”结构来去除或者增加“细胞状态”的信息,实现了对重要内容的保留和对不重要内容的去除.通过Sigmoid层输出一个0到1之间的概率值，描述每个部分有多少量可以通过，0表示“不允许任务变量通过”，1表示“运行所有变量通过 ”.用于遗忘的门叫做"遗忘门", 用于信息增加的叫做"信息增加门",最后是用于输出的"输出门". LSTM的第一步就是决定细胞状态需要丢弃哪些信息。这部分操作是通过一个称为忘记门的sigmoid单元来处理的。它通过查看和信息来输出一个0-1之间的向量，该向量里面的0-1值表示细胞状态中的哪些信息保留或丢弃多少。0表示不保留，1表示都保留。
+    
+    下一步是决定给细胞状态添加哪些新的信息。这一步又分为两个步骤，首先，利用和通过一个称为输入门的操作来决定更新哪些信息。然后利用和通过一个tanh层得到新的候选细胞信息，这些信息可能会被更新到细胞信息中。这两步描述如下图所示。
+    
+    下面将更新旧的细胞信息$C_{t-1}$，变为新的细胞信息$C_{t}$。更新的规则就是通过忘记门选择忘记旧细胞信息的一部分，通过输入门选择添加候选细胞信息$C_{t}$的一部分得到新的细胞信息$C_{t}$。
+    
+    更新完细胞状态后需要根据输入的和来判断输出细胞的哪些状态特征，这里需要将输入经过一个称为输出门的sigmoid层得到判断条件，然后将细胞状态经过tanh层得到一个-1~1之间值的向量，该向量与输出门得到的判断条件相乘就得到了最终该RNN单元的输出。
+    
+    
+    \begin{figure}[!htbp]
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+          \includegraphics[width=\textwidth]{RNN.pdf}
+          \caption{}
+          \label{fig:oaspl_a}
+        \end{subfigure}%
+        ~% add desired spacing
+        \begin{subfigure}[b]{0.45\textwidth}
+          \includegraphics[width=\textwidth]{LSTM.pdf}
+          \caption{}
+          \label{fig:oaspl_b}
+        \end{subfigure}
+        ~% add desired spacing
+    
+        \bicaption{总声压级。(a) 这是子图说明信息，(b) 这是子图说明信息。}{OASPL.(a) This is the explanation of subfig, (b) This is the explanation of subfig.}
+        \label{fig:oaspl}
+    \end{figure}
+    
     
     \item \textbf{Embedding方法}
+    Embedding在数学上表示一个maping：$f:X \rightarrow Y$  ， 也就是一个function。其中该函数满足两个性质：injective （单射的）：就是我们所说的单射函数，每个X只有唯一的Y对应;structure-preserving（结构保存）：比如在X所属的空间上  ，那么映射后在Y所属空间上同理  。那么对于word embedding, 就是找到一个映射(函数)将单词(word)映射到另外一个空间(其中这个映射具有injective和structure-preserving的特点), 生成在一个新的空间上的表达，该表达就是word representation.
+    
+    
 \end{itemize}
 
 
 \subsection{迁移学习方法}
+迁移学习是一种机器学习方法，其中为任务开发的模型被重用为第二个任务的模型的起点。迁移学习与传统机器学习的不同之处在于，它使用已用于另一任务的预训练模型来快速启动新任务或问题的开发过程。迁移学习的好处在于，通过重用已开发模型的这些部分或模块，可以缩短开发和训练模型所需的时间。这有助于加快模型训练过程并加快结果。
+在机器学习的经典监督学习场景中，如果我们打算为某个任务和领域A训练模型，则假定为我们提供了相同任务和领域的标记数据。我们可以在图1中清楚地看到这一点，其中模型A的训练和测试数据的任务和领域是相同的。稍后我们将更详细地定义任务和域的确切含义。目前，让我们假设任务是模型要执行的目标，例如识别图像中的对象，而域就是我们的数据来源，例如在旧金山咖啡店拍摄的图像。
+
+现在，我们可以在该数据集上训练模型A，并期望它在相同任务和领域的看不见的数据上表现良好。在另一种情况下，当给定其他任务或域B的数据时，我们再次需要相同任务或域的标记数据，可用于训练新模型B，以便可以期望它在此数据上表现良好。
+
+当我们没有足够的标签数据来完成我们想训练一个可靠模型的任务或领域时，传统的监督学习范式就会崩溃。
+如果我们想训练一个模型来检测夜间图像上的行人，我们可以应用一个在类似域上训练过的模型，例如在白天的图像上。但是在实践中，由于模型继承了训练数据的偏见并且不知道如何推广到新领域，因此我们经常会遇到性能下降或崩溃的情况。
+如果我们想训练一个模型来执行一项新任务，我们甚至不能重用现有模型，因为任务之间的标签有所不同。
+
+转移学习使我们能够利用一些相关任务或领域的已标记数据来应对这些情况。我们尝试将在解决源任务中获得的知识存储在源域中，并将其应用于我们感兴趣的问题，如图2所示。
+
 
 \subsection{增量学习方法}
+\citep{Geng2009}增量学习是一种机器学习范式，其中，每当出现新示例并根据新示例调整所学内容时，学习过程就会发生。 增量学习与传统机器学习最显着的区别在于，它不假定在学习过程开始之前就可以提供足够的训练集，但是随着时间的流逝，会出现训练示例。
 
+增量学习被定义为机器学习体系结构通过馈送新数据而不丢失先前学习的知识来不断改进学习模型的能力。
+
+已针对诸如图像分类和对象之类的问题来解决该问题，以解决\emph{灾难性遗忘}问题，该现象使旧类的性能急剧下降\cite{li2017learning，rebuffi2017icarl，shmelkov2017incremental}。一些研究保留了属于先前任务的一小部分数据，并在处理新问题时使用它们来保留旧任务的准确性。随机或根据相关性度量\ cite {hinton2015distilling，rebuffi2017icarl}选择要存储的样本集。
 
 \section{小结}
 通过对TLS/SSL协议的研究，可以发现，在HTTPS通信过程中，能够暴露出可以用于流量分析的特征。

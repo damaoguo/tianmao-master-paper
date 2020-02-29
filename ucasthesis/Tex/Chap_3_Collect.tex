@@ -22,8 +22,199 @@
 	\bicaption{离线流数据}{}
 	\label{fig:flow_offline}
 \end{figure}
+
 \subsection{基于splitcap抽取流}
+SplitCap\footnote{https://www.netresec.com/?page=SplitCap}是一个免费工具，旨在根据诸如IP地址，5元组或MAC地址等标准将捕获文件（PCAP文件）拆分为较小的文件。 可用于拆分/分组的标准是：
+\begin{itemize}
+    \item BSSID：根据WLAN BSSID分组的数据包
+    \item 流：每个5元组的单向流量（传输协议，IP地址和端口号）分组在一起。
+    \item 主机：将流量按IP地址（源和目标）分组到一个文件。 大多数数据包将以两个文件结尾。
+    \item 主机对：基于IP对通信进行分组的流量。
+    \item MAC地址：将流量按每个MAC地址分组到一个文件。 大多数数据包将以两个文件结尾。
+    \item 会话：每个会话的数据包（双向流）被分组在一起。
+    \item 时间：根据时间拆分。
+    \item 数据包计数：根据数据包计数拆分。
+\end{itemize}
+\begin{lstlisting}[language=sh]
+foreach($f in gci 1_Pcap *.pcap)
+{
+    SplitCap -p 100000 -b 100000 -r $f.FullName -o 2_Session\AllLayers\$($f.BaseName)-ALL
+    SplitCap -p 100000 -b 100000 -r $f.FullName -s flow -o 2_Session\AllLayers\$($f.BaseName)-ALL
+    gci 2_Session\AllLayers\$($f.BaseName)-ALL | ?{$_.Length -eq 0} | del
+}
+\end{lstlisting}
+
 \subsection{基于Scapy抽取流}
+Scapy是一个Python程序，使用户能够发送，嗅探，剖析和伪造网络数据包。 此功能允许构建可以探测，扫描或攻击网络的工具。Scapy是功能强大的交互式数据包处理程序。 它能够伪造或解码各种协议的数据包，在线发送它们，捕获它们，匹配请求和答复等等。 Scapy可以轻松处理大多数经典任务，例如扫描，跟踪路由，探测，单元测试，攻击或网络发现。 它可以替代hping，arpspoof，arp-sk，arping，p0f甚至Nmap，tcpdump和tshark的某些部分。
+\begin{lstlisting}[language=Python]
+#!/usr/bin/env python
+#encoding=utf-8
+"""
+@author: TianMao
+@contact: tianmao1994@yahoo.com
+@file: split-pcap.py
+@time: 19-11-27 下午6:38
+@desc:
+    功能：按照TCP流切分pcap文件
+    参考：https://github.com/mao-tool/packet-analysis
+    环境：Scapy
+    使用：python split-pcap.py test.pcap
+    输出：test.pcap_220.194.64.35-443_192.168.137.22-56458_split.pcap
+    问题：当前输出为splitcap文件的一般？疑似这里处理的是双向流？
+"""
+
+import sys
+import re
+import glob
+
+# This is needed to suppress a really irrating warning message when scapy
+# is imported
+import logging
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+
+
+
+try:
+    from scapy.all import*
+except ImportError:
+    print "scapy is not installed. See comments for installation suggestions"
+    exit ()
+
+# argument processing, require just the file name. If a second argument
+# is provided make sure its an integer
+if len (sys.argv) < 2 or len (sys.argv) > 3:
+   print "Usage is: split-pcap.py file-name [packet-count]"
+   print "Try\n     grep -A 20 Usage: " + sys.argv[0] +  \
+                                            " | head -20\nfor details"
+   exit ()
+
+if len (sys.argv) == 3:
+   inputFileString = sys.argv [1]
+   try:
+      inputTotalPackets = int (sys.argv [2])
+   except ValueError:
+      print "The second argument must be an integer <" + \
+                       sys.argv [2] + "> does appear to be an integer"
+      exit ()
+else:
+   inputFileString = sys.argv [1]
+   inputTotalPackets = 0
+
+
+# 保存文件夹
+out_dir = "../../../../data/1/raw_2/"
+
+# try opening the file.
+try:
+   pcapIn = PcapReader (inputFileString)
+except IOError:
+   print "It doesn't look like " + inputFileString + " exists"
+   exit()
+except NameError:
+   print "It doesn't look like " + inputFileString + \
+                                      " is a file that can be processed."
+   print "Note that this script cannot process pcapng files. Review the "
+   print "usage details for ideas on how to convert from pcapng to pcap"
+   exit ()
+
+# Extract out just the the file name. Note that I assume the the ".*/" match
+# is greedy and will match until the last "/" character in the string. If
+# the match fails there are no "/" characters so the whole string must be the
+# name.
+x = re.search ("^.*/(.*$)", inputFileString)
+try:
+   prefix = x.group(1) + "_"
+except:
+   prefix = inputFileString + "_"
+
+# Look for prefix*_split.pcap files. If you find them print a
+# warning and exit.
+
+t = len (glob (prefix + "*_split.pcap"))
+if t > 0:
+   print "There are already " + str (t) + " files with the name " + \
+       prefix + "*_split.pcap."
+   print "Delete or rename them or change to a different directory to"
+   print "avoid adding duplicate packets into the " + prefix + \
+                                               "*_split.pcap trace files."
+   exit ()
+
+# 判断是否存在当前文件的文件夹
+if not os.path.exists(out_dir + inputFileString):
+    os.makedirs(out_dir + inputFileString)
+
+
+pcapOutName = ""
+oldPcapOutName = ""
+packetCount = 0
+donePercentage = 0;
+oldDonePercentage = -1
+
+# Loop for each packet in the file
+
+for aPkt in pcapIn:
+
+# count the packets read
+   packetCount = packetCount + 1
+
+# If the packet contains a TCP header extract out the IP addresses and
+# port numbers
+   if TCP in aPkt:
+      ipSrc = aPkt[IP].src
+      tcpSport = aPkt[TCP].sport
+      ipDst = aPkt[IP].dst
+      tcpDport = aPkt[TCP].dport
+
+# put things in some sort of cannonical order. It doesn't really matter
+# what the order is as long as packets going in either direction get the
+# same order.
+      if ipSrc > ipDst:
+         pcapOutName = prefix + ipSrc + "-" + str(tcpSport) + "_" + ipDst + "-" + str(tcpDport) + "_split.pcap"
+      elif ipSrc < ipDst:
+         pcapOutName = prefix + ipDst + "-" + str(tcpDport) + "_" + ipSrc + "-" + str(tcpSport) + "_split.pcap"
+      elif tcpSport > tcpDport:
+         pcapOutName = prefix + ipSrc + "-" + str(tcpSport) + "_" + ipDst + "-" + str(tcpDport) + "_split.pcap"
+      else:
+         pcapOutName = prefix + ipDst + "-" + str(tcpDport) + "_" + ipSrc + "-" + str(tcpSport) + "_split.pcap"
+
+# If the current packet should be written to a different file from the last
+# packet, close the current output file and open the new file for append
+# save the name of the newly opened file so we can compare it for the next
+# packet.
+      if pcapOutName != oldPcapOutName:
+         if oldPcapOutName != "":
+            pcapOut.close()
+
+         if type(aPkt) == scapy.layers.l2.Ether:
+            lkType = 1
+         elif type (aPkt) == scapy.layers.l2.CookedLinux:
+            lkType = 113
+         else:
+            print "Unknown link type: "
+            type (aPkt)
+            print "    -- exiting"
+            exit
+
+         # 修改文件路劲
+         pcapOutName = out_dir+inputFileString+"/"+pcapOutName
+         pcapOut = PcapWriter (pcapOutName, linktype=lkType, append=True)
+         oldPcapOutName = pcapOutName
+
+# write the packet
+      pcapOut.write (aPkt)
+
+# Write the progress information, either percentages if we had a packet-count
+# argument or just the packet count.
+
+      if inputTotalPackets > 0:
+         donePercentage = packetCount * 100 / inputTotalPackets
+         if donePercentage > oldDonePercentage:
+            print "Percenage done: ", donePercentage
+            oldDonePercentage = donePercentage
+      else:
+         print packetCount
+\end{lstlisting}
+
 \subsection{数据集概览}
 我们基于HTTPS协议创建流量数据集。 数据集包含20个流行应用程序的100,000多个HTTPS流。 我们在多个真实的Android设备和Android模拟器中都执行一个应用程序。 该应用由Android工具monkeyrunner\footnote{https://developer. android. com/studio/test/monkeyrunner/index.html}自动驱动。 我们会同时在不同设备上执行同一应用，并通过限制android设备中其他应用的权限来确保没有应用在后台运行。 我们一次捕获一个应用程序的流量，以确保它是事实。 为了避免受到网络环境的影响，我们在一个月的时间里，一直在手动和自动方式下通过Wireshark \footnote{https://www.wireshark.org/}和TcpDump\footnote{http://www.tcpdump.org}来捕获流量。
 

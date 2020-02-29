@@ -1,50 +1,9 @@
 \chapter{绪论}\label{chap:introduction}
 
 \section{研究背景及研究的目的和意义}
-移动互联网的迅速发展导致移动应用程序数量急剧增加。截至2018年12月，在中国市场受监控的移动应用程序（Apps）数量为449万\citet{cnnic2019}。随着移动互联网的快速发展和普及，越来越多的人开始使用互联网。HTTPS(Hyper Text Transfer Protocol Secure)的使用越来越广泛，例如，处于服务安全的考虑，谷歌正在投资并努力确保其网站和服务默认提供现代HTTPS。 它的目标是在其产品和服务上实现100％的加密\citet{google2018google}。
+移动互联网的迅速发展导致移动应用程序数量急剧增加。截至2018年12月，在中国市场受监控的移动应用程序（Apps）数量为449万\citet{cnnic2019}。随着移动互联网的快速发展和普及，越来越多的人开始使用互联网。HTTPS(Hyper Text Transfer Protocol Secure)的使用越来越广泛，例如，处于服务安全的考虑，谷歌正在投资并努力确保其网站和服务默认提供现代HTTPS。它的目标是在其产品和服务上实现100％的加密\citet{google2018google}。
 
 因此，\underline{e}crypted \underline{m}obile \underline {a}pplication\ underline {i}dentification（简称EMAI）\emph{将加密的SSL/TLS流与特定的移动应用程序关联}作为许多任务场景的基本技术，这是一项至关重要的挑战，例如流量监控，QoS保证，网络异常检测等。综上所述，随着移动互联网的快速发展，针对移动互联网的流量的分析工作越来越重要。使用深度学习技术，可以充分利用流量数据，研究出一种快速、准确的识别技术，在网络管理上具有重要的意义。
-
-\section{国内外相关技术及其研究现状}
-近些年来，使用机器学习和深度学习在流量识别研究领域成为一种趋势。在过去的十年中，许多统计和机器学习算法已应用于交通分类问题。但是，作者使用不同的方法学数据集来评估其方法，因此结果无法直接比较。 大多数方法使用监督或半监督机器学习算法对流进行分类，甚至确定流的应用协议。大多数方法都针对加密协议，例如安全外壳（SSH），安全套接字层（SSL）/传输层安全性（TLS）和加密的BitTorrent。
-
-\subsection{基于协议本身的HTTPS流量识别}
-基于DPI(深度包)的方法只能够识别明文流量，一旦服务采用了加密的方式，就会隐去载荷部分的特征，不再可见。
-\subsubsection{基于SNI的HTTPS流量应用识别}
-
-基于SNI的HTTPS流量应用识别技术是一种广泛使用的实用技术，用于识别HTTPS流量，一种基于SNI的监视，它使用服务器名称指示（SNI）（SSL / TLS握手的字段）来识别HTTPS连接中访问的网站。 SNI是TLS ClientHello消息中的明文字符串值，它提供了一种方便的方法来了解新HTTPS连接所访问的服务。 基于SNI的监视已集成到许多防火墙解决方案（Sphirewall\footnote{http://www.sphirewall.net}，Untangle NG\footnote{https://www.untangle.com}，IPFire3\footnote{http://www.ipfire.org}等）中。
-
-
-
-
-\subsubsection{基于message type的HTTPS流量应用应用识别}
-
-
-\subsection{基于机器学习的HTTPS流量识别}
-针对HTTP流量，\citet{Moore2005Internet}在2005年提出使用机器学习的方法进行网络流量分类，并且提出了248中特征。这248中特征具有普适性，能够迁移到处理各种协议的分析工作。这些特征主要包括：packet数量，packet头部大小，TCP分片大小，packet到达的时间等时间和大小上的特征，并计算均值方差等统计量，计算熵以及傅里叶变换等。同时，这项工作还选取特征并证明其在分类任务中的重要性。
-
-\subsection{基于深度学习的HTTPS流量识别}
-
-
-\subsection{细粒度的应用识别技术}
-
-
-\subsection{传统的统计特征应用识别}
-
-\citet{Shbair2016Improving}实现基于SNI给流量添加标签。这篇文章主要的思路是：利用域名数据集（ 两个数据集：\href{https://scans.io/series/443-https-tls-alexa_top1mil}{数据集1},\href{https://cs.uwaterloo.ca/ t55wang/wf.html}{数据集2}),使用爬虫工具进行访问，获取到在建立握手的Client hello过程中返回的SNI（ 其实是一个扩展extension，名称为server name），为了识别SNI是否是真是的又结合了DNS解析SNI的结果和真实的ip进行比较。
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{SNI_vertification}
-	\bicaption{SNI结合DNS验证}{}
-	\label{fig:SNI_vertification}
-\end{figure}
-\subsection{存在的问题}
-
-
-
-
-\section{论文主要研究内容}
-
 本文主要针对各种应用HTTPS流量进行分析，HTTPS应用流量分分析具有非常重要的意义：
 
 我们的目标之对加密的网络流量进行精细化分类：
@@ -54,6 +13,49 @@
 	\bicaption{网络流量精细化分类}{}
 	\label{fig:gt_structure}
 \end{figure}
+
+\section{国内外相关技术及其研究现状}
+
+
+\subsection{基于协议本身的HTTPS流量识别}
+基于DPI(深度包)的方法只能够识别明文流量，一旦服务采用了加密的方式，就会隐去载荷部分的特征，不再可见。
+\subsubsection{基于SNI的HTTPS流量应用识别}
+
+基于SNI的HTTPS流量应用识别技术是一种广泛使用的实用技术，用于识别HTTPS流量，一种基于SNI的监视，它使用服务器名称指示（SNI）（SSL / TLS握手的字段）来识别HTTPS连接中访问的网站。 SNI是TLS ClientHello消息中的明文字符串值，它提供了一种方便的方法来了解新HTTPS连接所访问的服务。 基于SNI的监视已集成到许多防火墙解决方案（Sphire wall\footnote{http://www.sphirewall.net}，Untangle NG\footnote{https://www.untangle.com}，IPFire3\footnote{http://www.ipfire.org}等）中。下图是将百度的HTTPS流量使用wireshark转为xml文件后，可见SNI为”www.baidu.com“。
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{SNI-extensions-server-name.jpg}
+	\bicaption{SNI}{SNI}
+	\label{fig:SNI-extensions-server-name}
+\end{figure}
+
+\citet{Shbair2016Improving}实现基于SNI给流量添加标签。这篇文章主要的思路是：利用域名数据集（ 两个数据集\footnote{https://scans.io/series/443-https-tls-alexa_top1mil}，\footnote{https://cs.uwaterloo.ca/t55wang/wf.html},使用爬虫工具进行访问，获取到在建立握手的Client hello过程中返回的SNI，为了识别SNI是否是真实的，又结合了DNS解析SNI的结果和真实的ip进行比较，方法是：通过ip请求域名服务器，得到该ip所对应的域名，将得到的域名和SNI进行比较，判断该SNI是否正确。基于SNI的技术不能够处理SNI被移除的流，也不能够处理SNI被造假的情况。
+
+\subsubsection{基于message type的HTTPS流量应用应用识别}
+\citep{shen2017classification}利用TLS嵌入的消息类型作为状态，并在数据包级别上建立了隐马尔可夫模型。它主要利用HTTPS的消息类型（它是通信过程中协议设计的功能）作为状态信息，并扩展了应用程序的指纹。并验证数据包的消息类型功能可用于流量识别。
+
+\subsection{基于机器学习的HTTPS流量识别}
+近些年来，使用机器学习和深度学习在流量识别研究领域成为一种趋势。在过去的十年中，许多统计和机器学习算法已应用于流量分类问题。针对HTTP流量，\citet{Moore2005Internet}在2005年提出使用机器学习的方法进行网络流量分类，并且提出了248中特征。这248中特征具有普适性，能够迁移到处理各种协议的分析工作。这些特征主要包括：packet数量，packet头部大小，TCP分片大小，packet到达的时间等时间和大小上的特征，并计算均值方差等统计量，计算熵以及傅里叶变换等。同时，这项工作还选取特征并证明其在分类任务中的重要性。HTTPS流量识别的现有技术通常采用基于统计功能的机器学习方法\citep{Muehlstein2016Analyzing, Kohout2017Network}。\citep{Wright2006On}提出了一种基于大小和时间的特征提取方法。 此方法完全独立于内容。 Fahad等人\citep{Fahad2013Toward}提出了一种选择交通特征的方法，其主要目的是获得最重要的交通特征。 Jonathan等人\citep{Muehlstein2016Analyzing}展示的方法专注于加密网络流量的统计分析，以识别用户的操作系统，浏览器和应用程序。 它们提供了利用浏览器的突发行为和SSL（安全套接字层）行为的新功能。 这些基于统计特征的方法依赖于复杂的特征构造和提取。
+
+基于机器学习的HTTPS流量精细化识别的主要缺点是功能设计和选择的复杂性，当网络环境变化时，这将导致通用性较差。
+
+\subsection{基于深度学习的HTTPS流量识别}
+Yu Zhang等\citep{Chen2017Automatic}提出了一种基于HTTP流量识别自动移动应用程序的方法。 他们使用卷积神经网络自动提取特征，并为每种应用建立了二进制分类模型。 但是，应用程序市场上有大量应用程序，所有应用程序的模型训练和识别的时间复杂度将非常高。 \citep{Wang2017End}等提出了一种端到端流量分类方法，该方法提取忽略任何其他信息的流或会话的前784个字节，然后使用一维卷积进行处理，
+
+
+
+
+\section{论文主要研究内容}
+针对当前HTTPS应用识别存在的依赖特征工程高、特征建模能力弱、识别粒度粗、迁移能力弱等问题，本课题旨在研究精细化的HTTPS网络应用特征提取与识别方法。
+\subsection{自动化流量数据标记方法}
+主要解决由于标记粗糙导致的识别粒度粗的问题。
+
+\subsection{基于多视图序列特征的应用识别方法}
+解决特征定义选择困难，依赖特征工程高，特征建模能力弱的问题。
+
+\subsection{基于增量学习的新应用识别方法}
+解决新增应用识别问题。
 
 \section{论文组织架构}
 本文的组织结构如下：
