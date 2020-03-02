@@ -1,6 +1,8 @@
-\chapter{基于HTTPS流量的HTTPS流量应用多视图特征识别方法的研究}\label{chap:AIBMF}
+\chapter{HTTPS流量应用多视图特征识别方法的研究}\label{chap:AIBMF}
 
 \section{引入}
+HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成识别任务了。而传统地机器学习方法又需要大量地特征工程来提取特征，并且这些特征很容易受到网络环境的影响而不具备鲁棒性。
+
 我们对\emph{AIBMF}对加密应用程序标识的见解有三方面：
 ％
 \emph{（i）} SSL /TLS协议本质上是移动应用程序客户端和服务器之间通信的一种语言，这种语言的具体表现是网络流\emph{i.e。}，它是一系列数据包；
@@ -9,80 +11,88 @@
 ％
 \emph {（iii）}尽管SSL / TLS隐藏了网络流的有效负载，但仍然从加密连接中泄漏了旁信道协议状态信息。
 
+基于以上，我们采取深度学习的方法，从不同的视图特征进行研究，使用深度学习的方法提取抽象的特征，构建识别的模型。
+
+
 \section{多视图特征}
 模型中包含了三个视图，分别称为数据包大小（PS）视图，数据包内容类型（CT）视图和数据包有效载荷字节（PB）视图。
 
 该框架包括三个模块：预处理，特征学习和识别。
 
 
-This module first organizes raw network traffic into flows (\emph{i.e.}, the sample objects to be classified). 
-%
-整个流程的集合可以表示为 $D = \{{\{f_i\}}_{i=1}^{i=N}\}_{j=1}^{j=C}$ where $f_i$ means the $i^{th}$ flow. 
-%
-% In this paper, the flow objects defined by the $\{SRC_{IP}, SRC_{port}, DEST_{IP}, DEST_{port},$ $Transport Protocol\}$ tuple.
-%
-% and an inactivity timeout, with a default value of 60s.
-%
+\subsection{预处理}
+在数据集构建部分我们将流量数据按照流进行提取，形成的数据集中每一条流就是一个待识别的样本。 整个流程的集合可以表示为
+\begin{equation}
+    D = \{{\{f_i\}}_{i=1}^{i=N}\}_{j=1}^{j=C} 
+\end{equation}
+这里 $f_i$ 表示第$i$条流。我们定义的视图分从payload，parameter部分和packet size三个部分提取。
+
+\subsubsection{payload部分}
+形成PB视图。
+
+\subsubsection{parameter部分}
+形成CT视图。
+
+\subsubsection{packet size部分}
+形成PS视图。
+
+
 由于已经有了流程对象，因此可以转向流程的数字矢量表示。
 
 
 \emph{（i）}对于PS视图，通过计算前16个数据包的大小（用-1填充），我们形成了$ 16 $维矢量$ v_ {ps} $。
 
-\emph{（ii）}对于CT视图，我们通过将值内容类型字段扩展为前16个数据包（用-1填充）来形成$ 16 $维矢量$ v_ {ct} $，其范围从0到255 。
+\emph{（ii）}\citep{wiana2019}对于CT视图，我们通过将值内容类型字段扩展为前16个数据包（用-1填充）来形成$ 16 $维矢量$ v_ {ct} $，其范围从0到255 。
 
 \emph{（iii）}对于PB视图，通过将有效载荷字节值视为相应的ASCII码，我们形成一个$ 16 \ times64 = 1024 $维向量$v_{pb}$，然后进一步转换为0-255（ 用-1填充）。
 
 
+\subsection{特征学习}
+
 \begin{itemize}
 
-	\item \textbf{Feature learning from PB view:} 
+	\item \textbf{从 PB 提取特征:} 
 	%
-	We use a 1D-CNN network architecture to process the input numerical vector $v_{pb}$.
+	我们使用一维卷积神经网络处理 $v_{pb}$向量。
 	%
-	In the 1D-CNN, two-layer convolutional are used, the number of convolution kernels used in each layer is 64, and the size of the convolution kernel is $1 \times 3$, max pooling layer used. 
+	在处理过程中, 使用了两层卷积神经网络, 每一层卷积的卷积核数量是 64, 卷积核的大小是$1 \times 3$, 卷积操作中我们采用的是max pooling。 
 	%
-	Therefore, raw payload byte sequence is transformed into a 64-dimensional vector $\alpha$.
+	原始的payload部分的转换为64维的向量 $\alpha$.
 	%
 	\begin{equation}
 		\alpha = \mathit{1\!D\!-\!C\!N\!N}(v_{pb})
 	\end{equation}
 
-	\item \textbf{Feature learning from PS view:}
+	\item \textbf{从PS视图提取特征:}
 	%
-	The vector $v_{ps}$ is processed by 1D-CNN the same as payload byte sequence, the differences are that the input vector is packet size sequence and the input length is 16 here.
+	$v_{ps}$向量和处理payload部分的一样，使用一维卷积神经网络进行处理, 所不同的是输入的向量大小为packet的数目。
 	%
-	After 1D-CNN feature learning, packet size sequence is transformed into a 64-dimensional vector $\beta$.
+	经过一维卷积神经网络的处理后, packet size 序列被转换为一个64维的向量 $\beta$.
 	%
 	\begin{equation}
 		\beta = \mathit{1D\!-\!C\!N\!N}(v_{ps})
 	\end{equation}
 	%
-	\item \textbf{Feature learning from CT view:} 
+	\item \textbf{从CT视图提取特征:} 
 	%
-	The content type is originally a discrete variable represented by a 257-dimensional one-hot vector which is very sparse, so we introduce the embedding operation which maps the sparse representation to a 16-dimensional real vector which incorporates contextual information about the content type.
+	content type 是一个用257维的one-hot编码的稀疏向量,每一个取值之间的距离为$\sqrt{2}$,one-hot夫人编码方式不能够有效表示上下文关系， 所以我们引入了embedding操作将这个257维的稀疏表示映射为一个16维的实数向量，这种表示方法有效保留了上下文关系。
 	%
-	% Embedding mathetextbfcally represents a mapping: $f:X \to Y$, which satisfies two properties: injective and structure-preserving.
-	%
-	The Embedding layer needs to learn a transform matrix whose shape is $ (vocab\_size, embedding\_dim) $.
+	Embedding层需要学习一个转换向量，其大小为 $ (vocab\_size, embedding\_dim) $.
 	%
 	The embedding layer is basically a matrix which can be considered a transformation from discrete and sparse 1-hot-vector into a continuous and dense latent space. 
-	%
-	Formally, 
-	%
+	
+	经过Embedding操作后，我们使用了循环神经网络从CT视图序列特征中提取抽象特征，形式上， 
 	\begin{equation}
 		\gamma = \mathit{R\!N\!N}(Embedding(v_{ct}))
 	\end{equation}
-	%
+	
+	经过RNN处理后，content type视图被转换为一个64维的向量$\gamma$
+	
 \end{itemize}
 
-\subsection{payload部分}
 
-\subsection{parameter部分}
-\citep{wiana2019}
 
-\subsection{packet size部分}
-
-\subsection{神经网络结构}
+\subsection{识别模型架构}
 % =================================
 % Fig. 03: Model architecture
 % =================================
@@ -121,11 +131,13 @@ Then the model's prediction $y_{pd} $ is the class whose probability is maximal:
 y_{pd}=argmax(p(Y=j|x,W,b)),\forall j \in \{1,2,3,...,C\}
 \end{equation} 
 %
-Our neural network selects the cross entropy \cite{Boer2005A} as the loss function. 
+我们的模型使用交叉熵 \citep{Boer2005A} 作为损失函数。 
 %
 
 
-\section{多视图识别模型评估}
+
+
+\section{实验和评估}
 \subsection{评估标准}
 为了对AIBMF在交通数据上的识别性能进行合理有效的定量评估，本文介绍了一些基本指标：真阳性（TP），假阴性（FN），真阴性（TN）和假阳性（ FP）。 TP是分类为应用程序$ i $的流量确切属于应用程序$ i $的数量。 FN是分类为应用程序$ i $的流数，完全属于应用程序$ j $。 TN是分类为应用程序$ j $的流数，完全属于应用程序$ i $。 FP是分类为应用程序$ j $的流数，完全属于应用程序$ j $。
 
@@ -184,9 +196,22 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \end{subequations}
 
 
+\subsection{实验环境和数据集的组织}
+
+\begin{itemize}
+	\item CPU: 24 Intel (R) Xeon CPU E5-2650 v4 @ 2.2GHz
+	\item GPU: 2 GTX TITAN X
+	\item RAM: 128GB
+	\item OS: Ubuntu 16.04 LTS
+\end{itemize}
+
+我们将100,000+个带有标签的示例分为两个部分：训练集和测试集。 为了确保随机性，我们对数据进行了随机操作，其中训练集占90％，测试集占10％。
+
 
 \subsection{超参数的确定}
+
 \subsubsection{单个样本packet数目确定}
+我们收集了100,000多个流数据，并研究了各种应用程序的数据包计数分布。如图4所示，超过100,000个流的数据包计数的中位数为11，一个流中的数据包计数超过16只占32％，在我们的方法中，每个流的数据包计数设置为16，第一个 每个流中获取16个数据包。
 % =================================
 % Fig. 03: Model architecture
 % =================================
@@ -211,10 +236,8 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 
 
 \subsubsection{单个packet的payload字节数确定}
+为了确定每个数据包使用多少字节，我们进行了一系列比较实验。如图5所示，每个数据包以不同的长度截取，随着截取长度的增加，1D-CNN的识别能力增强。 当采用前64个字节时，测试集的准确性为93.34％。在64个字节的长度之后，精度会非常缓慢地增加，并且增益随着长度的增加而降低，但是1D-CNN的时间复杂度和空间复杂度将显着增加，因此每个数据包的长度设置为64。
 
-% =================================
-% Fig. 03: Model architecture
-% =================================
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.80\textwidth]{Payload-size-acc.eps}
@@ -230,7 +253,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 % =================================
 
 \subsection{不同深度学习模型的评估}
-
+在实验的过程种，我们分别比较了仅仅使用一维卷积神经网络、二维卷积神经网络处理payload视图和AIBMF模型训练的过程，对比了在识别的过程中，loss和accuracy的变化过程。
 \begin{figure}[!htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
@@ -251,9 +274,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \end{figure}
 
 \subsection{传统方法和研究方法的对比}
-% ===========
-% Table 01:Statistics
-% ===========
+我们的研究工作还对比了机器学习的方法，首先使用特征工程的方法构建了23种特征，其中7种特征是根据HTTPS协议定义的特征，属于HTTPS流量特有的特征，其余的16种特征是流量分析工作常用的特征。
 \begin{table}
 	\caption{HTTPS Statistics}
 	\setlength{\tabcolsep}{7mm}
@@ -315,7 +336,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 		\label{tab1}
 	\end{center}
 \end{table}
-
+针对提取的23种特征，分别使用了随机森林，支持向量机和单层神经网络进行训练和识别，如下表，和我们的研究工作提出的AIBMF模型相比较，基于机器学习的方法在识别能力表现不是很优秀。我们的AIBMF模型在三个参数上均领先于其他的识别模型。
 \begin{table}
 	\caption{traffic identification based on statistical features only}
 	\begin{center}
@@ -339,10 +360,9 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 
 
 
-\section{在混合模式下的效果}
-% =================================
-% Fig. 03: Model architecture
-% =================================
+\section{AIBMF模型识别效果}
+针对20个移动应用1万条样本，绘制混淆矩阵来观察识别的效果。整体上，识别的效果非常好，其中大多数的错误是由于不同的应用之间可能共享服务所致，尤其针对那些由同一个公司开发的应用而言，识别能力存在一定的混淆。有一些应用将其API提供给了其他的应用作为公共接口，如百度地图，这给我们模型的识别能力带来了一定的影响。另外我们发现在我们的实验中，QQ软件的识别效果最差。 可能的原因是QQ使用的通信协议主要是UDP，并补充了TCP协议。 我们主要从Qzone捕获QQ流量，该流量混合了许多其他应用程序的流量。
+
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.80\textwidth]{AIBMF-confusematrix.png}
