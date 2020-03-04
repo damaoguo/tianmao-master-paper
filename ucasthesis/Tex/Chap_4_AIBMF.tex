@@ -112,6 +112,74 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 \end{equation}
 %
 然后将其输入到完全连接的层。
+\begin{table}[!htbp]
+    \bicaption{AIBMF网络}{AIBMF network.}
+    \label{tab:AIBMF-layer}
+    \centering
+    \footnotesize% fontsize
+    \setlength{\tabcolsep}{4pt}% column separation
+    \renewcommand{\arraystretch}{1.2}%row space 
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{网络层(类型)} & \textbf{输出层} & \textbf{参数个数} & \textbf{上一层网络}\\
+        \hline
+        \hline
+        packetPayload (InputLayer) & (None, 1024) & 0 & \\
+        \hline
+        packetSize (InputLayer) & (None, 16) & 0 & \\
+        \hline
+        batch\_normalization\_1 (BatchNor) & (None, 1024) & 4096 & packetPayload[0][0] \\
+        \hline
+        batch\_normalization\_2 (BatchNor) & (None, 16) & 64 & packetSize[0][0] \\     
+        \hline
+        reshape\_1 (Reshape) & (None, 1024, 1) & 0 & batch\_normalization\_1[0][0] \\
+        \hline
+        reshape\_2 (Reshape) & (None, 16, 1) & 0 & batch\_normalization\_2[0][0] \\
+        \hline
+        layer\_conv\_1 (Conv1D) & (None, 1022, 64) & 256 & reshape\_1[0][0] \\
+        \hline
+        layer\_conv\_3 (Conv1D) & (None, 14, 64) & 256 & reshape\_2[0][0] \\
+        \hline
+        max\_pooling1d\_1 (MaxPooling1D) &  (None, 1020, 64) & 0 & layer\_conv\_1[0][0] \\ 
+        \hline
+        max\_pooling1d\_3 (MaxPooling1D) & (None, 12, 64) & 0 & layer\_conv\_3[0][0] \\
+        \hline
+        layer\_conv\_2 (Conv1D) & (None, 1020, 32) & 6176 & max\_pooling1d\_1[0][0] \\  
+        \hline
+        recordTypes (InputLayer) & (None, 16) & 0 & \\     
+        \hline
+        layer\_conv\_4 (Conv1D) & (None, 12, 32) & 6176 & max\_pooling1d\_3[0][0] \\
+        \hline
+        max\_pooling1d\_2 (MaxPooling1D) & (None, 1018, 32) & 0 & layer\_conv\_2[0][0] \\
+        \hline
+        embedding\_1 (Embedding) & (None, 16, 32) & 8224 & recordTypes[0][0] \\
+        \hline
+        max\_pooling1d\_4 (MaxPooling1D) &  (None, 10, 32) & 0 & layer\_conv\_4[0][0] \\
+        \hline
+        flatten\_1 (Flatten) & (None, 32576) & 0 & max\_pooling1d\_2[0][0] \\
+        \hline
+        lstm\_1 (LSTM) & (None, 16) & 3136 & embedding\_1[0][0] \\
+        \hline
+        flatten\_2 (Flatten) & (None, 320) & 0 & max\_pooling1d\_4[0][0] \\ 
+        \hline
+        dense\_1 (Dense) & (None, 64) & 2084928 & flatten\_1[0][0] \\
+        \hline
+        dense\_2 (Dense) & (None, 64) & 1088 & lstm\_1[0][0] \\
+        \hline
+        dense\_3 (Dense) & (None, 64) & 20544 & flatten\_2[0][0] \\
+        \hline
+        concatenate\_1 (Concatenate) & (None, 192) & 0 & dense\_1[0][0],dense\_2[0][0],dense\_3[0][0] \\
+        \hline
+        main\_output (Dense) & (None, 20) & 3860 & concatenate\_1[0][0] \\
+        \hline
+        \hline
+        \textbf{总共参数} & \multicolumn{3}{|c|}{2,138,804} \\
+        \textbf{可训练的参数} & \multicolumn{3}{|c|}{2,136,724} \\
+        \textbf{不可训练的参数} & \multicolumn{3}{|c|}{2,080} \\
+        \hline
+    \end{tabular}
+\end{table}
+
 %
 完全连接层的输出\emph {i.e。}，$ x $，将用作softmax回归的输入，以识别流量。
 

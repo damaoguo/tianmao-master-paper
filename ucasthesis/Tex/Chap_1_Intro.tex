@@ -30,7 +30,39 @@
 	\label{fig:SNI-extensions-server-name}
 \end{figure}
 
-\citet{Shbair2016Improving}实现基于SNI给流量添加标签。这篇文章主要的思路是：利用域名数据集（ 两个数据集\footnote{https://scans.io/series/443-https-tls-alexa_top1mil}，\footnote{https://cs.uwaterloo.ca/t55wang/wf.html},使用爬虫工具进行访问，获取到在建立握手的Client hello过程中返回的SNI，为了识别SNI是否是真实的，又结合了DNS解析SNI的结果和真实的ip进行比较，方法是：通过ip请求域名服务器，得到该ip所对应的域名，将得到的域名和SNI进行比较，判断该SNI是否正确。基于SNI的技术不能够处理SNI被移除的流，也不能够处理SNI被造假的情况。
+请见表~\ref{tab:sni-sample}。
+\begin{table}[!htbp]
+    \bicaption{这是一个样表。}{This is a sample table.}
+    \label{tab:sni-sample}
+    \centering
+    \footnotesize% fontsize
+    \setlength{\tabcolsep}{4pt}% column separation
+    \renewcommand{\arraystretch}{1.2}%row space 
+    \begin{tabular}{|c|c|}
+        \hline
+        应用名称 & Sever Name Identification(SNI)\\
+        \hline
+        \multirow{5}{*}{百度地图} & hmma.baidu.com\\
+        & gss0.bdstatic.com \\
+        & sofire.baidu.com \\
+        & api.tuisong.baidu.com\\
+        & loc.map.baidu.com\\
+        \hline
+        \multirow{4}{*}{百度贴吧} & gss0.bdstatic.com\\
+        & sofire.baidu.com \\
+        & browserkernel.baidu.com \\
+        & client.map.baidu.com \\
+        \hline
+        \multirow{4}{*}{淘宝} & nbsdk-baichuan.alicdn.com \\
+        & dtmall-tel.alicdn.com\\
+        & dorangesource.alicdn.com\\
+        & umdc.aliapp.org\\
+        \hline
+    \end{tabular}
+\end{table}
+
+
+\citet{Shbair2016Improving}实现基于SNI给流量添加标签。这篇文章主要的思路是：利用域名数据集（两个数据集\footnote{https://scans.io/series/443-https-tls-alexa_top1mil}，\footnote{https://cs.uwaterloo.ca/t55wang/wf.html},使用爬虫工具进行访问，获取到在建立握手的Client hello过程中返回的SNI，为了识别SNI是否是真实的，又结合了DNS解析SNI的结果和真实的ip进行比较，方法是：通过ip请求域名服务器，得到该ip所对应的域名，将得到的域名和SNI进行比较，判断该SNI是否正确。基于SNI的技术不能够处理SNI被移除的流，也不能够处理SNI被造假的情况。
 
 \subsubsection{基于message type的HTTPS流量应用应用识别}
 \citep{shen2017classification}利用TLS嵌入的消息类型作为状态，并在数据包级别上建立了隐马尔可夫模型。它主要利用HTTPS的消息类型（它是通信过程中协议设计的功能）作为状态信息，并扩展了应用程序的指纹。并验证数据包的消息类型功能可用于流量识别。
