@@ -209,6 +209,28 @@ y_{pd}=argmax(p(Y=j|x,W,b)),\forall j \in \{1,2,3,...,C\}
 \subsection{评估标准}
 为了对AIBMF在交通数据上的识别性能进行合理有效的定量评估，本文介绍了一些基本指标：真阳性（TP），假阴性（FN），真阴性（TN）和假阳性（ FP）。 TP是分类为应用程序$ i $的流量确切属于应用程序$ i $的数量。 FN是分类为应用程序$ i $的流数，完全属于应用程序$ j $。 TN是分类为应用程序$ j $的流数，完全属于应用程序$ i $。 FP是分类为应用程序$ j $的流数，完全属于应用程序$ j $。
 
+请见表~\ref{tab:confusion-matrix}。
+\begin{table}[!htbp]
+    \bicaption{识别结果的混淆矩阵。}{Confusion matrix of classification results.}
+    \label{tab:confusion-matrix}
+    \centering
+    \footnotesize% fontsize
+    \setlength{\tabcolsep}{4pt}% column separation
+    \renewcommand{\arraystretch}{1.2}%row space 
+    \begin{tabular}{l|l|c|c|c}
+        \multicolumn{2}{c}{}&\multicolumn{2}{c}{\textbf{预测结果}}&\\
+        \cline{3-4}
+        \multicolumn{2}{c|}{} & \textbf{正类} & \textbf{负类} & \multicolumn{1}{c}{\textbf{总计}}\\
+        \cline{2-4}
+        \multirow{2}{*}{\textbf{真实情况}} & \textbf{正类} & 真正类(TP) & 假负类(FN) & $TP+FN$\\
+        \cline{2-4}
+        & \textbf{负类} & 假正类(FP) & 真负类(TN) & $FP+TN$\\
+        \cline{2-4}
+        \multicolumn{1}{c}{} & \multicolumn{1}{c} {\textbf{总计}} & \multicolumn{1}{c}{$TP+FP$} & \multicolumn{    1}{c}{$FN+TN$} & \multicolumn{1}{c}{$TP+FN+FP+TN$}\\
+    \end{tabular}
+\end{table}
+
+
 
 在训练阶段，\ emph {Accuracy（ACC）}用于指示模型识别能力的提高，并且改进了综合显示模型在识别HTTPS流量方面的性能。 准确率是在迭代训练过程中所有正确样本量与训练数据的比率，该比率是根据公式（7）计算的。
 
@@ -266,12 +288,29 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 
 \subsection{实验环境和数据集的组织}
 
-\begin{itemize}
-	\item CPU: 24 Intel (R) Xeon CPU E5-2650 v4 @ 2.2GHz
-	\item GPU: 2 GTX TITAN X
-	\item RAM: 128GB
-	\item OS: Ubuntu 16.04 LTS
-\end{itemize}
+请见表~\ref{tab:experiment-enviorment}。
+\begin{table}[!htbp]
+    \bicaption{实验所需的软硬件环境。}{Hardware and software environment of experiments.}
+    \label{tab:experiment-enviorment}
+    \centering
+    \footnotesize% fontsize
+    \setlength{\tabcolsep}{4pt}% column separation
+    \renewcommand{\arraystretch}{1.2}%row space 
+    \begin{tabular}{lcc}
+        \hline
+        \multirow{3}{*}{硬件} & CPU & 24 Intel (R) Xeon CPU E5-2650 v4 @ 2.2GHz \\
+        & GPU & 2 GTX TITAN X \\
+        & RAM & 128GB\\
+        \hline
+        \multirow{5}{*}{软件} & 操作系统 & Ubuntu 16.04 LTS\\
+        & 编程语言 & Python 3.6, Linux bash \\
+        & 深度学习框架 & Tensorflow 1.12，Keras 2.2.4\\
+        & 机器学习框架 & scikit-learn 0.22.1\footnote{https://scikit-learn.org/}\\
+        & 重要Python包 & Scapy\footnote{https://scapy.net/}, Pandas\footnote{https://pandas.pydata.org/}, Numpy\footnote{https://numpy.org/}, Matplotlib\footnote{https://matplotlib.org/} \\
+        \hline
+    \end{tabular}
+\end{table}
+
 
 我们将100,000+个带有标签的示例分为两个部分：训练集和测试集。 为了确保随机性，我们对数据进行了随机操作，其中训练集占90％，测试集占10％。
 
