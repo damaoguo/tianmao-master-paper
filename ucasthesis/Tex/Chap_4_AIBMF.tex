@@ -33,6 +33,37 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 \subsubsection{parameter部分}
 形成CT视图。
 
+\begin{table}[!htbp]
+    \bicaption{TLS消息类型。}{TLS Heartbeat Message Type.}
+    \label{tab:message-type}
+    \centering
+    \footnotesize% fontsize
+    \setlength{\tabcolsep}{4pt}% column separation
+    \renewcommand{\arraystretch}{1.2}%row space
+    \resizebox{\columnwidth}{!}{
+        \begin{tabular}{rccc}
+        \textbf{取值} & \textbf{描述} & \textbf{DTLS-OJ} & \textbf{参考}\\
+        \hline
+        0-19 & Unassigned (Requires coordination; see [RFC7983]) & & [RFC5764][RFC7983]\\
+        20 & change\_cipher\_spec & Y & [RFC8446]\\
+        21 & alert & Y & [RFC8446]\\
+        22 & handshake & Y & [RFC8446]\\
+        23 & application\_data & Y & [RFC8446]\\
+        24 & heartbeat & Y & [RFC6520]\\
+        25 & tls12\_cid (TEMPORARY - registered 2019-07-02, expires 2020-07-02) & Y & [draft-ietf-tls-dtls-connection-id]\\
+        26-63 & Unassigned & & \\
+        64-255 & Unassigned (Requires coordination; see [RFC7983]) & & [RFC5764][RFC7983]\\
+        \hline
+        \end{tabular}    
+    
+    }
+
+\end{table}
+
+
+
+
+
 \subsubsection{packet size部分}
 形成PS视图。
 
@@ -374,67 +405,69 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \end{figure}
 
 \subsection{传统方法和研究方法的对比}
-我们的研究工作还对比了机器学习的方法，首先使用特征工程的方法构建了23种特征，其中7种特征是根据HTTPS协议定义的特征，属于HTTPS流量特有的特征，其余的16种特征是流量分析工作常用的特征。
-\begin{table}
-	\caption{HTTPS Statistics}
-	\setlength{\tabcolsep}{7mm}
-	\begin{center}
-		\begin{tabular}{| c | c | c |}
-			\hline
-			\textbf{统计特征} & \textbf{含义} & \textbf{是否特有？}\\
-			\hline
-			\hline
-			Packet counts & Packet数量& 否\\
-			\hline
-			TTL max & TTL最大值 & 否\\
-			\hline
-			TTL min & TTL最小值 & 否\\
-			\hline
-			TTL mean & TTL平均值 & 否\\
-			\hline
-			TTL median & TTL中位数 & 否\\
-			\hline
-			TTL var & TTL方差 & 否\\
-			\hline
-			packet\_length max & packet长度最大值 & 否\\
-			\hline
-			packet\_length min & packet长度最小值 & 否\\
-			\hline
-			packet\_length mean & packet长度平均值 & 否\\
-			\hline
-			packet\_length median & packet长度中位数 & 否\\
-			\hline
-			packet\_length var & packet长度方差 & 否\\
-			\hline	
-			window max & 窗口最大值 & 否\\
-			\hline
-			window min & 窗口最小值 & 否\\
-			\hline
-			window mean & 窗口平均值 & 否\\
-			\hline
-			window median & 窗口中位数 & 否\\
-			\hline
-			window var & 窗口方差 & 否\\
-			\hline
-			session\_id\_length max & session id长度 & 否\\
-			\hline	
-			client\_extensions\_length max & client extensions长度最大值 & 是\\
-			\hline
-			client\_extensions\_length min & client extensions长度最小值 & 是\\
-			\hline
-			client\_extensions\_length mean & client extensions长度平均值 & 是\\
-			\hline
-			client\_extensions\_length median & client extensions长度中位数 & 是\\
-			\hline
-			client\_extensions\_length var & client extensions长度方差 & 是\\
-			\hline
-			client\_ciphers counts & 客户端加密组件种类 & 是\\
-			\hline
-			server\_cipher & 服务端加密组建类型 & 是\\
-			\hline
-		\end{tabular}
-		\label{tab1}
-	\end{center}
+我们的研究工作还对比了机器学习的方法，首先使用特征工程的方法构建了23种特征，见表：\ref{tab:statistical-feature}，其中7种特征是根据HTTPS协议定义的特征，属于HTTPS流量特有的特征，其余的16种特征是流量分析工作常用的特征。
+
+\begin{table}[!htbp]
+    \bicaption{统计特征。}{Statistical Feature.}
+    \label{tab:statistical-feature}
+    \centering
+    \footnotesize% fontsize
+    \setlength{\tabcolsep}{4pt}% column separation
+    \renewcommand{\arraystretch}{1.2}%row space 
+	\begin{tabular}{| c | c | c |}
+		\hline
+		\textbf{统计特征} & \textbf{含义} & \textbf{是否是HTTPS特有？}\\
+		\hline
+		\hline
+		Packet counts & Packet数量& 否\\
+		\hline
+		TTL max & TTL最大值 & 否\\
+		\hline
+		TTL min & TTL最小值 & 否\\
+		\hline
+		TTL mean & TTL平均值 & 否\\
+		\hline
+		TTL median & TTL中位数 & 否\\
+		\hline
+		TTL var & TTL方差 & 否\\
+		\hline
+		packet\_length max & packet长度最大值 & 否\\
+		\hline
+		packet\_length min & packet长度最小值 & 否\\
+		\hline
+		packet\_length mean & packet长度平均值 & 否\\
+		\hline
+		packet\_length median & packet长度中位数 & 否\\
+		\hline
+		packet\_length var & packet长度方差 & 否\\
+		\hline	
+		window max & 窗口最大值 & 否\\
+		\hline
+		window min & 窗口最小值 & 否\\
+		\hline
+		window mean & 窗口平均值 & 否\\
+		\hline
+		window median & 窗口中位数 & 否\\
+		\hline
+		window var & 窗口方差 & 否\\
+		\hline
+		session\_id\_length max & session id长度 & 否\\
+		\hline	
+		client\_extensions\_length max & client extensions长度最大值 & 是\\
+		\hline
+		client\_extensions\_length min & client extensions长度最小值 & 是\\
+		\hline
+		client\_extensions\_length mean & client extensions长度平均值 & 是\\
+		\hline
+		client\_extensions\_length median & client extensions长度中位数 & 是\\
+		\hline
+		client\_extensions\_length var & client extensions长度方差 & 是\\
+		\hline
+		client\_ciphers counts & 客户端加密组件种类 & 是\\
+		\hline
+		server\_cipher & 服务端加密组建类型 & 是\\
+		\hline
+	\end{tabular}
 \end{table}
 针对提取的23种特征，分别使用了随机森林，支持向量机和单层神经网络进行训练和识别，如下表，和我们的研究工作提出的AIBMF模型相比较，基于机器学习的方法在识别能力表现不是很优秀。我们的AIBMF模型在三个参数上均领先于其他的识别模型。
 \begin{table}

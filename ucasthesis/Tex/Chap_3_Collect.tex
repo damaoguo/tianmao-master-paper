@@ -1,55 +1,79 @@
 \chapter{数据集和数据预处理}\label{chap:collect}
-在课题研究过程中，需要大量的数据支持。需要在大量的数据上训练移动应用流量识别模型以及验证模型的效果。然而，当前所公布的开源数据较少，数据量有限，分类的粒度较为粗糙。
+在课题研究过程中，需要大量的数据支持。需要在大量的数据上训练移动应用流量识别模型以及验证模型的效果。然而，当前所公布的开源数据较少，数据量有限，分类的粒度较为粗糙。本章详细地描述了移动应用HTTPS流量数据地采集和处理方法，构建了一个50个不同类型的移动应用的流量数据集，规模为20万条流样本。
 
 \section{公开流量数据集}
-
+本章首先本文调研了当前已经公开的流量数据集，总结这些公开数据集的来源、规模、协议、用途以及获取方式。现有的公开并被多项研究工作使用的数据集如下：
 \begin{itemize}
     \item \citep{draper2016characterization}发布了VPN-nonVPN dataset (ISCXVPN2016)数据集\footnote{https://www.unb.ca/cic/datasets/vpn.html}，其中包括7种常规加密流量和7种协议封装流量。该项工作捕获了一个常规会话和一个通过VPN的会话，因此，共有14种流量类别：VOIP，VPN-VOIP，P2P，VPN-P2P等。数据内容包括：
     请见表~\ref{tab:sample}。
-\begin{table}[!htbp]
-    \bicaption{这是一个样表。}{This is a sample table.}
-    \label{tab:sample}
-    \centering
-    \footnotesize% fontsize
-    \setlength{\tabcolsep}{4pt}% column separation
-    \renewcommand{\arraystretch}{1.2}%row space 
-    \begin{tabular}{lc}
+    \begin{table}[!htbp]
+        \bicaption{这是一个样表。}{This is a sample table.}
+        \label{tab:sample}
+        \centering
+        \footnotesize% fontsize
+        \setlength{\tabcolsep}{4pt}% column separation
+        \renewcommand{\arraystretch}{1.2}%row space 
+        \begin{tabular}{lc}
+            \hline
+            类型 & 内容 \\
+            \hline
+            Traffic & Content \\
+            Web Browsing & Firefox and Chrome \\
+            Email & SMPTS, POP3S and IMAPS \\
+            Chat & ICQ, AIM, Skype, Facebook and Hangouts \\
+            Streaming & Vimeo and Youtube \\
+            File Transfer & Skype, FTPS and SFTP using Filezilla and an external service \\
+            VoIP & Facebook, Skype and Hangouts voice calls (1h duration) \\
+            P2P & uTorrent and Transmission (Bittorrent)\\
+            \hline
+        \end{tabular}
+    \end{table}
+    
+    \item Intrusion detection evaluation dataset (ISCXIDS2012) \footnote{https://www.unb.ca/cic/datasets/ids.html}：该数据集包括标记的网络跟踪，包括pcap格式的完整数据包有效负载，以及相关的配置文件供研究人员公开使用。如表：\ref{tab:ISCXIDS2012}所示，由7天的网络活动（正常和恶意）组成：
+     \begin{table}[!htbp]
+        \bicaption{这是一个样表。}{This is a sample table.}
+        \label{tab:ISCXIDS2012}
+        \centering
+        \footnotesize% fontsize
+        \setlength{\tabcolsep}{4pt}% column separation
+        \renewcommand{\arraystretch}{1.2}%row space 
+        \begin{tabular}{lcc}
         \hline
-        类型 & 内容 \\
+        \textbf{日期} &  \textbf{描述} & \textbf{数据规模(GB)}\\
         \hline
-        Traffic & Content \\
-        Web Browsing & Firefox and Chrome \\
-        Email & SMPTS, POP3S and IMAPS \\
-        Chat & ICQ, AIM, Skype, Facebook and Hangouts \\
-        Streaming & Vimeo and Youtube \\
-        File Transfer & Skype, FTPS and SFTP using Filezilla and an external service \\
-        VoIP & Facebook, Skype and Hangouts voice calls (1h duration) \\
-        P2P & uTorrent and Transmission (Bittorrent)\\
+        11/6/2010 & Normal Activity. No malicious activity & 16.1\\
+        12/6/2010 & Normal Activity. No malicious activity & 4.22\\
+        13/6/2010 & Infiltrating the network from inside + Normal Activity & 3.95\\
+        14/6/2010 & HTTP Denial of Service + Normal Activity & 6.85\\
+        15/6/2010 & Distributed Denial of Service using an IRC Botnet & 23.4\\
+        16/6/2010 & Normal Activity. No malicious activity & 17.6\\
+        17/6/2010 & Brute Force SSH + Normal Activity & 12.3\\
         \hline
-    \end{tabular}
-\end{table}
+        \end{tabular}
+    \end{table}
+    该数据集合主要针对恶意流量的分析，包含了HTTP，SSH等协议诸如DDOS，Brute Force等恶意行为，因此该数据集在本文研究的任务重合度有限。
     
-    \item Intrusion detection evaluation dataset (ISCXIDS2012) \footnote{https://www.unb.ca/cic/datasets/ids.html}
+    \item \citep{bujlow2015independent}提出数据集Independent Comparison of Popular DPI Tools for Traffic Classification" dataset\footnote{https://cba.upc.edu/monitoring/traffic-classification}，这个数据集包含767690个流，这些流占53.31GB的纯数据包数据。存在759720个流的应用程序名称（占所有流的98.96％），占数据量的51.93GB（97.41％）。数据集由一个pcap跟踪和一个INFO文件组成。INFO文件中的每一行对应于pcap跟踪中的流，并描述如下：
+    \begin{lstlisting}
+     flow_id + "#" + start_time + "#" + end_time + "#" + local_ip + "#" + remote_ip + "#" + local_port + "#" + remote_port + "#" + transport_protocol + "#" + operating_system + "#" + process_name + "#" + HTTP Url + "#" + HTTP Referer + "#" + HTTP Content-type +"#"
+    \end{lstlisting}
+    本数据集数据规模较大，但是数据是已经预处理，对于新的识别问题存在局限。
     
+    \item DARPA99 traces\footnote{https://www.ll.mit.edu/r-d/datasets}:该ARPA99跟踪是来自MIT Lincoln实验室1999年的模拟网络的数据包。这些数据包中提供了所有网络数据，其标签是不同的攻击行为，因此该数据集不符合本文的研究场景。
     
+    \item MAWILab\footnote{http://mawi.wide.ad.jp/mawi/}：\citep{mawilab}发布了MAWILab数据集，可帮助研究人员评估其交通异常检测方法。它由一组用于定位MAWI存档中交通异常的标签（样本点B和F）组成。使用基于图形的高级方法获得标签，该方法比较并组合了不同且独立的异常检测器。 数据集每天更新，以包括来自即将到来的应用程序和异常的新流量。该数据集是用于评估异常流量检测方法的，不符合本文的研究场景。
     
-    \item \citep{bujlow2015independent}提出数据集\footnote{https://cba.upc.edu/monitoring/traffic-classification}
+    \item NLANR AMP Data\footnote{https://labs.ripe.net/datarepository/data-sets/nlanr-amp-data}：此数据是NLANR研究小组收集的一组活动测量（ping /traceroute）。 数据由多达130个有利点的网格中的测量组成，并且这些测量在1998年至2006年之间进行。该数据可用于Internet的纵向研究。RIPE数据存储库中的可用数据是NLANR网站上可用的原始数据的重新制作版本。该数据集包括的是\emph{ping/traceroute}和相关的流量，不符合本文的研究场景所需。
     
-    \item DARPA99 traces\footnote{https://www.ll.mit.edu/r-d/datasets}: The DARPA99 traces are packets from a simulated network at the MIT Lincoln Laboratory in 1999. All network data is available in these packets and so identification was done reliably using the SSH handshake.
+    \item NIMS\footnote{https://projects.cs.dal.ca/projectx/Download.html}：在研究工作中\citep{alshammari2011can,alshammari2008investigating,alshammari2007flow}提出了NIMS数据集，该数据的标签为：\emph{TELNET, FTP, HTTP, DNS, lime, localForwarding, remoteForwarding, scp, sftp, x11, shell}，是基于协议层的分类，且单条样本已经被预处理为22个字段的数值，主要为均值、方差、最大值、最小值等统计特征。该数据集涉及了多种加密协议的样本，在识别粒度上要比本文的识别任务粗糙，不符合本文场景。
     
-    \item MAWI Working Group Traffic\footnote{http://mawi.wide.ad.jp/mawi/}
-    
-    \item NLANR AMP Data\footnote{https://labs.ripe.net/datarepository/data-sets/nlanr-amp-data}This data is a set of active measurements (ping/traceroute) collected by the NLANR research group. The data consists of measurements in a mesh of up to 130 vantage points and the measurements ran between 1998 and 2006. This data is useful for longitudinal study of the Internet. The data available from the RIPE Data Repository is a remastered version of the original data that was available from the NLANR website.
-    
-    \item NIMS\footnote{https://projects.cs.dal.ca/projectx/Download.html}
-    
-    \item WAND Group \footnote{https://wand.net.nz/wits/}
+    \item WITS: Waikato Internet Traffic Storage\footnote{https://wand.net.nz/wits/}：该数据集目前有33个不同的集合构成，数据规模较为庞大，且数据来源较为丰富，但是该数据集采集的是混合流量，样本缺少精细化的标记，因此难于用于训练精细化的流量识别方法，无法满足本文中的精细化识别场景的需求。
     
     
 \end{itemize}
 
 
-本课题的目的在于通过对大量的应用的HTTPS流量数据进行分析，得到一种可靠准确的分析方法，以上提到的公开数据集，规模有限且对于数据的标注不符合我们的要求。
+本课题的目的在于通过对大量的应用的HTTPS流量数据进行分析，得到一种可靠准确的分析方法，经过分析，以上提到的公开数据集在通信协议、数据规模、数据标签、数据格式或者使用场景等不满足本文针对HTTPS流量进行精细化识别的要求。为此需要构建新的数据集来支撑本文的研究工作。
 
 \section{流量采集}
 在本文章中介绍一种针对Android应用流量的自动化/半自动化的流量采集方法。数据采集的流程如图所示，该系统主要由APP爬虫、应用调度、App运行环境、事件注入和守护进程五个模块构成。
@@ -62,12 +86,8 @@
 
 \section{预处理}
 我们以流为单位进行研究和标记，离线的数据流结构如图，我们在采集流量的时候，保存的同一个pcap文件是由多条流构成的。
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{flow_offline}
-	\bicaption{离线流数据}{}
-	\label{fig:flow_offline}
-\end{figure}
+
+
 
 \subsection{基于splitcap抽取流}
 SplitCap\footnote{https://www.netresec.com/?page=SplitCap}是一个免费工具，旨在根据诸如IP地址，5元组或MAC地址等标准将捕获文件（PCAP文件）拆分为较小的文件。 可用于拆分/分组的标准是：
@@ -96,10 +116,6 @@ Scapy是一个Python程序，使用户能够发送，嗅探，剖析和伪造网
 #!/usr/bin/env python
 #encoding=utf-8
 """
-@author: TianMao
-@contact: tianmao1994@yahoo.com
-@file: split-pcap.py
-@time: 19-11-27 下午6:38
 @desc:
     功能：按照TCP流切分pcap文件
     参考：https://github.com/mao-tool/packet-analysis
@@ -260,6 +276,16 @@ for aPkt in pcapIn:
       else:
          print packetCount
 \end{lstlisting}
+
+原始的流量数据经过处理以后，一个原始的pacp文件将会按照流拆分为新的pcap小文件，文件存储的目录结构如图：\ref{fig:file-tree}所示。
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{File-tree.pdf}
+	\bicaption{流数据文件存储目录}{Traffic Flow File Tree}
+	\label{fig:file-tree}
+\end{figure}
+
+
 
 \subsection{数据集概览}
 我们基于HTTPS协议创建流量数据集。 数据集包含20个流行应用程序的100,000多个HTTPS流。 我们在多个真实的Android设备和Android模拟器中都执行一个应用程序。 该应用由Android工具monkeyrunner\footnote{https://developer. android. com/studio/test/monkeyrunner/index.html}自动驱动。 我们会同时在不同设备上执行同一应用，并通过限制android设备中其他应用的权限来确保没有应用在后台运行。 我们一次捕获一个应用程序的流量，以确保它是事实。 为了避免受到网络环境的影响，我们在一个月的时间里，一直在手动和自动方式下通过Wireshark \footnote{https://www.wireshark.org/}和TcpDump\footnote{http://www.tcpdump.org}来捕获流量。

@@ -1,71 +1,32 @@
 \chapter{相关研究及概述}\label{chap:https}
+本章详细介绍了论文所涉及到的理论知识，首先介绍HTTPS协议、HTTPS握手过程、HTTPS加密过程。然后针对本文中涉及到的机器学习、深度学习、增量学习方法总结。本章介绍的理论知识是接下来章节的基础。
 
-\section{TLS综述}
-TLS/SSL的功能实现主要是依赖于三类基本的算法：非对称加密、对称加密以及散列算法。非对称加密主要用于密钥协商的阶段，非对称加密和解密的过程比较困难，因为这涉及到求解最大素数。对称加密重要用于密钥协商好之后的加密通信，这个密钥主要是client发起的（ 即客户端产生的Pre-master，于是，客户端和服务端之间的通信是一对一的加密通信），在这个过程中，多次使用了hash算法，hash算法将不同长度的信息计算为等长的信息，这个过程是不可逆的，目的是为了验证数据的完整性。
-
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{ssl}
-	\bicaption{SSL主要功能 }{}
-	\label{fig:SSL}
-\end{figure}
-
-\subsection{TLS简介}
-HTTPS (Secure Hypertext Transfer Protocol)安全超文本传输协议，是一个安全通信通道，它基于HTTP开发用于在客户计算机和服务器之间交换信息。它使用安全套接字层(SSL)进行信息交换，简单来说它是HTTP的安全版,是使用TLS/SSL加密的HTTP协议。
-
-HTTP协议采用明文传输信息，存在信息窃听、信息篡改和信息劫持的风险，而协议TLS/SSL具有身份验证、信息加密和完整性校验的功能，可以避免此类问题发生。
-
-TLS/SSL全称安全传输层协议Transport Layer Security, 是介于TCP和HTTP之间的一层安全协议，不影响原有的TCP协议和HTTP协议，所以使用HTTPS基本上不需要对HTTP页面进行太多的改造。
+\section{HTTPS简介}
+HTTPS (Secure Hypertext Transfer Protocol)安全超文本传输协议，是一个安全通信通道，它基于HTTP开发用于在客户计算机和服务器之间交换信息。它使用安全套接字层(SSL)进行信息交换，简单来说它是HTTP的安全版,是使用TLS/SSL加密的HTTP协议。HTTP协议采用明文传输信息，存在信息窃听、信息篡改和信息劫持的风险，而协议TLS/SSL具有身份验证、信息加密和完整性校验的功能，可以避免此类问题发生。它是介于TCP和HTTP之间的一层安全协议，不影响原有的TCP协议和HTTP协议，所以使用HTTPS基本上不需要对HTTP页面进行太多的改造。HTTPS，HTTP以及TLS/SSL的关系如图：\ref{fig:https-http}，在本章中对TLS/SSL协议的分析即为针对HTTPS协议的分析。
 
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.60\textwidth]{http_and_https}
-	\bicaption{http和https的关系 }{}
-	\label{fig:http_and_https}
+	\includegraphics[width=0.80\textwidth]{HTTPS-HTTP.pdf}
+	\bicaption{HTTPS,HTTPS和TLS/SSL的关系 }{Relationship between HTTPS, HTTPS and TLS/SSL}
+	\label{fig:https-http}
 \end{figure}
 
-\subsection{SSL版本}
-2018年3月，TLS1.3协议正式批准问世，成为客户端和服务器之间通过HTTPS连接建立加密通信的最新标准。TLS1.3既能提高互联网用户的访问速度，又能增强安全性，大大提升HTTPS连接的速度性能。Chrome63已经支持TLS1.3，目前为止仅针对Gmail推出了TLS1.3，在2018年，谷歌将把TLS 1.3推到整个网络，使加密通信更快，更安全。Mozilla是在Firefox49开发版开始支持TLS1.3，Firefox52是首个面向所有用户提供TLS 1.3支持的稳定版。
 
-TLS1.3与TLS1.2及更早版本的区别:
-在配置正常的情况下，TLS1.2会很安全。但TLS1.2具有很强的可配置性，因此一些有安全漏洞的站点，为兼容老版本的浏览器没有关闭一些旧的属性。TLS1.3信奉“少即是多”哲学，取消了对一些老旧而衰弱的加密方式的支持，TLS1.2中原有的大量特性都被删除了。这些特性包括：
-\begin{itemize}
-	\item RSA密钥传输：不支持前向安全性
-	\item CBC模式密码：易受BEAST和Lucky 13攻击
-	\item RC4流密码：在HTTPS中使用并不安全
-	\item SHA-1哈希函数：建议使用SHA-2取而代之
-	\item 任意Diffie-Hellman组：CVE-2016-0701漏洞
-	\item 输出密码：易受FREAK和LogJam攻击
-\end{itemize}
 
-TLS1.3版本是对规范的重大修改，一些工作方式也非常不同：
+\section{HTTPS加密的理论基础}
+HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称加密、对称加密以及散列算法。非对称加密主要用于密钥协商的阶段，非对称加密和解密的过程比较困难，因为这涉及到求解最大素数。对称加密重要用于密钥协商好之后的加密通信，这个密钥主要是client发起的（ 即客户端产生的Pre-master，于是，客户端和服务端之间的通信是一对一的加密通信），在这个过程中，多次使用了hash算法，hash算法将不同长度的信息计算为等长的信息，这个过程是不可逆的，目的是为了验证数据的完整性，对称加密过程相对于非对称加密要简单，在HTTPS握手过程中首先使用的非对称加密协商出了对称加密的私钥。针对三类算法的介绍如下：
 \begin{itemize}
-	\item 有一些新的密码套件仅在TLS1.3下工作，一些旧的密码套件无法再TLS1.3上使用。
-	\item 新的密码套件定义方式不同，且并没有详细规定证书类型(如RSA,DSA,ECDSA)或者密钥交换机制(如DHE或者ECHDE)。这对密码套件的配置有暗示作用。
-	\item 客户端在客户问候消息(client hello)中提供了一个“key\_share”,这会对“组”配置产生影响。
-	\item 直到主握手完成以后，会话才会建立。在握手结束和会话建立之间可能会有一个间隙(理论上，会话可能根本不会建立)，并可能对会话恢复代码产生影响。
-	\item 在TLS1.3版本中，重新磋商是不可能的。
-	\item 现在大部分握手都会被加密。
-	\item 更多类型的消息现在可以有扩展(这对定制扩展API和证书透明系统有影响)。
-	\item 在TLS1.3连接中不再允许使用DSA证书。
+    \item 非对称加密：即常见的 RSA 算法，还包括 ECC、DH 等算法\citep{结城浩2015图解密码技术}，算法特点是，密钥成对出现，一般称为公钥(公开)和私钥(保密)，公钥加密的信息只能私钥解开，私钥加密的信息只能公钥解开。因此掌握公钥的不同客户端之间不能互相解密信息，只能和掌握私钥的服务器进行加密通信，服务器可以实现1对多的通信，客户端也可以用来验证掌握私钥的服务器身份。非对称加密的特点是信息传输1对多，服务器只需要维持一个私钥就能够和多个客户端进行加密通信，但服务器发出的信息能够被所有的客户端解密，且该算法的计算复杂，加密速度慢。它需要两个密钥，一个是公开密钥，另一个是私有密钥；公钥用作加密，私钥则用作解密。使用公钥把明文加密后所得的密文，只能用相对应的私钥才能解密并得到原本的明文，最初用来加密的公钥不能用作解密。由于加密和解密需要两个不同的密钥，故被称为非对称加密；不同于加密和解密都使用同一个密钥的对称加密。公钥可以公开，可任意向外发布；私钥不可以公开，
+    
+    \item 对称加密：常见的有AES-CBC、DES、3DES、AES-GCM等\citep{结城浩2015图解密码技术}，相同的密钥可以用于信息的加密和解密，掌握密钥才能获取信息，能够防止信息窃听，通信方式是1对1;对称加密的优势是信息传输1对1，需要共享相同的密码，密码的安全是保证信息安全的基础，服务器和 N 个客户端通信，需要维持 N 个密码记录，且缺少修改密码的机制。
+    
+    \item 散列算法：常见的有MD5、SHA1、SHA256\citep{结城浩2015图解密码技术}，该类函数特点是函数单向不可逆、对输入非常敏感、输出长度固定和输入的长度无关，针对数据的任何修改都会改变散列函数的结果，这种性质称为抗碰撞性(collision resistance)，用于防止信息篡改并验证数据的完整性;在信息传输过程中，散列函数不能单独实现信息防篡改，因为明文传输，中间人可以修改信息之后重新计算信息摘要，因此需要对传输的信息以及信息摘要进行加密;
+
 \end{itemize}
 
 
-\subsection{SSL之扩展(extension)}
-\subsubsection{server name extension(SNI)}
-早期的SSL2.0根据经典的公钥基础设施PKI(Public Key Infrastructure)设计，它默认认为：一台服务器(或者说一个IP)只会提供一个服务，所以在SSL握手时，服务器端可以确信客户端申请的是哪张证书。
 
-但是让人万万没有想到的是，虚拟主机大力发展起来了，这就造成了一个IP会对应多个域名的情况。有一些解决办法，例如申请通配域名证书，对所有同一顶级域名下的二级子域名(*.yourdomain.com)都可以认证，但如果你还有一个yourdomain.net的域名，那就不行了。如果在同一个IP上配置多个HTTPS主机，会出现一个很普遍的问题：不论浏览器请求哪个主机，都只会收到默认主机www.example.com的证书。这是由SSL协议引起的——先建立SSL连接，再发送HTTP请求，所以nginx建立SSL连接时不知道所请求主机的名字，因此，它只会返回默认主机的证书。最古老的也是最稳定的解决方法就是每个HTTPS主机使用不同的IP地址，在同一个IP上，使用SNI配置多个HTTPS主机。
-
-在HTTP协议中，请求的域名作为主机头(Host)放在HTTP Header中，所以服务器端知道应该把请求引向哪个域名，但是早期的SSL做不到这一点，因为在SSL握手的过程中，根本不会有Host的信息，所以服务器端通常返回的是配置中的第一个可用证书。因而一些较老的环境，可能会产生多域名分别配好了证书，但返回的始终是同一个。既然问题的原因是在SSL握手时缺少主机头信息，那么补上就是了，即添加扩展。
-
-SNI(Server Name Indication)定义在RFC 4366，是一项用于改善SSL/TLS的技术，在SSL3.0/TLS1.0中被启用。它允许客户端在发起SSL握手请求时(具体说来，是客户端发出SSL请求中的ClientHello阶段)，就提交请求的Host信息，使得服务器能够切换到正确的域并返回相应的证书。
-
-
-
-
-
-\section{TLS安全机制}
+\section{HTTPS安全机制}
 \subsection{HTTPS连接建立的过程}
 证书颁发机构的英文全称是Certificate Authority，一般简称为CA。证书颁发机构是采用PKI（Public Key Infrastructure）公开密钥基础架构技术，专门提供网络身份认证服务，负责签发和管理数字证书，且具有权威性和公正性的第三方信任机构。它的作用就像我们现实生活中颁发证件的公司，如护照办理机构。证书颁发机构 (CA) 是一个向单位、个人等颁发证书的可信实体。CA 受理证书申请，根据该 CA 的策略验证申请人的信息，然后使用它的私钥把其数字签名应用于证书。然后，CA 将该证书颁发给该证书的主体。由浏览器联盟维护着CA根证书列表，大型机构或政府机构可能拥有自己的CA.
 
@@ -106,7 +67,6 @@ SNI(Server Name Indication)定义在RFC 4366，是一项用于改善SSL/TLS的�
 	\item \textbf{加密通信:}开始使用协商的密钥与算法进行加密通信。
 \end{itemize}
 
-
 \subsection{SSL加密计算过程}
 SSL加密计算过程为：
 
@@ -120,72 +80,66 @@ SSL加密计算过程为：
 Pre-master由客户端产生，采用RSA或Diffie-Hellman等加密算法生成，Pre-master结合random client和random server两个随机数通过PseudoRandomFunction(PRF)计算得到Master secret，Master secret结合两个随机数进行迭代计算得到Key material.
 
 
+\subsection{SSL之扩展(extension)}
+\subsubsection{server name extension(SNI)}
+早期的SSL2.0根据经典的公钥基础设施PKI(Public Key Infrastructure)设计，它默认认为：一台服务器(或者说一个IP)只会提供一个服务，所以在SSL握手时，服务器端可以确信客户端申请的是哪张证书。
+
+但是让人万万没有想到的是，虚拟主机大力发展起来了，这就造成了一个IP会对应多个域名的情况。有一些解决办法，例如申请通配域名证书，对所有同一顶级域名下的二级子域名(*.yourdomain.com)都可以认证，但如果你还有一个yourdomain.net的域名，那就不行了。如果在同一个IP上配置多个HTTPS主机，会出现一个很普遍的问题：不论浏览器请求哪个主机，都只会收到默认主机www.example.com的证书。这是由SSL协议引起的——先建立SSL连接，再发送HTTP请求，所以nginx建立SSL连接时不知道所请求主机的名字，因此，它只会返回默认主机的证书。最古老的也是最稳定的解决方法就是每个HTTPS主机使用不同的IP地址，在同一个IP上，使用SNI配置多个HTTPS主机。
+
+在HTTP协议中，请求的域名作为主机头(Host)放在HTTP Header中，所以服务器端知道应该把请求引向哪个域名，但是早期的SSL做不到这一点，因为在SSL握手的过程中，根本不会有Host的信息，所以服务器端通常返回的是配置中的第一个可用证书。因而一些较老的环境，可能会产生多域名分别配好了证书，但返回的始终是同一个。既然问题的原因是在SSL握手时缺少主机头信息，那么补上就是了，即添加扩展。
+
+SNI(Server Name Indication)定义在RFC 4366，是一项用于改善SSL/TLS的技术，在SSL3.0/TLS1.0中被启用。它允许客户端在发起SSL握手请求时(具体说来，是客户端发出SSL请求中的ClientHello阶段)，就提交请求的Host信息，使得服务器能够切换到正确的域并返回相应的证书。
+
+
+
 \section{相关机器学习/深度学习算法}
 \subsection{常用的机器学习算法}
-
 \begin{itemize}
-    % \item \textbf{朴素贝叶斯：}在机器学习中，朴素贝叶斯分类器是一系列以假设特征之间强（朴素）独立下运用贝叶斯定理为基础的简单概率分类器。该分类器模型会给问题实例分配用特征值表示的类标签，类标签取自有限集合。它不是训练这种分类器的单一算法，而是一系列基于相同原理的算法：所有朴素贝叶斯分类器都假定样本每个特征与其他特征都不相关。理论上，概率模型分类器是一个条件概率模型。
-    % \begin{equation}
-    %     p\left(C | F_{1}, \dots, F_{n}\right)
-    % \end{equation}
-    % 独立的类别变量C有若干类别，条件依赖于若干特征变量$F_{1}, F_{2, \cdots, F}_{n}$。 贝叶斯定理有以下式子：
-    % \begin{equation}
-    %     p\left(C | F_{1}, \ldots, F_{n}\right)=\frac{p(C) p\left(F_{1}, \ldots, F_{n} | C\right)}{p\left(F_{1}, \ldots, F_{n}\right)}
-    % \end{equation}
-    % 实际中，我们只关心分式中的分子部分，因为分母不依赖于$C$而且特征$F_{i}$的值是给定的，于是分母可以认为是一个常数。这样分子就等价于联合分布模型。
-    % \begin{equation}
-    %     p\left(C, F_{1}, \dots, F_{n}\right)
-    % \end{equation}
-    % 重复使用链式法则，可将该式写成条件概率的形式，如下所示：
-    % \begin{equation}
-    %     p\left(C, F_{1}, \ldots, F_{n}\right) \propto p(C) p\left(F_{1} | C\right) p\left(F_{2} | C, F_{1}\right) \ldots p\left(F_{n} | C, F_{1}, F_{2}, F_{3}, \ldots, F_{n-1}\right)
-    % \end{equation}
-    % 假设每个特征$F_{i}$对于其他特征$F_{j}$, $j\neq i$是条件独立的。类变量C的条件分布可以表达为：
-    % \begin{equation}
-    %     p\left(C | F_{1}, \ldots, F_{n}\right)=\frac{1}{Z} p(C) \prod_{i=1}^{n} p\left(F_{i} | C\right)
-    % \end{equation}
-    % 其中Z(证据因子)是一个只依赖与$F_{1},\dots ,F_{n},\dots ,F_{n}$等的缩放因子，当特征变量的值已知时是一个常数。所有的模型参数都可以通过训练集的相关频率来估计。常用方法是概率的最大似然估计。类的先验概率可以通过假设各类等概率来计算（先验概率 = 1/(类的数量)），或者通过训练集的各类样本出现的次数来估计（A类先验概率=（A类样本的数量）/(样本总数)）。
-    
     \item \textbf{随机森林：}在机器学习中，随机森林是一个包含多个决策树的分类器最早由\citep{breiman2001random}提出。随机森林是以决策树为基础的一种更高级的算法，并且其输出的类别是由个别树输出的类别的众数而定。。目前，针对各个主流语言都有随机森林的实现\footnote{http://www.stat.berkeley.edu/~breiman/RandomForests/cc_software.htm}\footnote{http://www.alglib.net/dataanalysis/decisionforest.php}\footnote{http://cran.r-project.org/web/packages/randomForest/index.html}\footnote{https://code.google.com/p/randomforest-matlab}\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html}。
     
-    
-    
     \item \textbf{支持向量机：}在机器学习中，支持向量机（英语：support vector machine，常简称为SVM）是在分类与回归分析中分析数据的监督式学习模型与相关的学习算法。给定一组训练实例，每个训练实例被标记为属于两个类别中的一个或另一个，SVM训练算法创建一个将新的实例分配给两个类别之一的模型，使其成为非概率二元线性分类器。对于支持向量机来说，数据点被视为 p 维向量，而我们想知道是否可以用(p-1)维超平面来分开这些点。
-    
-    
-    
     
 \end{itemize}
 
 
 \subsection{常用深度学习算法}
 \begin{itemize}
-    \item \textbf{卷积神经网络}卷积神经网路（Convolutional Neural Network, CNN）是一种前馈神经网络，它的人工神经元可以响应一部分覆盖范围内的周围单元，对于大型图像处理有出色表现。卷积神经网路由一个或多个卷积层和顶端的全连通层（对应经典的神经网路）组成，同时也包括关联权重和池化层（pooling layer）。这一结构使得卷积神经网路能够利用输入数据的二维结构。与其他深度学习结构相比，卷积神经网路在图像和语音识别方面能够给出更好的结果。是一种专门用于处理具有已知的、网格状拓扑数据的神经网络。例如时间序列数据，它可以被认为是以一定时间间隔采样的一维网格，又如图像数据，其可以被认为是二维像素网格。“卷积神经网络”表示网络采用称为卷积的数学运算。卷积是一种特殊的线性操作。卷积网络是简单的神经网络，它使用卷积代替至少一层中的一般矩阵乘法。我们使用二维图像I作为我们的输入，我们可能也想使用二维内核K：
+    \item \textbf{卷积神经网络}卷积神经网路（Convolutional Neural Network, CNN）是一种前馈神经网络，它的人工神经元可以响应一部分覆盖范围内的周围单元，对于大型图像处理有出色表现。卷积神经网路由一个或多个卷积层和顶端的全连通层（对应经典的神经网路）组成，同时也包括关联权重和池化层（pooling layer）。
+    典型的卷积网络包含三个阶段\citep{goodfellow2016deep}。在第一阶段，该层并行执行几个卷积以产生一组线性激活。在第二阶段，每个线性激活都是通过非线性激活函数进行的，本文选择ReLU（整流线性）激活函数。在第三阶段，使用池化操作进一步修改图层的输出。合并功能使用某个位置处相邻输出的统计特性来替换该位置处的网络输出。
+    
+    与其他深度学习结构相比，卷积神经网路在图像和语音识别方面能够给出更好的结果。是一种专门用于处理具有已知的、网格状拓扑数据的神经网络。例如时间序列数据，它可以被认为是以一定时间间隔采样的一维网格，又如图像数据，其可以被认为是二维像素网格。“卷积神经网络”表示网络采用称为卷积的数学运算。卷积是一种特殊的线性操作。卷积网络是简单的神经网络，它使用卷积代替至少一层中的一般矩阵乘法。我们使用二维图像I作为我们的输入，我们可能也想使用二维内核K：
     \begin{equation}
         S(i,j)=(I*K)(i,j)=\sum_{m}\sum_{n}I(m,n)K(i-m,j-n)
     \end{equation}
-
+    
+    如图:\ref{fig:CNN_2D}是二维卷积神经网络的结构图，二位卷积神经网络用于学习空间特征，尤其在图像领域取得了优秀的效果：
+    
+    如图：\ref{fig:CNN_1D}是一维卷积神经网络的结构图，一维卷积神经网络常用于学习序列特征，在很多场景中其性能已经得到了验证：\citet{kim2014convolutional}使用一维卷积神经网络完成了句子分类任务。 
     \begin{figure}[!htbp]
         \centering
-        \begin{subfigure}[b]{0.8\textwidth}
+        \begin{subfigure}[b]{0.45\textwidth}
           \includegraphics[width=\textwidth]{CNN2D.pdf}
           \caption{}
-          \label{fig:oaspl_a}
+          \label{fig:CNN_2D}
         \end{subfigure}%
-        \\% line break
-        \begin{subfigure}[b]{0.8\textwidth}
+        % \\% line break
+        ~% add desired spacing
+        \begin{subfigure}[b]{0.45\textwidth}
           \includegraphics[width=\textwidth]{CNN1D.pdf}
           \caption{}
-          \label{fig:oaspl_b}
+          \label{fig:CNN_1D}
         \end{subfigure}
         ~% add desired spacing
     
-        \bicaption{总声压级。(a) 这是子图说明信息，(b) 这是子图说明信息。}{OASPL.(a) This is the explanation of subfig, (b) This is the explanation of subfig.}
-        \label{fig:oaspl}
+        \bicaption{卷积神经网络。(a) 二维卷积神经网络，(b) 一维卷积神经网络。}{CNN.(a)2D convolutional neural network , (b) 1D convolutional neural network.}
+        \label{fig:CNN}
     \end{figure}
-
+    
+    
+    
+    
     \item \textbf{循环神经网络} 
-    如图2所示为Hidden Layer的层级展开图. t-1, t, t+1表示时间序列. X表示输入的样本. St表示样本在时间t处的的记忆,St = f(W*St-1 +U*Xt). W表示输入的权重,其中,f和g均为激活函数. 其中f可以是tanh,relu,sigmoid等激活函数，g通常是softmax也可以是其他。这里的W,U,V在每个时刻都是相等的(权重共享). U表示此刻输入的样本的权重, V表示输出的样本权重.单纯的RNN因为无法处理随着递归，权重指数级爆炸或梯度消失问题，难以捕捉长期时间关联；而结合不同的LSTM可以很好解决这个问题。和RNN不同的是: RNN中,就是个简单的线性求和的过程. 而LSTM可以通过“门”结构来去除或者增加“细胞状态”的信息,实现了对重要内容的保留和对不重要内容的去除.通过Sigmoid层输出一个0到1之间的概率值，描述每个部分有多少量可以通过，0表示“不允许任务变量通过”，1表示“运行所有变量通过 ”.用于遗忘的门叫做"遗忘门", 用于信息增加的叫做"信息增加门",最后是用于输出的"输出门". LSTM的第一步就是决定细胞状态需要丢弃哪些信息。这部分操作是通过一个称为忘记门的sigmoid单元来处理的。它通过查看和信息来输出一个0-1之间的向量，该向量里面的0-1值表示细胞状态中的哪些信息保留或丢弃多少。0表示不保留，1表示都保留。
+    如图：\ref{fig:simple-rnn}所示为Hidden Layer的层级展开图. t-1, t, t+1表示时间序列. X表示输入的样本. St表示样本在时间t处的的记忆,St = f(W*St-1 +U*Xt). W表示输入的权重,其中,f和g均为激活函数. 其中f可以是tanh,relu,sigmoid等激活函数，g通常是softmax也可以是其他。这里的W,U,V在每个时刻都是相等的(权重共享). U表示此刻输入的样本的权重, V表示输出的样本权重.单纯的RNN因为无法处理随着递归，权重指数级爆炸或梯度消失问题，难以捕捉长期时间关联；而结合不同的LSTM可以很好解决这个问题。和RNN不同的是: RNN中,就是个简单的线性求和的过程. 如图：\ref{fig:lstm}，LSTM可以通过“门”结构来去除或者增加“细胞状态”的信息,实现了对重要内容的保留和对不重要内容的去除.通过Sigmoid层输出一个0到1之间的概率值，描述每个部分有多少量可以通过，0表示“不允许任务变量通过”，1表示“运行所有变量通过 ”.用于遗忘的门叫做"遗忘门", 用于信息增加的叫做"信息增加门",最后是用于输出的"输出门". LSTM的第一步就是决定细胞状态需要丢弃哪些信息。这部分操作是通过一个称为忘记门的sigmoid单元来处理的。它通过查看和信息来输出一个0-1之间的向量，该向量里面的0-1值表示细胞状态中的哪些信息保留或丢弃多少。0表示不保留，1表示都保留。
     
     下一步是决定给细胞状态添加哪些新的信息。这一步又分为两个步骤，首先，利用和通过一个称为输入门的操作来决定更新哪些信息。然后利用和通过一个tanh层得到新的候选细胞信息，这些信息可能会被更新到细胞信息中。这两步描述如下图所示。
     
@@ -199,18 +153,18 @@ Pre-master由客户端产生，采用RSA或Diffie-Hellman等加密算法生成�
         \begin{subfigure}[b]{0.45\textwidth}
           \includegraphics[width=\textwidth]{RNN.pdf}
           \caption{}
-          \label{fig:oaspl_a}
+          \label{fig:simple-rnn}
         \end{subfigure}%
         ~% add desired spacing
         \begin{subfigure}[b]{0.45\textwidth}
           \includegraphics[width=\textwidth]{LSTM.pdf}
           \caption{}
-          \label{fig:oaspl_b}
+          \label{fig:lstm}
         \end{subfigure}
         ~% add desired spacing
     
-        \bicaption{总声压级。(a) 这是子图说明信息，(b) 这是子图说明信息。}{OASPL.(a) This is the explanation of subfig, (b) This is the explanation of subfig.}
-        \label{fig:oaspl}
+        \bicaption{循环神经网络。(a) 循环神经网络基本结构，(b) 长短期记忆网络 。}{RNN.(a)Basic structure of recurrent neural network(LSTM), (b)Long Short-Term Memory(LSTM) .}
+        \label{fig:rnn}
     \end{figure}
     
     
@@ -223,23 +177,17 @@ Pre-master由客户端产生，采用RSA或Diffie-Hellman等加密算法生成�
 
 \subsection{迁移学习方法}
 迁移学习是一种机器学习方法，其中为任务开发的模型被重用为第二个任务的模型的起点。迁移学习与传统机器学习的不同之处在于，它使用已用于另一任务的预训练模型来快速启动新任务或问题的开发过程。迁移学习的好处在于，通过重用已开发模型的这些部分或模块，可以缩短开发和训练模型所需的时间。这有助于加快模型训练过程并加快结果。
-在机器学习的经典监督学习场景中，如果我们打算为某个任务和领域A训练模型，则假定为我们提供了相同任务和领域的标记数据。我们可以在图1中清楚地看到这一点，其中模型A的训练和测试数据的任务和领域是相同的。稍后我们将更详细地定义任务和域的确切含义。目前，让我们假设任务是模型要执行的目标，例如识别图像中的对象，而域就是我们的数据来源，例如在旧金山咖啡店拍摄的图像。
+在机器学习的经典监督学习场景中，如果我们打算为某个任务和领域A训练模型，则假定为我们提供了相同任务和领域的标记数据。我们可以在图1中清楚地看到这一点，其中模型A的训练和测试数据的任务和领域是相同的。
 
-现在，我们可以在该数据集上训练模型A，并期望它在相同任务和领域的看不见的数据上表现良好。在另一种情况下，当给定其他任务或域B的数据时，我们再次需要相同任务或域的标记数据，可用于训练新模型B，以便可以期望它在此数据上表现良好。
+现在，我们可以在该数据集上训练模型A，并期望它在相同任务和领域的看不见的数据上表现良好。在另一种情况下，当给定其他任务或域B的数据时，我们再次需要相同任务或域的标记数据，可用于训练新模型B，以便可以期望它在此数据上表现良好。当我们没有足够的标签数据来完成我们想训练一个可靠模型的任务或领域时，传统的监督学习范式就会崩溃。
 
-当我们没有足够的标签数据来完成我们想训练一个可靠模型的任务或领域时，传统的监督学习范式就会崩溃。
-如果我们想训练一个模型来检测夜间图像上的行人，我们可以应用一个在类似域上训练过的模型，例如在白天的图像上。但是在实践中，由于模型继承了训练数据的偏见并且不知道如何推广到新领域，因此我们经常会遇到性能下降或崩溃的情况。
-如果我们想训练一个模型来执行一项新任务，我们甚至不能重用现有模型，因为任务之间的标签有所不同。
-
-转移学习使我们能够利用一些相关任务或领域的已标记数据来应对这些情况。我们尝试将在解决源任务中获得的知识存储在源域中，并将其应用于我们感兴趣的问题，如图2所示。
+如果我们想训练一个模型来检测夜间图像上的行人，我们可以应用一个在类似域上训练过的模型，例如在白天的图像上。但是在实践中，由于模型继承了训练数据的偏见并且不知道如何推广到新领域，因此我们经常会遇到性能下降或崩溃的情况。如果我们想训练一个模型来执行一项新任务，我们甚至不能重用现有模型，因为任务之间的标签有所不同。转移学习使我们能够利用一些相关任务或领域的已标记数据来应对这些情况。我们尝试将在解决源任务中获得的知识存储在源域中，并将其应用于我们感兴趣的问题。
 
 
 \subsection{增量学习方法}
-\citep{Geng2009}增量学习是一种机器学习范式，其中，每当出现新示例并根据新示例调整所学内容时，学习过程就会发生。 增量学习与传统机器学习最显着的区别在于，它不假定在学习过程开始之前就可以提供足够的训练集，但是随着时间的流逝，会出现训练示例。
+\citep{Geng2009}增量学习是一种机器学习范式，其中，每当出现新示例并根据新示例调整所学内容时，学习过程就会发生。增量学习与传统机器学习最显着的区别在于，它不假定在学习过程开始之前就可以提供足够的训练集，但是随着时间的流逝，会出现训练示例。增量学习被定义为机器学习体系结构通过馈送新数据而不丢失先前学习的知识来不断改进学习模型的能力。
 
-增量学习被定义为机器学习体系结构通过馈送新数据而不丢失先前学习的知识来不断改进学习模型的能力。
-
-已针对诸如图像分类和对象之类的问题来解决该问题，以解决\emph{灾难性遗忘}问题，该现象使旧类的性能急剧下降\cite{li2017learning，rebuffi2017icarl，shmelkov2017incremental}。一些研究保留了属于先前任务的一小部分数据，并在处理新问题时使用它们来保留旧任务的准确性。随机或根据相关性度量\ cite {hinton2015distilling，rebuffi2017icarl}选择要存储的样本集。
+已针对诸如图像分类和对象之类的问题来解决该问题，以解决\emph{灾难性遗忘}问题，该现象使旧类的性能急剧下降\citep{li2017learning,rebuffi2017icarl,shmelkov2017incremental}。一些研究保留了属于先前任务的一小部分数据，并在处理新问题时使用它们来保留旧任务的准确性。随机或根据相关性度量\citep{hinton2015distilling,rebuffi2017icarl}选择要存储的样本集。
 
 \section{小结}
-通过对TLS/SSL协议的研究，可以发现，在HTTPS通信过程中，能够暴露出可以用于流量分析的特征。
+通过对TLS/SSL协议的研究，可以发现，在HTTPS通信过程中，能够暴露出可以用于流量分析的特征。深度学习在不同的领域均取得了优秀的成果，使用深度学习处理流量分类问题是一个重要的发展趋势。
