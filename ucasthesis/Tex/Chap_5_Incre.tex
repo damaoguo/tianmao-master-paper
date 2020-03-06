@@ -16,39 +16,39 @@
 \section{增量学习方法}
 
 \subsection{增量学习框架}
+如图：\ref{fig:IncreAIBMF-architecture}所示，IncreAIBMF由三个模块构成：训练集构建，训练，代表性存储空间。
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.80\textwidth]{IncreAIBMF.pdf}
+	\includegraphics[width=0.95\textwidth]{IncreAIBMF.pdf}
 	\bicaption{IncreAIBMF架构}{IncreAIBMF architecture}
-	\label{fig:IncreAIBMF architecture}
+	\label{fig:IncreAIBMF-architecture}
 \end{figure}
 
-
-
+分别介绍如下：
 \subsubsection{构建训练集}
 此阶段准备训练数据以用于下一个训练阶段。训练集由旧类的代表性样本的一部分（代表存储器中存储的旧类的示例）和新的app类的样本组成。由于我们的方法使用了两个损失函数，即分类和蒸馏，因此每个样本都需要两个标签，与这两个损失相关联。为了进行分类，我们使用一键向量来指示应用程序出现在所有应用程序类中。对于蒸馏，我们使用每个识别模块使用旧的应用程序类生成的蒸馏标签。因此，每个样品的蒸馏标签与具有旧应用程序类的识别模块一样多。为了更好地理解，我们在哪里执行IncreAIBMF的第三步增量。此时，两个标识模块将在旧应用程序上运行，一个标识模块将处理新应用程序。对样品进行评估时，将使用旧应用程序的两个识别模块生成的蒸馏标签用于蒸馏，将使用三个识别模块生成的蒸馏标签用于分类。
 
 
 \subsubsection{训练过程}
-训练阶段将带有相应标签的增强训练集作为交叉蒸馏损失计算的输入，并更新整个网络体系结构的所有参数。 交叉蒸馏损失函数L（！）定义为：
+训练阶段将带有相应标签的增强训练集作为交叉蒸馏损失计算的输入，并更新整个网络体系结构的所有参数。 交叉蒸馏损失函数L定义如公式：（\ref{eqn:cdl}）所示。
 \begin{equation}
-	\label{eq:cdl}
+	\label{eqn:cdl}
 	L(\omega)=L_{C}(\omega)+\lambda\sum_{f=1}^{F} L_{D_{f}}(\omega)
 \end{equation}
 
-where $L_{C}(\omega)$ is the cross-entropy loss applied to samples from the old and new classes. 
+这里 $L_{C}(\omega)$是应用于新旧类别样本的交叉熵损失。
 %
-$L_{D_{f}}$is the distillation loss of the classification layer $f$, and $F$ is the total number of classification layer for the old apps. 
+$ L_{D_{f}} $是分类层$ f $的蒸馏损失，$ F $是旧应用程序的分类层总数。
 %
-$\lambda$ is refered to ratio that distilled loss in the cross-distilled loss. In our training process, we set it 0.3. 
+$ \lambda $是指交叉蒸馏损失中蒸馏损失的比率。 在训练过程中，我们将其设置为0.3。
 %
-The cross-entropy loss $L_{C}(\omega)$ is given by:
+交叉熵损失$ L_{C}（\omega）$由下式给出：
 %
 \begin{equation}
 	L_{C}(\omega)=-\frac{1}{N} \sum_{i=1}^{N} \sum_{j=1}^{C} p_{i j} \log q_{i j}
 \end{equation}
 %
-where $qi$ is a score obtained by applying a softmax function to the logits of a classification layer for sample $i$, $pi$ is the ground truth for the sample $i$, and $N$ and $C$ denote the number of samples and classes respectively.
+其中$ qi $是通过对样本$ i $的分类层的logit应用softmax函数获得的分数，$ pi $是样本$ i $的基本事实，$ N $和$ C $表示 样本数和类别。
 %
 精馏损失 $L_{D}(\omega)$ 定义为:
 %
@@ -56,30 +56,24 @@ where $qi$ is a score obtained by applying a softmax function to the logits of a
 	L_{D}(\omega)=-\frac{1}{N} \sum_{i=1}^{N} \sum_{j=1}^{C} { pdist }_{i j} \log {qd i s t}_{i j}
 \end{equation}
 %
-where $pdisti$ and $qdisti$ are modified versions of $pi$ and $qi$, respectively. 
+其中$ pdisti $和$ qdisti $分别是$ pi $和$ qi $的修改版本。
 
 \subsubsection{代表性空间更新}
-%
-The goal of this phase is to update the sample in the memory, and ensure that the size of the training set does not increase dramatically.
-%
-That is, in the updated memory, we fixed the memory size to $K$ flows ($K=100,000$ in this paper), and the number of samples corresponding to each category of application is $\frac{100,000}{C}$, here $C$ indicates the category of the application. 
-%
-Then, we employ the two operations:
-%
-\emph{(i)} selection of new samples to store: we perform the herding selection strategy \cite{welling2009herding}, which produces a sorted list of samples of one class based on the distance to the mean sample of that class;
-%
-Given the sorted list of samples, the first $n$ samples of the list are selected. 
-%
-These samples are most representative of the class according to the mean.
-%
-% This step is performed after the training process to allocate memory for the samples from the new classes.
-%
-\emph{(ii)} removal of leftover samples: as the samples are stored in a sorted list, this operation is trivial.
-%
-The memory unit only needs to remove samples from the end of the sample set of each class. 
-%
-Note that after this operation, the removed samples are never used again.
+此阶段的目标是更新内存中的样本，并确保训练集的大小不会急剧增加。也就是说，在更新的内存中，我们将内存大小固定为$ K $个流量（本文中$ K = 100,000 $），并且与每个应用程序类别相对应的样本数为$ \ frac {100,000} {C} $，此处$ C $表示应用程序的类别。
 
+然后，我们采用两个操作：
+
+\emph{（i）}选择要存储的新样本：我们执行herding采样\citep{welling2009herding}，该策略根据与该类别的平均样本的距离生成一类样本的排序列表；
+％
+给定样本的排序列表，选择列表中的前$ n $个样本。
+％
+这些样本根据平均值最能代表该类别。
+％
+\emph{（ii）}删除剩余的样本：由于样本存储在排序列表中，因此此操作很简单。
+％
+存储单元仅需要从每个类别的样本集的末尾删除样本。
+％
+请注意，执行此操作后，删除的样本将不再使用。
 
 
 
@@ -96,7 +90,7 @@ Note that after this operation, the removed samples are never used again.
 
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.90\textwidth]{AIBMF-Fine-tuning.pdf}
+	\includegraphics[width=0.45\textwidth]{AIBMF-Fine-tuning.pdf}
 	\bicaption{AIBMF 微调}{AIBMF Fine tuning}
 	\label{fig:AIBMF-Fine-tuning}
 \end{figure}
@@ -104,13 +98,6 @@ Note that after this operation, the removed samples are never used again.
 \subsubsection{增量学习表现}
 
 
-
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.90\textwidth]{Incre-confuse-matrix.pdf}
-	\bicaption{IncreAIBM 混淆矩阵}{IncreAIBM confuse matrix}
-	\label{fig:IncreAIBM confuse matrix}
-\end{figure}
 
 
 \begin{figure}[!htbp]
@@ -132,12 +119,24 @@ Note that after this operation, the removed samples are never used again.
     \label{fig:oaspl}
 \end{figure}
 
+
+
+
+
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.90\textwidth]{Time-cost-incre.eps}
+	\includegraphics[width=0.45\textwidth]{Time-cost-incre.eps}
 	\bicaption{AIBMF和IncreAIBM时间消耗对比 }{Time cost comparation between AIBMF and IncreAIBMF}
 	\label{fig:Time-cost-incre}
 \end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.90\textwidth]{Incre-confuse-matrix.pdf}
+	\bicaption{IncreAIBM 混淆矩阵}{IncreAIBM confuse matrix}
+	\label{fig:IncreAIBM confuse matrix}
+\end{figure}
+
 
 
 \section{小节}
