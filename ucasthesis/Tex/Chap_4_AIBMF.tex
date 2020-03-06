@@ -1,24 +1,27 @@
-\chapter{HTTPS流量应用多视图特征识别方法的研究}\label{chap:AIBMF}
+\chapter{基于HTTPS流量多视图特征的应用识别方法}\label{chap:AIBMF}
+HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成识别任务了。而传统地机器学习方法又需要大量地特征工程来提取特征，并且这些特征很容易受到网络环境的影响而不具备鲁棒性。本文的第1、2、3章介绍了研究背景和研究内容，概述李基础知识和相关研究工作并准备了移动应用的HTTPS流量数据，本章将使用深度学习方法从HTTPS流量的多视图特征出发研究识别方法。
 
 \section{引入}
-HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成识别任务了。而传统地机器学习方法又需要大量地特征工程来提取特征，并且这些特征很容易受到网络环境的影响而不具备鲁棒性。
+本文中的分类/识别是指将HTTPS流量关联到产生它的应用程序上，是一个流量精细化识别和分类的方法。该项工作在网络管理以及网络安全流域发挥着极为重要的作用。本文的研究工作是建立在对HTTPS流量以下三个方面的认知：
 
-我们对\emph{AIBMF}对加密应用程序标识的见解有三方面：
-％
 \emph{（i）} SSL /TLS协议本质上是移动应用程序客户端和服务器之间通信的一种语言，这种语言的具体表现是网络流\emph{i.e。}，它是一系列数据包；
-％
-\emph{（ii）}因为协议状态机是对网络流的总体抽象描述，所以可以从不同的协议状态信息中构造应用程序指纹。
-％
+
+\emph{（ii）}因为协议状态机是对网络流的总体抽象描述，所以可以从不同的协议状态信息中构造应用程序指纹。如message type，content type等协议定义的参数信息。
+
 \emph {（iii）}尽管SSL / TLS隐藏了网络流的有效负载，但仍然从加密连接中泄漏了旁信道协议状态信息。
 
 基于以上，我们采取深度学习的方法，从不同的视图特征进行研究，使用深度学习的方法提取抽象的特征，构建识别的模型。
 
 
-\section{多视图特征}
-模型中包含了三个视图，分别称为数据包大小（PS）视图，数据包内容类型（CT）视图和数据包有效载荷字节（PB）视图。
 
-该框架包括三个模块：预处理，特征学习和识别。
+\section{识别模型架构}
 
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{AIBMF-model.pdf}
+	\bicaption{AIBMF网络结构}{AIBMF Architecture}
+	\label{fig:AIBMF-Architecture}
+\end{figure}
 
 \subsection{预处理}
 在数据集构建部分我们将流量数据按照流进行提取，形成的数据集中每一条流就是一个待识别的样本。 整个流程的集合可以表示为
@@ -78,7 +81,12 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 \emph{（iii）}对于PB视图，通过将有效载荷字节值视为相应的ASCII码，我们形成一个$ 16 \ times64 = 1024 $维向量$v_{pb}$，然后进一步转换为0-255（ 用-1填充）。
 
 
-\subsection{特征学习}
+
+
+
+\subsection{多视图特征}
+模型中包含了三个视图，分别称为数据包大小（PS）视图，数据包内容类型（CT）视图和数据包有效载荷字节（PB）视图。
+
 
 \begin{itemize}
 
@@ -123,18 +131,10 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 
 
 
-\subsection{识别模型架构}
-% =================================
-% Fig. 03: Model architecture
-% =================================
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.80\textwidth]{AIBMF-model.pdf}
-	\bicaption{AIBMF网络结构}{AIBMF Architecture}
-	\label{fig:AIBMF_Architecture}
-\end{figure}
 
-\subsubsection{Identification Module:}
+
+
+\subsection{识别模块}
 %
 将三个不同的抽象特征连接在一起以形成192维向量。
 % 
@@ -232,9 +232,6 @@ y_{pd}=argmax(p(Y=j|x,W,b)),\forall j \in \{1,2,3,...,C\}
 %
 我们的模型使用交叉熵 \citep{Boer2005A} 作为损失函数。 
 %
-
-
-
 
 \section{实验和评估}
 \subsection{评估标准}
@@ -492,7 +489,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \end{table}
 
 
-\section{AIBMF模型识别效果}
+\subsection{AIBMF模型识别效果}
 针对20个移动应用1万条样本，绘制混淆矩阵来观察识别的效果。整体上，识别的效果非常好，其中大多数的错误是由于不同的应用之间可能共享服务所致，尤其针对那些由同一个公司开发的应用而言，识别能力存在一定的混淆。有一些应用将其API提供给了其他的应用作为公共接口，如百度地图，这给我们模型的识别能力带来了一定的影响。另外我们发现在我们的实验中，QQ软件的识别效果最差。 可能的原因是QQ使用的通信协议主要是UDP，并补充了TCP协议。 我们主要从Qzone捕获QQ流量，该流量混合了许多其他应用程序的流量。
 
 \begin{figure}[!htbp]
