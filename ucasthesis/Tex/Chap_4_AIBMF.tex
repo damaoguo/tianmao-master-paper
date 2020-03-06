@@ -10,12 +10,12 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 
 \emph {（iii）}尽管SSL / TLS隐藏了网络流的有效负载，但仍然从加密连接中泄漏了旁信道协议状态信息。
 
-基于以上，我们采取深度学习的方法，从不同的视图特征进行研究，使用深度学习的方法提取抽象的特征，构建识别的模型。
+基于以上，采取深度学习的方法，从不同的视图特征进行研究，使用深度学习的方法提取抽象的特征，构建识别的模型。
 
 
 
 \section{识别模型架构}
-
+本文构建的识别模型如图：\ref{fig:AIBMF-Architecture}所示，由预处理模块，特征学习模块，预测模块三个部分构成。在于处理部分，从原始的流样本（pcap）文件中抽取识别视图；在特征学习模块针对识别视图使用深度学习方法提取抽象特征；在识别模块部分利用抽象特征完成精细化识别任务。
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.80\textwidth]{AIBMF-model.pdf}
@@ -23,22 +23,52 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 	\label{fig:AIBMF-Architecture}
 \end{figure}
 
-\subsection{预处理}
+\subsection{预处理模块}
 在数据集构建部分我们将流量数据按照流进行提取，形成的数据集中每一条流就是一个待识别的样本。 整个流程的集合可以表示为
 \begin{equation}
     D = \{{\{f_i\}}_{i=1}^{i=N}\}_{j=1}^{j=C} 
 \end{equation}
 这里 $f_i$ 表示第$i$条流。我们定义的视图分从payload，parameter部分和packet size三个部分提取。
 
+%------------------------------------------------------------------------
 \subsubsection{payload部分}
 形成PB视图。
+\begin{figure}[!htbp]
+    \centering
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{elem-payload.eps}
+      \caption{}
+      \label{fig:payload-elem}
+    \end{subfigure}%
+    ~% add desired spacing
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{meituan-payload.eps}
+      \caption{}
+      \label{fig:payload-meituan}
+    \end{subfigure}
+    \\% line break
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{jinritoutiao-payload.eps}
+      \caption{}
+      \label{fig:payload-jinritoutiao}
+    \end{subfigure}%
+    ~% add desired spacing
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{cloudmusic-payload.eps}
+      \caption{}
+      \label{fig:payload-netease-cloud-music}
+    \end{subfigure}
+    \bicaption{负载特征。(a) 饿了么，(b) 美团，(c) 今日头条，(d) 网易云音乐。}{PAYLOAD.(a)Ele , (b)Meituan , (c)Jinritoutiao , (d)Netease-cloud-music.}
+    \label{fig:payload-eda}
+\end{figure}
 
+%-------------------------------------------------------------------------
 \subsubsection{parameter部分}
 形成CT视图。
 
 \begin{table}[!htbp]
-    \bicaption{TLS消息类型。}{TLS Heartbeat Message Type.}
-    \label{tab:message-type}
+    \bicaption{内容类型。}{Content Type.}
+    \label{tab:content-type}
     \centering
     \footnotesize% fontsize
     \setlength{\tabcolsep}{4pt}% column separation
@@ -65,10 +95,70 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 
 
 
+\begin{figure}[!htbp]
+    \centering
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{elem-contenttype.eps}
+      \caption{}
+      \label{fig:oaspl_a}
+    \end{subfigure}%
+    ~% add desired spacing
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{meituan-contenttype.eps}
+      \caption{}
+      \label{fig:oaspl_b}
+    \end{subfigure}
+    \\% line break
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{jinritoutiao-contenttype.eps}
+      \caption{}
+      \label{fig:oaspl_c}
+    \end{subfigure}%
+    ~% add desired spacing
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{cloudmusic-contenttype.eps}
+      \caption{}
+      \label{fig:oaspl_d}
+    \end{subfigure}
+    \bicaption{内容类型特征。(a) 饿了么，(b) 美团，(c) 今日头条，(d) 网易云音乐。}{PAYLOAD.(a)Ele , (b)Meituan , (c)Jinritoutiao , (d)Netease-cloud-music.}
+    \label{fig:content-type-eda}
+\end{figure}
 
 
+%-----------------------------------------------------------------------
 \subsubsection{packet size部分}
 形成PS视图。
+\begin{figure}[!htbp]
+    \centering
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{elem-count.eps}
+      \caption{}
+      \label{fig:packet-size-ele}
+    \end{subfigure}%
+    ~% add desired spacing
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{meituan-count.eps}
+      \caption{}
+      \label{fig:packet-size-meituan}
+    \end{subfigure}
+    \\% line break
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{jinritoutiao-count.eps}
+      \caption{}
+      \label{fig:packet-size-jinritoutiao}
+    \end{subfigure}%
+    ~% add desired spacing
+    \begin{subfigure}[b]{0.35\textwidth}
+      \includegraphics[width=\textwidth]{cloudmusic-count.eps}
+      \caption{}
+      \label{fig:packet-size-netease-cloud-music}
+    \end{subfigure}
+    \bicaption{包大小特征。(a) 饿了么，(b) 美团，(c) 今日头条，(d) 网易云音乐。}{Packet Size.(a)Ele , (b)Meituan , (c)Jinritoutiao , (d)Netease-cloud-music.}
+    \label{fig:packet-size-eda}
+\end{figure}
+
+
+
 
 
 由于已经有了流程对象，因此可以转向流程的数字矢量表示。
