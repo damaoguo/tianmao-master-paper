@@ -1,7 +1,7 @@
-\chapter{基于HTTPS流量多视图特征的应用识别方法}\label{chap:AIBMF}
+\chapter{基于多视图特征的移动应用识别方法}\label{chap:AIBMF}
 HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成识别任务了。而传统地机器学习方法又需要大量地特征工程来提取特征，并且这些特征很容易受到网络环境的影响而不具备鲁棒性。本文的第1、2、3章介绍了研究背景和研究内容，概述李基础知识和相关研究工作并准备了移动应用的HTTPS流量数据，本章将使用深度学习方法从HTTPS流量的多视图特征出发研究识别方法。
 
-\section{引入}
+\section{引言}
 本文中的分类/识别是指将HTTPS流量关联到产生它的应用程序上，是一个流量精细化识别和分类的方法。该项工作在网络管理以及网络安全流域发挥着极为重要的作用。本文的研究工作是建立在对HTTPS流量以下三个方面的认知：
 
 \emph{（i）} SSL /TLS协议本质上是移动应用程序客户端和服务器之间通信的一种语言，这种语言的具体表现是网络流\emph{i.e。}，它是一系列数据包；
@@ -14,7 +14,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 
 
 
-\section{识别模型架构}
+\section{方法描述}
 本文构建的识别模型如图：\ref{fig:AIBMF-Architecture}所示，由预处理模块，特征学习模块，预测模块三个部分构成。在于处理部分，从原始的流样本（pcap）文件中抽取识别视图；在特征学习模块针对识别视图使用深度学习方法提取抽象特征；在识别模块部分利用抽象特征完成精细化识别任务。
 \begin{figure}[!htbp]
 	\centering
@@ -99,7 +99,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 
 \end{table}
 
-本文接着比较了饿了么、美团、今日头条和网易云音乐四款应用在内容类型（content type）的取值的分布情况。计算了不同的content type取值在不同应用上的比例，得到分布情况。
+本文接着比较了饿了么、美团、今日头条和网易云音乐四款应用在内容类型（content type）的取值的分布情况，如图：\ref{fig:content-type-eda}。计算了不同的content type取值在不同应用上的比例，得到分布情况。
 \begin{figure}[!htbp]
     \centering
     \begin{subfigure}[b]{0.35\textwidth}
@@ -165,7 +165,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 如图：\ref{fig:packet-size-eda}所示，不同的应用的packet在大小上的分布存在显著的差异，为了更加进一步探索packet size对于流量识别的作用，本文将其定义为PS视图。
 
 
-
+\subsubsection{视图特征矢量化}
 由于已经有了流程对象，因此可以转向流程的数字矢量表示。
 
 \emph{（i）}对于PS视图，通过计算前M个数据包的大小（用-1填充），我们形成了$ M $维矢量$ v_ {ps} $。
@@ -174,7 +174,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 
 \emph{（iii）}对于PB视图，通过将有效载荷字节值视为相应的ASCII码，对于每一个packet取前N个字节，我们形成一个$ M \times N $维向量$v_{pb}$，然后进一步转换为0-255（ 用-1填充）。
 
-以上涉及到的超参数M和N将再本章后面进行详细分析。\usepackage{babel}
+以上涉及到的超参数M和N将再本章后面进行详细分析。
 
 
 \subsection{多视图特征}
@@ -310,7 +310,7 @@ y_{pd}=argmax(p(Y=j|x,W,b)),\forall j \in \{1,2,3,...,C\}
 \end{table}
 
 
-\section{实验和评估}
+\section{实验评估}
 \subsection{评估标准}
 为了对AIBMF在交通数据上的识别性能进行合理有效的定量评估，本文介绍了一些基本指标：真阳性（TP），假阴性（FN），真阴性（TN）和假阳性（ FP）。 TP是分类为应用程序$ i $的流量确切属于应用程序$ i $的数量。 FN是分类为应用程序$ i $的流数，完全属于应用程序$ j $。 TN是分类为应用程序$ j $的流数，完全属于应用程序$ i $。 FP是分类为应用程序$ j $的流数，完全属于应用程序$ j $。
 
@@ -428,7 +428,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 
 \subsection{超参数的确定}
 
-\subsubsection{单个样本packet数目确定}
+\subsubsection{超参数M的确定}
 针对前20个应用100,000多个流数据，并研究了各种应用程序的数据包计数分布。如图：\ref{fig:packet-count-all}所示，超过100,000个流的数据包计数的中位数为11，一个流中的数据包计数超过16只占32％，针对每一条流，取用不同的packet的数目进行对比实验,如图：\ref{fig:packet-count-acc}，发现，随着packet的数目的增加，我们的模型的识别效果也在持续增加，当packet的数目增加为16个的时候，识别的效果不再由明显的变化，但是经过分析，随着packet数目的增加，模型所需要的空间复杂度和时间复杂度都会增加。在这里，将packet的数目取为16.
 
 \begin{figure}[!htbp]
@@ -451,13 +451,13 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \end{figure}
 
 
-\subsubsection{单个packet的payload字节数确定}
+\subsubsection{超参数N的确定}
 为了确定每个数据包使用多少字节，我们进行了一系列比较实验。如图5所示，每个数据包以不同的长度截取，随着截取长度的增加，1D-CNN的识别能力增强。 当采用前64个字节时，测试集的准确性为93.34％。在64个字节的长度之后，精度会非常缓慢地增加，并且增益随着长度的增加而降低，但是1D-CNN的时间复杂度和空间复杂度将显着增加，因此每个数据包的长度设置为64。
 
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.45\textwidth]{Payload-size-acc.eps}
-	\bicaption{不同N取值表现}{Performance of Different N}
+	\bicaption{超参数N}{Parameter N}
 	\label{fig:payload size}
 \end{figure}
 
@@ -485,6 +485,8 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 
 
 \subsection{传统方法和研究方法的对比}
+
+\subsubsection{基于统计特征的方法}
 本文的研究工作还对比了机器学习的方法，首先使用特征工程的方法构建了23种特征，见表：\ref{tab:statistical-feature}，其中7种特征是根据HTTPS协议定义的特征，属于HTTPS流量特有的特征，其余的16种特征是流量分析工作常用的特征。
 
 \begin{table}[!htbp]
@@ -574,6 +576,10 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 	\end{tabular}
 \end{table}
 
+
+% \subsubsection{基于隐马尔可夫模型的识别方法}
+
+
 \subsection{AIBMF模型识别效果}
 如图：\ref{fig:AIBMF-confusematrix}，针对20个移动应用1万条测试样本，绘制混淆矩阵来观察识别的效果。整体上，识别的效果非常好，其中大多数的错误是由于不同的应用之间可能共享服务所致，尤其针对那些由同一个公司开发的应用而言，识别能力存在一定的混淆。有一些应用将其API提供给了其他的应用作为公共接口，如百度地图，这给我们模型的识别能力带来了一定的影响。另外我们发现在我们的实验中，QQ软件的识别效果最差。 可能的原因是QQ使用的通信协议主要是UDP，并补充了TCP协议。 我们主要从Qzone捕获QQ流量，该流量混合了许多其他应用程序的流量。
 
@@ -585,5 +591,5 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \end{figure}
 
 
-\section{小结}
+\section{本章小结}
 人工定义的统计特征越复杂，流量识别任务的通用性就越差。但是，仅使用深度学习忽略协议设计的信息来处理有效负载，识别能力也受到限制。实际上，协议定义的一些有意义的信息（例如内容类型）花费很少的精力，在流量分析中很有用。因此，从多个角度分析HTTPS流量并组合不同的功能可能是将来加密流量分析中的有力选择。本章节提出了一种通过HTTPS流量进行应用程序识别的方法-AIBMF。我们的方法能够分析HTTPS应用流量并将HTTPS流量与特定的移动应用相关联。

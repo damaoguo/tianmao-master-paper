@@ -1,4 +1,4 @@
-\chapter{数据集和数据预处理}\label{chap:collect}
+\chapter{自动化移动应用HTTPS流量标记方法}\label{chap:collect}
 在课题研究过程中，需要大量的数据支持。需要在大量的数据上训练移动应用流量识别模型以及验证模型的效果。然而，当前所公布的开源数据较少，数据量有限，分类的粒度较为粗糙。本章详细地描述了移动应用HTTPS流量数据地采集和处理方法，构建了一个50个不同类型的移动应用的流量数据集，规模为20万条流样本。
 
 \section{公开流量数据集}
@@ -7,7 +7,7 @@
     \item \citep{draper2016characterization}发布了VPN-nonVPN dataset (ISCXVPN2016)数据集\footnote{https://www.unb.ca/cic/datasets/vpn.html}，其中包括7种常规加密流量和7种协议封装流量。该项工作捕获了一个常规会话和一个通过VPN的会话，因此，共有14种流量类别：VOIP，VPN-VOIP，P2P，VPN-P2P等。数据内容包括：
     请见表~\ref{tab:sample}。
     \begin{table}[!htbp]
-        \bicaption{这是一个样表。}{This is a sample table.}
+        \bicaption{ISCXVPN2016 数据集。}{ISCXVPN2016 Dataset.}
         \label{tab:sample}
         \centering
         \footnotesize% fontsize
@@ -31,7 +31,7 @@
     
     \item Intrusion detection evaluation dataset (ISCXIDS2012) \footnote{https://www.unb.ca/cic/datasets/ids.html}：该数据集包括标记的网络跟踪，包括pcap格式的完整数据包有效负载，以及相关的配置文件供研究人员公开使用。如表：\ref{tab:ISCXIDS2012}所示，由7天的网络活动（正常和恶意）组成：
      \begin{table}[!htbp]
-        \bicaption{这是一个样表。}{This is a sample table.}
+        \bicaption{ISCXIDS2012数据集。}{ISCXIDS2012 Dataset.}
         \label{tab:ISCXIDS2012}
         \centering
         \footnotesize% fontsize
@@ -86,7 +86,7 @@
 为了便捷地从应用市场下载应用，首先设计了爬虫工具，从应用市场爬取移动应用的安装包。然后应用调度模块选取安装文件进行分发，在应用的运行环境（虚拟机和真机）完成安装，接着事件注入层通过一些列操作事件驱动应用程序自动运行，同时守护进程中的流量捕获模块（核心为Wireshark \footnote{https://www.wireshark.org/}和TcpDump\footnote{http://www.tcpdump.org}）会开始抓取流量，在单个真实的设备和模拟器中都执行一个应用程序。 该应用由Android工具monkeyrunner\footnote{https://developer. android. com/studio/test/monkeyrunner/index.html}自动驱动。为了避免设备本身的影响，同时在不同设备上执行同一应用，并通过限制设备中其他应用的网络权限来确保没有应用在后台运行。一次捕获一个应用程序的流量，以确保采集的数据的标签即为当前的应用名。 为的了避免受到网络环境的影响，在一个月的不同时间段捕获了流量。
 
 \section{预处理}
-我们以流为单位进行研究和标记，我们在采集流量的时候，保存的同一个pcap文件是由多条流构成的。在流量被采集后，通过五元组信息---[源地址，源端口，目的地址，目的端口，传输协议]将pcap文件进行切分，pcap文件中的包（packet）重组后形成新的pcap文件，被切分后，每一个pcap文件都是一条样本，本文中使用的抽取方法介绍如下。
+我们以流为单位进行研究和标记，我们在采集流量的时候，保存的同一个pcap文件是由多条流构成的。在流量被采集后，通过五元组信息---\textit{[源地址，源端口，目的地址，目的端口，传输协议]}将pcap文件进行切分，pcap文件中的包（packet）重组后形成新的pcap文件，被切分后，每一个pcap文件都是一条样本，本文中使用的抽取方法介绍如下。
 
 
 
@@ -113,7 +113,7 @@ foreach($f in gci 1_Pcap *.pcap)
 \end{lstlisting}
 
 \subsection{基于Scapy抽取流}
-Scapy是一个Python程序，使用户能够发送，嗅探，剖析和伪造网络数据包。 此功能允许构建可以探测，扫描或攻击网络的工具。Scapy是功能强大的交互式数据包处理程序。 它能够伪造或解码各种协议的数据包，在线发送它们，捕获它们，匹配请求和答复等等。 Scapy可以轻松处理大多数经典任务，例如扫描，跟踪路由，探测，单元测试，攻击或网络发现。它可以替代hping，arpspoof，arp-sk，arping，p0f甚至Nmap，tcpdump和tshark的某些部分。
+Scapy是一个Python程序，使用户能够发送，嗅探，剖析和伪造网络数据包。 此功能允许构建可以探测，扫描或攻击网络的工具。Scapy是功能强大的交互式数据包处理程序。 它能够伪造或解码各种协议的数据包，在线发送它们，捕获它们，匹配请求和答复等等。 Scapy可以轻松处理大多数经典任务，例如扫描，跟踪路由，探测，单元测试，攻击或网络发现。它可以替代\textit{hping，arpspoof，arp-sk，arping，p0f}甚至\textit{Nmap，tcpdump和tshark}的某些部分。
 
 本文中利用Scapy按照五元组信息重组pcap文件，提取流，并将提取的流保存为pcap文件格式，这里附上提取代码\footnote{http://www.damaoguo.site/2020/03/06/ExtractFlowWithPython/}。
 
@@ -131,7 +131,7 @@ Scapy是一个Python程序，使用户能够发送，嗅探，剖析和伪造网
 我们基于HTTPS协议创建流量数据集。共采集了旅行交通、社交、影音视听、时尚购物新闻资讯、居家生活、聊天、图书阅读、金融理财、实用工具、游戏共计11种类型，50个应用的流量，使用sliptcap切分后得到20万多万条流量样本。
 
 \begin{longtable}{c|c|c|c}
-    \bicaption{Android应用}{Android apps}\\
+    \bicaption{移动应用HTTPS流量数据集}{mobile apps HTTPS Traffic Dataset}\\
 	\hline
 	\textbf{应用名} & \textbf{开发商} & \textbf{应用类别} & \textbf{应用数量} \\
 	\hline

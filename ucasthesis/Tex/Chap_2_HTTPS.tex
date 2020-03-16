@@ -1,5 +1,5 @@
 \chapter{相关研究及概述}\label{chap:https}
-本章详细介绍了论文所涉及到的理论知识，首先介绍HTTPS协议、HTTPS握手过程、HTTPS加密过程。然后针对本文中涉及到的机器学习、深度学习、增量学习方法总结。本章介绍的理论知识是接下来章节的基础。
+本章详细介绍了论文所涉及到的理论知识，首先介绍HTTPS协议、HTTPS握手过程。然后针对本文中涉及到的机器学习、深度学习、增量学习方法总结。本章介绍的理论知识是接下来章节的基础。
 
 \section{HTTPS简介}
 HTTPS (Secure Hypertext Transfer Protocol)安全超文本传输协议，是一个安全通信通道，它基于HTTP开发用于在客户计算机和服务器之间交换信息。它使用安全套接字层(SSL)进行信息交换，简单来说它是HTTP的安全版,是使用TLS/SSL加密的HTTP协议。HTTP协议采用明文传输信息，存在信息窃听、信息篡改和信息劫持的风险，而协议TLS/SSL具有身份验证、信息加密和完整性校验的功能，可以避免此类问题发生。它是介于TCP和HTTP之间的一层安全协议，不影响原有的TCP协议和HTTP协议，所以使用HTTPS基本上不需要对HTTP页面进行太多的改造。HTTPS，HTTP以及TLS/SSL的关系如图：\ref{fig:https-http}，在本章中对TLS/SSL协议的分析即为针对HTTPS协议的分析。
@@ -28,34 +28,43 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 
 \section{HTTPS安全机制}
 \subsection{HTTPS连接建立的过程}
-证书颁发机构的英文全称是Certificate Authority，一般简称为CA。证书颁发机构是采用PKI（Public Key Infrastructure）公开密钥基础架构技术，专门提供网络身份认证服务，负责签发和管理数字证书，且具有权威性和公正性的第三方信任机构。它的作用就像我们现实生活中颁发证件的公司，如护照办理机构。证书颁发机构 (CA) 是一个向单位、个人等颁发证书的可信实体。CA 受理证书申请，根据该 CA 的策略验证申请人的信息，然后使用它的私钥把其数字签名应用于证书。然后，CA 将该证书颁发给该证书的主体。由浏览器联盟维护着CA根证书列表，大型机构或政府机构可能拥有自己的CA.
-
-一个完整的 HTTPS 链接的建立大概需要以下四步：
+一个完整的 HTTPS 链接的建立大概需四步，假设 DNS 的查询时间忽略不计，那么从开始到建立一个完整的 HTTPS 连接大概一共需要 4 个RTT（往返时延，Round-Trip Time），如果是浏览刚刚已经访问过的站点的话，通过 TLS 的会话恢复机制，第三步 TLS 握手能够从 2 RTT变为 1 RTT。
 \begin{itemize}
-	\item \textbf{DNS 查询：}浏览器在建立链接之前，需要将域名转换为互联网 IP 地址。一般默认是由你的 ISP DNS提供解析。ISP 通常都会有缓存的，一般来说花费在这部分的时间很少。
-	\item \textbf{TCP 握手( 1 RTT)：}TCP 握手( 1 RTT)：和服务器建立 TCP 连接，客户端向服务器发送 SYN 包，服务端返回确认的 ACK 包，这会花费一个往返(1 RTT)。
-	\item \textbf{TLS 握手(2 RTT)：}该部分客户端会和服务器交换密钥，同时设置加密链接，对于 TLS 1.2 或者更早的版本，这步需要 2 个 RTT
+	\item \textbf{DNS 查询：}浏览器在建立链接之前，需要将域名转换为互联网 IP 地址。一般默认是由ISP DNS提供解析。ISP 通常都会有缓存的，一般来说花费在这部分的时间很少。
+	\item \textbf{TCP 握手(1 RTT )}和服务器建立 TCP 连接，客户端向服务器发送 SYN 包，服务端返回确认的 ACK 包，这会花费一个往返(1 RTT)。
+	\item \textbf{TLS 握手(2 RTT)：}该部分客户端会和服务器交换密钥，同时设置加密链接，对于 TLS 1.2 或者更早的版本，这步需要 2 个 RTT。
 	\item \textbf{建立 HTTP 连接(1 RTT)：}一旦 TLS 连接建立，浏览器就会通过该连接发送加密过的 HTTP 请求。
 \end{itemize}
 
-我们假设 DNS 的查询时间忽略不计，那么从开始到建立一个完整的 HTTPS 连接大概一共需要 4 个RTT，如果是浏览刚刚已经访问过的站点的话，通过 TLS 的会话恢复机制，第三步 TLS 握手能够从 2 RTT变为 1 RTT.
-
-
-
 \subsection{HTTPS握手过程}
+图:\ref{fig:https-handshake}表示的是HTTPS的握手过程。
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.90\textwidth]{HTTPS-handshake.pdf}
 	\bicaption{HTTTPS握手过程}{HTTPS handshake}
 	\label{fig:https-handshake}
 \end{figure}
+
 \begin{itemize}
     % https://segmentfault.com/a/1190000016636897
-	\item \textbf{client hello：}客户端首先主动发起请求，以明文传输请求信息：包括版本信息，加密套件候选列表，压缩算法候选列表，随机数，扩展字段信息。相关信息如下：版本信息：当前基本已经不再使用TLSv1的版本；客户端的加密套件ciphersuites列表：每个加密套件对应着四个主要的功能组合---认证算法AU（身份验证）、密钥交换算法keyExchange密钥协商、对称加密算法Enc信息加密、和信息摘要Mac信息完整性校验。支持的压缩算法列表用于后续的压缩计算，随机数用于后续的密钥生成。扩展字段包含的信息比较丰富，是我们识别过程中应该重点关注的对象，比如extension中的server name是SNI，我们可以提取出主机名称。注意传输过程是明文传输，所以对抓包非常有作用。
+	\item \textbf{client hello：}客户端首先主动发起请求，以明文传输请求信息：包括版本信息，加密套件候选列表，压缩算法候选列表，随机数，扩展字段信息。相关信息如下：
 	
-	\item \textbf{server hello + server certificate + server hello done：}server hello服务器返回协商的信息，主要和client hello比较类似，区别在于服务器端对于cipher suite进行了选择，压缩算法进行了选择；server certificate服务器端配置对应的证书链，用于身份验证和密钥交换；server hello done，通知客户端server hello信息发送结束。这个过程也是通过明文进行传输的，我们通过抓包，可以获取到加密套件cipher suite.server hello done通知客户端srver hello信息发送结束。
+	\begin{itemize}
+	    \item 版本信息：SSL 1.0没用公开使用；SSL 2.0于1995发布，2011年被弃用（参考RFC 6176）；SSL 3.0于1996年发布，2011年被废弃（参考RFC 7568）；TLS 1.0于1999年发布，计划2020年弃用，TLS 1.1	于2006年发布，计划2020年弃用\citet{bright2018apple}；TLS 1.2于2008年发布；TLS 1.3于2018年发布。	
+	    \item 客户端的加密套件ciphersuites列表：每个加密套件对应着四个主要的功能组合---认证算法AU（身份验证）、密钥交换算法keyExchange密钥协商、对称加密算法Enc信息加密、和信息摘要Mac信息完整性校验。
+	    \item 支持的压缩算法列表：用于后续的压缩计算\citep{hollenbeck2004transport}。
+	    \item 随机数：用于后续的密钥生成。
+	    \item 扩展字段信息：TLS/SSL扩展信息包括了server\_name, max\_fragment\_length, client\_certificate\_url, trusted\_ca\_keys,  truncated\_hmac,   status\_request等信息\citep{blake2003transport, eastlake2011transport}。其中SNI(Server Name Indication)定义在RFC 4366\citep{blake2003transport}中，是一项用于改善SSL/TLS的技术，在SSL3.0/TLS1.0中被启用,其在流量的精细化识别的工业应用中很常见。它允许客户端在发起SSL握手请求时(具体说来，是客户端发出SSL请求中的ClientHello阶段)，就提交请求的Host信息，使得服务器能够切换到正确的域并返回相应的证书。早期的SSL2.0根据经典的公钥基础设施PKI(Public Key Infrastructure)设计，它默认认为：一台服务器(或者说一个IP)只会提供一个服务，所以在SSL握手时，服务器端可以确信客户端申请的是哪张证书。在HTTP协议中，请求的域名作为主机头(Host)放在HTTP Header中，所以服务器端知道应该把请求引向哪个域名，但是早期的SSL做不到这一点，因为在SSL握手的过程中，根本不会有Host的信息，所以服务器端通常返回的是配置中的第一个可用证书。因而一些较老的环境，可能会产生多域名分别配好了证书，但返回的始终是同一个。既然问题的原因是在SSL握手时缺少主机头信息，那么补上就是了，即添加扩展。
+	\end{itemize}
 	
-	\item \textbf{客户端验证证书的合法性：}证书是第三方机构提供的，在客户端：如浏览器中保存了相关的证书信息，如果证书通过才会进行后续的通信，否则根据错误的信息提示操作。合法性的检验包括：证书链的可信性，证书是否被吊销，有效期以及域名。
+	\item \textbf{server hello + server certificate + server hello done：}
+	\begin{itemize}
+	    \item server hello服务器返回协商的信息，主要和client hello比较类似，区别在于服务器端对于cipher suite进行了选择，压缩算法进行了选择；
+	    \item server certificate 服务器端配置对应的证书链，用于身份验证和密钥交换；
+	    \item server hello done，通知客户端server hello信息发送结束。这个过程也是通过明文进行传输的，通过抓包，可以获取到加密套件cipher suite.server hello done通知客户端srver hello信息发送结束。
+	\end{itemize}
+	
+	\item \textbf{客户端验证证书的合法性：}证书是第三方机构提供的，采用证书的原因在于公开加密还存在一些问题就是无法证明公开秘钥的正确性，为了解决这个问题，HTTPS采取了有数字证实认证机构和其相关机构颁发的公开秘钥证书。在客户端：如浏览器中保存了相关的证书信息，如果证书通过才会进行后续的通信，否则根据错误的信息提示操作。合法性的检验包括：证书链的可信性，证书是否被吊销，有效期以及域名。
 	
 	\item \textbf{client key exchange + change cipher spec:}合法性验证通过后客户端计算随机产生Pre-master，使用公钥加密，发送给服务器，此时此刻，客户端实际已经计算出协商密钥了，用到的信息是之前产生的。通过计算协商密钥，change\_cipher\_spec客户端通知服务器后续的通信都是通过协商密钥对称加密的方式进行。encrypted handshake messge,结合之前使用到的所有通信参数的hash值与其他的相关信息生成一段数据，采用协商密钥session secret与算法进行加密，然后发送服务器用于数据与握手验证。
 	\begin{equation}
@@ -67,52 +76,46 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 	\item \textbf{加密通信:}开始使用协商的密钥与算法进行加密通信。
 \end{itemize}
 
-\subsection{SSL加密计算过程}
-SSL加密计算过程为：
+% \subsection{SSL加密计算过程}
+% SSL加密计算过程为：
 
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[width=0.60\textwidth]{ssl_encrypted}
-	\bicaption{SSL加密计算 }{}
-	\label{fig:SSL_encrypted}
-\end{figure}
+% \begin{figure}[!htbp]
+% 	\centering
+% 	\includegraphics[width=0.60\textwidth]{ssl_encrypted}
+% 	\bicaption{SSL加密计算 }{}
+% 	\label{fig:SSL_encrypted}
+% \end{figure}
 
-Pre-master由客户端产生，采用RSA或Diffie-Hellman等加密算法生成，Pre-master结合random client和random server两个随机数通过PseudoRandomFunction(PRF)计算得到Master secret，Master secret结合两个随机数进行迭代计算得到Key material.
-
-
-\subsection{SSL之扩展(extension)}
-\subsubsection{server name extension(SNI)}
-早期的SSL2.0根据经典的公钥基础设施PKI(Public Key Infrastructure)设计，它默认认为：一台服务器(或者说一个IP)只会提供一个服务，所以在SSL握手时，服务器端可以确信客户端申请的是哪张证书。
-
-但是让人万万没有想到的是，虚拟主机大力发展起来了，这就造成了一个IP会对应多个域名的情况。有一些解决办法，例如申请通配域名证书，对所有同一顶级域名下的二级子域名(*.yourdomain.com)都可以认证，但如果你还有一个yourdomain.net的域名，那就不行了。如果在同一个IP上配置多个HTTPS主机，会出现一个很普遍的问题：不论浏览器请求哪个主机，都只会收到默认主机www.example.com的证书。这是由SSL协议引起的——先建立SSL连接，再发送HTTP请求，所以nginx建立SSL连接时不知道所请求主机的名字，因此，它只会返回默认主机的证书。最古老的也是最稳定的解决方法就是每个HTTPS主机使用不同的IP地址，在同一个IP上，使用SNI配置多个HTTPS主机。
-
-在HTTP协议中，请求的域名作为主机头(Host)放在HTTP Header中，所以服务器端知道应该把请求引向哪个域名，但是早期的SSL做不到这一点，因为在SSL握手的过程中，根本不会有Host的信息，所以服务器端通常返回的是配置中的第一个可用证书。因而一些较老的环境，可能会产生多域名分别配好了证书，但返回的始终是同一个。既然问题的原因是在SSL握手时缺少主机头信息，那么补上就是了，即添加扩展。
-
-SNI(Server Name Indication)定义在RFC 4366，是一项用于改善SSL/TLS的技术，在SSL3.0/TLS1.0中被启用。它允许客户端在发起SSL握手请求时(具体说来，是客户端发出SSL请求中的ClientHello阶段)，就提交请求的Host信息，使得服务器能够切换到正确的域并返回相应的证书。
-
+% Pre-master由客户端产生，采用RSA或Diffie-Hellman等加密算法生成，Pre-master结合random client和random server两个随机数通过PseudoRandomFunction(PRF)计算得到Master secret，Master secret结合两个随机数进行迭代计算得到Key material.
 
 
 \section{相关机器学习/深度学习算法}
 \subsection{常用的机器学习算法}
 \begin{itemize}
-    \item \textbf{随机森林：}在机器学习中，随机森林是一个包含多个决策树的分类器最早由\citep{breiman2001random}提出。随机森林是以决策树为基础的一种更高级的算法，并且其输出的类别是由个别树输出的类别的众数而定。。目前，针对各个主流语言都有随机森林的实现\footnote{http://www.stat.berkeley.edu/~breiman/RandomForests/cc_software.htm}\footnote{http://www.alglib.net/dataanalysis/decisionforest.php}\footnote{http://cran.r-project.org/web/packages/randomForest/index.html}\footnote{https://code.google.com/p/randomforest-matlab}\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html}。
+    \item \textbf{随机森林：}在机器学习中，随机森林是一个包含多个决策树的分类器最早由\citep{breiman2001random}提出。随机森林是以决策树为基础的一种更高级的算法，并且其输出的类别是由个别树输出的类别的众数而定。目前，针对各个主流语言都有随机森林的实现\footnote{http://www.stat.berkeley.edu/~breiman/RandomForests/cc\_software.htm}\footnote{http://www.alglib.net/dataanalysis/decisionforest.php}\footnote{http://cran.r-project.org/web/packages/randomForest/index.html}\footnote{https://code.google.com/p/randomforest-matlab}\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html}。
     
     \item \textbf{支持向量机：}在机器学习中，支持向量机（英语：support vector machine，常简称为SVM）是在分类与回归分析中分析数据的监督式学习模型与相关的学习算法。给定一组训练实例，每个训练实例被标记为属于两个类别中的一个或另一个，SVM训练算法创建一个将新的实例分配给两个类别之一的模型，使其成为非概率二元线性分类器。对于支持向量机来说，数据点被视为 p 维向量，而我们想知道是否可以用(p-1)维超平面来分开这些点。
+    
+    % \item \textbf{隐马尔科夫模型：},目前重要的实现包括：seqlearn\footnote{https://github.com/larsmans/seqlearn}和HTK\footnote{http://htk.eng.cam.ac.uk/}。
     
 \end{itemize}
 
 
 \subsection{常用深度学习算法}
+深度学习算法尝试通过使用多层层次结构来学习（多个级别的）表示形式。近年来，其在图像处理\citep{krizhevsky2012imagenet, taigman2014deepface}，语音识别\citep{ping2017deep,xiong2016achieving}，自然语言处理\citep{gehring2017convolutional,zhang2015character}等领域均取得了良好的效果。下面主要介绍卷积神经网络和循环神经网络，本文基于这两个深度学习结构设计了特征提取和识别模型。
 \begin{itemize}
-    \item \textbf{卷积神经网络}卷积神经网路（Convolutional Neural Network, CNN）是一种前馈神经网络，它的人工神经元可以响应一部分覆盖范围内的周围单元，对于大型图像处理有出色表现。卷积神经网路由一个或多个卷积层和顶端的全连通层（对应经典的神经网路）组成，同时也包括关联权重和池化层（pooling layer）。
-    典型的卷积网络包含三个阶段\citep{goodfellow2016deep}。在第一阶段，该层并行执行几个卷积以产生一组线性激活。在第二阶段，每个线性激活都是通过非线性激活函数进行的，本文选择ReLU（整流线性）激活函数。在第三阶段，使用池化操作进一步修改图层的输出。合并功能使用某个位置处相邻输出的统计特性来替换该位置处的网络输出。
+    \item \textbf{卷积神经网络}卷积神经网路（Convolutional Neural Network, CNN）是一种前馈神经网络，在图像和语音识别方面能够给出更好的结果,它的人工神经元可以响应一部分覆盖范围内的周围单元，对于大型图像处理有出色表现。卷积神经网路由一个或多个卷积层和顶端的全连通层（对应经典的神经网路）组成，同时也包括关联权重和池化层（pooling layer）。典型的卷积网络包含三个阶段\citep{goodfellow2016deep}。
+    \begin{itemize}
+        \item 在第一阶段，该层并行执行几个卷积以产生一组线性激活。
+        \item 在第二阶段，每个线性激活都是通过非线性激活函数进行的。
+        \item 在第三阶段，使用池化操作进一步修改图层的输出。合并功能使用某个位置处相邻输出的统计特性来替换该位置处的网络输出
+    \end{itemize}
     
-    与其他深度学习结构相比，卷积神经网路在图像和语音识别方面能够给出更好的结果。是一种专门用于处理具有已知的、网格状拓扑数据的神经网络。例如时间序列数据，它可以被认为是以一定时间间隔采样的一维网格，又如图像数据，其可以被认为是二维像素网格。“卷积神经网络”表示网络采用称为卷积的数学运算。卷积是一种特殊的线性操作。卷积网络是简单的神经网络，它使用卷积代替至少一层中的一般矩阵乘法。我们使用二维图像I作为我们的输入，我们可能也想使用二维内核K：
+    对于时间序列数据，它可以被认为是以一定时间间隔采样的一维网格，对于图像数据，其可以被认为是二维像素网格。卷积神经网络表示网络采用称为卷积的数学运算,如图:\ref{fig:CNN_2D}是二维卷积神经网络的结构图，二位卷积神经网络用于学习空间特征，尤其在图像领域取得了优秀的效果, 对于二维图像,输入为I，二维内核K, 卷积的计算过程如公式\ref{eqn:cnn-operation}：
     \begin{equation}
+    \label{eqn:cnn-operation}
         S(i,j)=(I*K)(i,j)=\sum_{m}\sum_{n}I(m,n)K(i-m,j-n)
     \end{equation}
-    
-    如图:\ref{fig:CNN_2D}是二维卷积神经网络的结构图，二位卷积神经网络用于学习空间特征，尤其在图像领域取得了优秀的效果：
     
     如图：\ref{fig:CNN_1D}是一维卷积神经网络的结构图，一维卷积神经网络常用于学习序列特征，在很多场景中其性能已经得到了验证：\citet{kim2014convolutional}使用一维卷积神经网络完成了句子分类任务。 
     \begin{figure}[!htbp]
@@ -139,13 +142,20 @@ SNI(Server Name Indication)定义在RFC 4366，是一项用于改善SSL/TLS的�
     
     
     \item \textbf{循环神经网络} 
-    如图：\ref{fig:simple-rnn}所示为Hidden Layer的层级展开图. t-1, t, t+1表示时间序列. X表示输入的样本. St表示样本在时间t处的的记忆,St = f(W*St-1 +U*Xt). W表示输入的权重,其中,f和g均为激活函数. 其中f可以是tanh,relu,sigmoid等激活函数，g通常是softmax也可以是其他。这里的W,U,V在每个时刻都是相等的(权重共享). U表示此刻输入的样本的权重, V表示输出的样本权重.单纯的RNN因为无法处理随着递归，权重指数级爆炸或梯度消失问题，难以捕捉长期时间关联；而结合不同的LSTM可以很好解决这个问题。和RNN不同的是: RNN中,就是个简单的线性求和的过程. 如图：\ref{fig:lstm}，LSTM可以通过“门”结构来去除或者增加“细胞状态”的信息,实现了对重要内容的保留和对不重要内容的去除.通过Sigmoid层输出一个0到1之间的概率值，描述每个部分有多少量可以通过，0表示“不允许任务变量通过”，1表示“运行所有变量通过 ”.用于遗忘的门叫做"遗忘门", 用于信息增加的叫做"信息增加门",最后是用于输出的"输出门". LSTM的第一步就是决定细胞状态需要丢弃哪些信息。这部分操作是通过一个称为忘记门的sigmoid单元来处理的。它通过查看和信息来输出一个0-1之间的向量，该向量里面的0-1值表示细胞状态中的哪些信息保留或丢弃多少。0表示不保留，1表示都保留。
+    如图：\ref{fig:simple-rnn}所示为Hidden Layer的层级展开图。 
+    $t-1, t, t+1$表示时间序列, $X$表示输入的样本。 $S_t$表示样本在时间$t$处的的记忆,$S_t = f(W*St-1 +U*X_t)$，其中$W$表示输入的权重,其中,$f$和$g$均为激活函数。其中$f$可以是$tanh,relu,sigmoid$等激活函数，$g$通常是$softmax$，当然也可以是其他激活函数。这里的$W,U,V$在每个时刻都是相等的(权重共享)。$U$表示此刻输入的样本的权重,$V$表示输出的样本权重.单纯的RNN因为无法处理随着递归，权重指数级爆炸或梯度消失问题，难以捕捉长期时间关联；而结合不同的LSTM可以很好解决这个问题\citep{hochreiter1997long}。
     
-    下一步是决定给细胞状态添加哪些新的信息。这一步又分为两个步骤，首先，利用和通过一个称为输入门的操作来决定更新哪些信息。然后利用和通过一个tanh层得到新的候选细胞信息，这些信息可能会被更新到细胞信息中。这两步描述如下图所示。
+    如图：\ref{fig:lstm}，LSTM可以通过“门”结构来去除或者增加“细胞状态”的信息,实现了对重要内容的保留和对不重要内容的去除.通过Sigmoid层输出一个0到1之间的概率值，描述每个部分有多少量可以通过，0表示“不允许任务变量通过”，1表示“运行所有变量通过 ”。用于遗忘的门叫做"遗忘门"（见图\ref{fig:simple-rnn}的$f$），用于信息增加的叫做"信息增加门"，（见图\ref{fig:simple-rnn}的$i$），最后是用于输出的"输出门"（见图\ref{fig:simple-rnn}的$o$）。
+    \begin{itemize}
+        \item 第一步就是决定细胞状态需（见图\ref{fig:simple-rnn}的$f$）要丢弃哪些信息。这部分操作是通过一个称为忘记门的sigmoid单元来处理的。它通过查看和信息来输出一个0-1之间的向量，该向量里面的0-1值表示细胞状态中的哪些信息保留或丢弃多少。0表示不保留，1表示都保留。
+        \item 第二步是决定给细胞状态添加哪些新的信息。这一步又分为两个步骤，首先，利用和通过一个称为输入门的操作来决定更新哪些信息。然后利用和通过一个tanh层得到新的候选细胞信息，这些信息可能会被更新到细胞信息中。
+        \item 第三步将更新旧的细胞信息$C_{t-1}$，变为新的细胞信息$C_{t}$。更新的规则就是通过忘记门选择忘记旧细胞信息的一部分，通过输入门选择添加候选细胞信息$C_{t}$的一部分得到新的细胞信息$C_{t}$。更新完细胞状态后需要根据输入的和来判断输出细胞的哪些状态特征，这里需要将输入经过一个称为输出门的sigmoid层得到判断条件，然后将细胞状态经过tanh层得到一个-1~1之间值的向量，该向量与输出门得到的判断条件相乘就得到了最终该RNN单元的输出。
+    \end{itemize}
     
-    下面将更新旧的细胞信息$C_{t-1}$，变为新的细胞信息$C_{t}$。更新的规则就是通过忘记门选择忘记旧细胞信息的一部分，通过输入门选择添加候选细胞信息$C_{t}$的一部分得到新的细胞信息$C_{t}$。
     
-    更新完细胞状态后需要根据输入的和来判断输出细胞的哪些状态特征，这里需要将输入经过一个称为输出门的sigmoid层得到判断条件，然后将细胞状态经过tanh层得到一个-1~1之间值的向量，该向量与输出门得到的判断条件相乘就得到了最终该RNN单元的输出。
+    
+    
+    
     
     
     \begin{figure}[!htbp]
@@ -175,19 +185,45 @@ SNI(Server Name Indication)定义在RFC 4366，是一项用于改善SSL/TLS的�
 \end{itemize}
 
 
-\subsection{迁移学习方法}
-迁移学习是一种机器学习方法，其中为任务开发的模型被重用为第二个任务的模型的起点。迁移学习与传统机器学习的不同之处在于，它使用已用于另一任务的预训练模型来快速启动新任务或问题的开发过程。迁移学习的好处在于，通过重用已开发模型的这些部分或模块，可以缩短开发和训练模型所需的时间。这有助于加快模型训练过程并加快结果。
-在机器学习的经典监督学习场景中，如果我们打算为某个任务和领域A训练模型，则假定为我们提供了相同任务和领域的标记数据。我们可以在图1中清楚地看到这一点，其中模型A的训练和测试数据的任务和领域是相同的。
-
-现在，我们可以在该数据集上训练模型A，并期望它在相同任务和领域的看不见的数据上表现良好。在另一种情况下，当给定其他任务或域B的数据时，我们再次需要相同任务或域的标记数据，可用于训练新模型B，以便可以期望它在此数据上表现良好。当我们没有足够的标签数据来完成我们想训练一个可靠模型的任务或领域时，传统的监督学习范式就会崩溃。
-
-如果我们想训练一个模型来检测夜间图像上的行人，我们可以应用一个在类似域上训练过的模型，例如在白天的图像上。但是在实践中，由于模型继承了训练数据的偏见并且不知道如何推广到新领域，因此我们经常会遇到性能下降或崩溃的情况。如果我们想训练一个模型来执行一项新任务，我们甚至不能重用现有模型，因为任务之间的标签有所不同。转移学习使我们能够利用一些相关任务或领域的已标记数据来应对这些情况。我们尝试将在解决源任务中获得的知识存储在源域中，并将其应用于我们感兴趣的问题。
-
-
 \subsection{增量学习方法}
 \citep{Geng2009}增量学习是一种机器学习范式，其中，每当出现新示例并根据新示例调整所学内容时，学习过程就会发生。增量学习与传统机器学习最显着的区别在于，它不假定在学习过程开始之前就可以提供足够的训练集，但是随着时间的流逝，会出现训练示例。增量学习被定义为机器学习体系结构通过馈送新数据而不丢失先前学习的知识来不断改进学习模型的能力。
 
 已针对诸如图像分类和对象之类的问题来解决该问题，以解决\emph{灾难性遗忘}问题，该现象使旧类的性能急剧下降\citep{li2017learning,rebuffi2017icarl,shmelkov2017incremental}。一些研究保留了属于先前任务的一小部分数据，并在处理新问题时使用它们来保留旧任务的准确性。随机或根据相关性度量\citep{hinton2015distilling,rebuffi2017icarl}选择要存储的样本集。
+
+
+\subsection{激活函数}在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数。常见的激活函数包括Sigmoid(见公式：\ref{eqn:Sigmoid})、tanh(见公式：\ref{eqn:tanh})、ReLU(见公式：\ref{eqn:ReLU})、LeakyReLU(见公式：\ref{eqn:LeakyReLU})、ELU(见公式：\ref{eqn:ELU})等，这些非线性的函数使得神经网络具有更强的特征建模能力。
+
+\begin{subequations}
+	\begin{equation}
+	\label{eqn:Sigmoid}
+	Sigmoid(x)=\frac{1}{1+e^{-x}}
+	\end{equation}
+	
+	\begin{equation}
+	\label{eqn:tanh}
+	\tanh (x)=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}
+	\end{equation}
+	
+	\begin{equation}
+	\label{eqn:ReLU}
+	Relu(x)=max(0,x)
+	\end{equation}
+
+	\begin{equation}
+	\label{eqn:LeakyReLU}
+	LeakyReLU(x)=\max (\alpha x, x)
+	\end{equation}
+	
+	\begin{equation}
+	\label{eqn:ELU}
+	ELU(x)=\left\{\begin{array}{ll}
+x, & \text { if } x>0 \\
+\alpha\left(e^{x}-1\right), & \text { otherwise }
+\end{array}\right.
+	\end{equation}
+
+\end{subequations}
+
 
 \section{小结}
 通过对TLS/SSL协议的研究，可以发现，在HTTPS通信过程中，能够暴露出可以用于流量分析的特征。深度学习在不同的领域均取得了优秀的成果，使用深度学习处理流量分类问题是一个重要的发展趋势。
