@@ -1,12 +1,12 @@
-\chapter{相关研究及概述}\label{chap:https}
-本章详细介绍了论文所涉及到的理论知识，首先介绍HTTPS协议、HTTPS握手过程。然后针对本文中涉及到的机器学习、深度学习、增量学习方法总结。本章介绍的理论知识是接下来章节的基础。
+\chapter{相关概念及技术}\label{chap:https}
+本章详细介绍了论文所涉及到的理论知识，首先介绍HTTPS协议相关基础知识。然后针对本文中涉及到的机器学习、深度学习、增量学习方法总结。
 
 \section{HTTPS简介}
-HTTPS (Secure Hypertext Transfer Protocol)安全超文本传输协议，是一个安全通信通道，它基于HTTP开发用于在客户计算机和服务器之间交换信息。它使用安全套接字层(SSL)进行信息交换，简单来说它是HTTP的安全版,是使用TLS/SSL加密的HTTP协议。HTTP协议采用明文传输信息，存在信息窃听、信息篡改和信息劫持的风险，而协议TLS/SSL具有身份验证、信息加密和完整性校验的功能，可以避免此类问题发生。它是介于TCP和HTTP之间的一层安全协议，不影响原有的TCP协议和HTTP协议，所以使用HTTPS基本上不需要对HTTP页面进行太多的改造。HTTPS，HTTP以及TLS/SSL的关系如图：\ref{fig:https-http}，在本章中对TLS/SSL协议的分析即为针对HTTPS协议的分析。
+HTTPS (Secure Hypertext Transfer Protocol)安全超文本传输协议，是一个安全通信通道，它基于HTTP开发用于在客户计算机和服务器之间交换信息。它使用安全套接字层(SSL)进行信息交换，简单来说它是HTTP的安全版,是使用TLS/SSL加密的HTTP协议。HTTP协议采用明文传输信息，存在信息窃听、信息篡改和信息劫持的风险，而协议TLS/SSL具有身份验证、信息加密和完整性校验的功能，可以避免此类问题发生。它是介于TCP和HTTP之间的一层安全协议，不影响原有的TCP协议和HTTP协议，所以使用HTTPS基本上不需要对HTTP页面进行太多的改造。HTTPS，HTTP以及TLS/SSL的关系如图\ref{fig:https-http}，在本章中对TLS/SSL协议的分析即为针对HTTPS协议的分析。
 
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.80\textwidth]{HTTPS-HTTP.pdf}
+	\includegraphics[width=0.45\textwidth]{HTTPS-HTTP.pdf}
 	\bicaption{HTTPS,HTTPS和TLS/SSL的关系 }{Relationship between HTTPS, HTTPS and TLS/SSL}
 	\label{fig:https-http}
 \end{figure}
@@ -37,7 +37,7 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 \end{itemize}
 
 \subsection{HTTPS握手过程}
-图:\ref{fig:https-handshake}表示的是HTTPS的握手过程。
+图\ref{fig:https-handshake}表示的是HTTPS的握手过程。
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.90\textwidth]{HTTPS-handshake.pdf}
@@ -94,7 +94,7 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 \begin{itemize}
     \item \textbf{随机森林：}在机器学习中，随机森林是一个包含多个决策树的分类器最早由\citep{breiman2001random}提出。随机森林是以决策树为基础的一种更高级的算法，并且其输出的类别是由个别树输出的类别的众数而定。目前，针对各个主流语言都有随机森林的实现\footnote{http://www.stat.berkeley.edu/~breiman/RandomForests/cc\_software.htm}\footnote{http://www.alglib.net/dataanalysis/decisionforest.php}\footnote{http://cran.r-project.org/web/packages/randomForest/index.html}\footnote{https://code.google.com/p/randomforest-matlab}\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html}。
     
-    \item \textbf{支持向量机：}在机器学习中，支持向量机（英语：support vector machine，常简称为SVM）是在分类与回归分析中分析数据的监督式学习模型与相关的学习算法。给定一组训练实例，每个训练实例被标记为属于两个类别中的一个或另一个，SVM训练算法创建一个将新的实例分配给两个类别之一的模型，使其成为非概率二元线性分类器。对于支持向量机来说，数据点被视为 p 维向量，而我们想知道是否可以用(p-1)维超平面来分开这些点。
+    \item \textbf{支持向量机：}在机器学习中，支持向量机（英语：support vector machine，常简称为SVM）是在分类与回归分析中分析数据的监督式学习模型与相关的学习算法。给定一组训练实例，每个训练实例被标记为属于两个类别中的一个或另一个，SVM训练算法创建一个将新的实例分配给两个类别之一的模型，使其成为非概率二元线性分类器。对于支持向量机来说，数据点被视为 p 维向量。
     
     % \item \textbf{隐马尔科夫模型：},目前重要的实现包括：seqlearn\footnote{https://github.com/larsmans/seqlearn}和HTK\footnote{http://htk.eng.cam.ac.uk/}。
     
@@ -111,13 +111,13 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
         \item 在第三阶段，使用池化操作进一步修改图层的输出。合并功能使用某个位置处相邻输出的统计特性来替换该位置处的网络输出
     \end{itemize}
     
-    对于时间序列数据，它可以被认为是以一定时间间隔采样的一维网格，对于图像数据，其可以被认为是二维像素网格。卷积神经网络表示网络采用称为卷积的数学运算,如图:\ref{fig:CNN_2D}是二维卷积神经网络的结构图，二位卷积神经网络用于学习空间特征，尤其在图像领域取得了优秀的效果, 对于二维图像,输入为I，二维内核K, 卷积的计算过程如公式\ref{eqn:cnn-operation}：
+    对于时间序列数据，它可以被认为是以一定时间间隔采样的一维网格，对于图像数据，其可以被认为是二维像素网格。卷积神经网络表示网络采用称为卷积的数学运算,如图\ref{fig:CNN_2D}是二维卷积神经网络的结构图，二位卷积神经网络用于学习空间特征，尤其在图像领域取得了优秀的效果, 对于二维图像,输入为I，二维内核K, 卷积的计算过程如公式\ref{eqn:cnn-operation}：
     \begin{equation}
     \label{eqn:cnn-operation}
         S(i,j)=(I*K)(i,j)=\sum_{m}\sum_{n}I(m,n)K(i-m,j-n)
     \end{equation}
     
-    如图：\ref{fig:CNN_1D}是一维卷积神经网络的结构图，一维卷积神经网络常用于学习序列特征，在很多场景中其性能已经得到了验证：\citet{kim2014convolutional}使用一维卷积神经网络完成了句子分类任务。 
+    如图\ref{fig:CNN_1D}是一维卷积神经网络的结构图，一维卷积神经网络常用于学习序列特征，在很多场景中其性能已经得到了验证：\citet{kim2014convolutional}使用一维卷积神经网络完成了句子分类任务。 
     \begin{figure}[!htbp]
         \centering
         \begin{subfigure}[b]{0.45\textwidth}
@@ -142,10 +142,10 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
     
     
     \item \textbf{循环神经网络} 
-    如图：\ref{fig:simple-rnn}所示为Hidden Layer的层级展开图。 
+    如图\ref{fig:simple-rnn}所示为Hidden Layer的层级展开图。 
     $t-1, t, t+1$表示时间序列, $X$表示输入的样本。 $S_t$表示样本在时间$t$处的的记忆,$S_t = f(W*St-1 +U*X_t)$，其中$W$表示输入的权重,其中,$f$和$g$均为激活函数。其中$f$可以是$tanh,relu,sigmoid$等激活函数，$g$通常是$softmax$，当然也可以是其他激活函数。这里的$W,U,V$在每个时刻都是相等的(权重共享)。$U$表示此刻输入的样本的权重,$V$表示输出的样本权重.单纯的RNN因为无法处理随着递归，权重指数级爆炸或梯度消失问题，难以捕捉长期时间关联；而结合不同的LSTM可以很好解决这个问题\citep{hochreiter1997long}。
     
-    如图：\ref{fig:lstm}，LSTM可以通过“门”结构来去除或者增加“细胞状态”的信息,实现了对重要内容的保留和对不重要内容的去除.通过Sigmoid层输出一个0到1之间的概率值，描述每个部分有多少量可以通过，0表示“不允许任务变量通过”，1表示“运行所有变量通过 ”。用于遗忘的门叫做"遗忘门"（见图\ref{fig:simple-rnn}的$f$），用于信息增加的叫做"信息增加门"，（见图\ref{fig:simple-rnn}的$i$），最后是用于输出的"输出门"（见图\ref{fig:simple-rnn}的$o$）。
+    如图\ref{fig:lstm}，LSTM可以通过“门”结构来去除或者增加“细胞状态”的信息,实现了对重要内容的保留和对不重要内容的去除.通过Sigmoid层输出一个0到1之间的概率值，描述每个部分有多少量可以通过，0表示“不允许任务变量通过”，1表示“运行所有变量通过 ”。用于遗忘的门叫做"遗忘门"（见图\ref{fig:simple-rnn}的$f$），用于信息增加的叫做"信息增加门"，（见图\ref{fig:simple-rnn}的$i$），最后是用于输出的"输出门"（见图\ref{fig:simple-rnn}的$o$）。
     \begin{itemize}
         \item 第一步就是决定细胞状态需（见图\ref{fig:simple-rnn}的$f$）要丢弃哪些信息。这部分操作是通过一个称为忘记门的sigmoid单元来处理的。它通过查看和信息来输出一个0-1之间的向量，该向量里面的0-1值表示细胞状态中的哪些信息保留或丢弃多少。0表示不保留，1表示都保留。
         \item 第二步是决定给细胞状态添加哪些新的信息。这一步又分为两个步骤，首先，利用和通过一个称为输入门的操作来决定更新哪些信息。然后利用和通过一个tanh层得到新的候选细胞信息，这些信息可能会被更新到细胞信息中。
@@ -179,7 +179,7 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
     
     
     \item \textbf{Embedding方法}
-    Embedding在数学上表示一个maping：$f:X \rightarrow Y$  ， 也就是一个function。其中该函数满足两个性质：injective （单射的）：就是我们所说的单射函数，每个X只有唯一的Y对应;structure-preserving（结构保存）：比如在X所属的空间上  ，那么映射后在Y所属空间上同理  。那么对于word embedding, 就是找到一个映射(函数)将单词(word)映射到另外一个空间(其中这个映射具有injective和structure-preserving的特点), 生成在一个新的空间上的表达，该表达就是word representation.
+    Embedding在数学上表示一个映射：$f:X \rightarrow Y$  ， 也就是一个函数。其中该函数满足两个性质：injective （单射的）：即单射函数，每个X只有唯一的Y对应;structure-preserving（结构保存）：比如在X所属的空间上  ，那么映射后在Y所属空间上同理  。那么对于word embedding, 就是找到一个映射(函数)将单词(word)映射到另外一个空间(其中这个映射具有injective和structure-preserving的特点), 生成在一个新的空间上的表达，该表达就是word representation.
     
     
 \end{itemize}
