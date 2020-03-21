@@ -1,5 +1,5 @@
 \chapter{自动化移动应用HTTPS流量标记方法}\label{chap:collect}
-在课题研究过程中，需要大量的数据支持。需要在大量的数据上训练移动应用流量识别模型以及验证模型的效果。然而，当前所公布的开源数据较少，数据量有限，分类的粒度较为粗糙。本章详细地描述了移动应用HTTPS流量数据地采集和处理方法，构建了一个50个不同类型的移动应用的流量数据集，规模为20万条流样本。
+在课题研究过程中，需要大量的数据支持。然而，当前所公布的开源数据较少，数据量有限，分类的粒度较为粗糙。本章详细地描述了移动应用HTTPS流量数据地采集和处理方法，构建了一个50个不同类型的移动应用的流量数据集，规模为20万条流样本。
 
 \section{公开流量数据集}
 本章首先本文调研了当前已经公开的流量数据集，总结这些公开数据集的来源、规模、协议、用途以及获取方式。现有的公开并被多项研究工作使用的数据集如下：
@@ -29,7 +29,7 @@
         \end{tabular}
     \end{table}
     
-    \item Intrusion detection evaluation dataset (ISCXIDS2012) \footnote{https://www.unb.ca/cic/datasets/ids.html}：该数据集包括标记的网络跟踪，包括pcap格式的完整数据包有效负载，以及相关的配置文件供研究人员公开使用。如表\ref{tab:ISCXIDS2012}所示，由7天的网络活动（正常和恶意）组成：
+    \item Intrusion detection evaluation dataset (ISCXIDS2012) \footnote{https://www.unb.ca/cic/datasets/ids.html}：该数据集包括标记的网络跟踪，完整数据包有效负载（pcap格式），以及相关的配置文件，供研究人员公开使用。如表\ref{tab:ISCXIDS2012}所示，该数据集由7天的网络活动（正常和恶意）组成：
      \begin{table}[!htbp]
         \bicaption{ISCXIDS2012数据集。}{ISCXIDS2012 Dataset.}
         \label{tab:ISCXIDS2012}
@@ -75,7 +75,7 @@
 
 本课题的目的在于通过对大量的应用的HTTPS流量数据进行分析，得到一种可靠准确的分析方法，经过分析，以上提到的公开数据集在通信协议、数据规模、数据标签、数据格式或者使用场景等不满足本文针对HTTPS流量进行精细化识别的要求。为此需要构建新的数据集来支撑本文的研究工作。
 
-\section{流量采集}
+\section{流量数据采集}
 在本文章中介绍一种针对Android应用流量的自动化/半自动化的流量采集方法。数据采集的流程如图所示，如图\ref{fig:data-collect}所示，该系统主要由APP爬虫、应用调度、App运行环境、事件注入和守护进程五个模块构成。
 \begin{figure}[!htbp]
 	\centering
@@ -85,7 +85,7 @@
 \end{figure}
 为了便捷地从应用市场下载应用，首先设计了爬虫工具，从应用市场爬取移动应用的安装包。然后应用调度模块选取安装文件进行分发，在应用的运行环境（虚拟机和真机）完成安装，接着事件注入层通过一些列操作事件驱动应用程序自动运行，同时守护进程中的流量捕获模块（核心为Wireshark \footnote{https://www.wireshark.org/}和TcpDump\footnote{http://www.tcpdump.org}）会开始抓取流量，在单个真实的设备和模拟器中都执行一个应用程序。 该应用由Android工具monkeyrunner\footnote{https://developer. android. com/studio/test/monkeyrunner/index.html}自动驱动。为了避免设备本身的影响，同时在不同设备上执行同一应用，并通过限制设备中其他应用的网络权限来确保没有应用在后台运行。一次捕获一个应用程序的流量，以确保采集的数据的标签即为当前的应用名。 为的了避免受到网络环境的影响，在一个月的不同时间段捕获了流量。
 
-\section{预处理}
+\section{数据流抽取}
 本文以流为单位进行研究和标记，在采集流量的时候，保存的同一个pcap文件是由多条流构成的。在流量被采集后，通过五元组信息---\textit{[源地址，源端口，目的地址，目的端口，传输协议]}将pcap文件进行切分，pcap文件中的包（packet）重组后形成新的pcap文件，被切分后，每一个pcap文件都是一条样本，本文中使用的抽取方法介绍如下。
 
 
@@ -116,6 +116,8 @@ foreach($f in gci 1_Pcap *.pcap)
 Scapy是一个Python程序，使用户能够发送，嗅探，剖析和伪造网络数据包。 此功能允许构建可以探测，扫描或攻击网络的工具。Scapy是功能强大的交互式数据包处理程序。 它能够伪造或解码各种协议的数据包，在线发送它们，捕获它们，匹配请求和答复等等。 Scapy可以轻松处理大多数经典任务，例如扫描，跟踪路由，探测，单元测试，攻击或网络发现。它可以替代\textit{hping，arpspoof，arp-sk，arping，p0f}甚至\textit{Nmap，tcpdump和tshark}的某些部分。
 
 本文中利用Scapy按照五元组信息重组pcap文件，提取流，并将提取的流保存为pcap文件格式，这里附上提取代码\footnote{http://www.damaoguo.site/2020/03/06/ExtractFlowWithPython/}。
+
+\subsection{原始流数据存储}
 
 原始的流量数据经过处理以后，一个原始的pacp文件将会按照流拆分为新的pcap小文件，文件存储的目录结构如图\ref{fig:file-tree}所示。
 \begin{figure}[!htbp]

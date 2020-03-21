@@ -4,18 +4,18 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 \section{引言}
 本文中的分类/识别是指将HTTPS流量关联到产生它的应用程序上，是一个流量精细化识别和分类的方法。该项工作在网络管理以及网络安全流域发挥着极为重要的作用。本文的研究工作是建立在对HTTPS流量以下三个方面的认知：
 
-\emph{（i）} SSL /TLS协议本质上是移动应用程序客户端和服务器之间通信的一种语言，这种语言的具体表现是网络流\emph{i.e。}，它是一系列数据包；
+\emph{（i）} SSL/TLS协议本质上是移动应用程序客户端和服务器之间通信的一种语言，这种语言的具体表现是数据包序列；
 
-\emph{（ii）}因为协议状态机是对网络流的总体抽象描述，所以可以从不同的协议状态信息中构造应用程序指纹。如message type，content type等协议定义的参数信息。
+\emph{（ii）}因为协议状态机是对网络流的总体抽象描述，所以可以从不同的协议状态信息中构造应用程序指纹。如消息类型，内容类型等协议定义的参数信息。
 
-\emph {（iii）}尽管SSL / TLS隐藏了网络流的有效负载，但仍然从加密连接中泄漏了旁信道协议状态信息。
+\emph {（iii）}尽管SSL/TLS隐藏了网络流的有效负载，但仍然从加密连接中泄漏可以用于流量识别的状态信息。
 
 基于以上，采取深度学习的方法，从不同的视图特征进行研究，使用深度学习的方法提取抽象的特征，构建识别的模型。
 
 
 
 \section{方法描述}
-本文构建的识别模型如图\ref{fig:AIBMF-Architecture}所示，由预处理，特征学习，流量识别三个步骤构成。在预处理部分，从原始的流样本（pcap）文件中抽取识别视图；在特征学习模块针对识别视图使用深度学习方法提取抽象特征；在识别模块部分利用抽象特征完成精细化识别任务。
+本文构建的识别模型如图\ref{fig:AIBMF-Architecture}所示，由预处理，特征学习，流量识别三个步骤构成。在预处理时，从原始的流样本（pcap）文件中抽取识别视图；在特征学习时，针对识别视图使用深度学习方法提取抽象特征；在应用识别时，利用抽象特征完成精细化识别任务。
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.80\textwidth]{AIBMF-model.pdf}
@@ -23,7 +23,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 	\label{fig:AIBMF-Architecture}
 \end{figure}
 
-\subsection{预处理模块}
+\subsection{数据流预处理}
 在数据集构建部分将流量数据按照流进行提取，形成的数据集中每一条流就是一个待识别的样本。 整个流程的集合可以表示为
 \begin{equation}
     D = \{{\{f_i\}}_{i=1}^{i=N}\}_{j=1}^{j=C} 
@@ -36,7 +36,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.35\textwidth]{Wireshark-payload.png}
-	\bicaption{Payload}{Payload}
+	\bicaption{流量负载}{Payload}
 	\label{fig:wireshark-payload}
 \end{figure}
 本文首先比较了饿了么、美团、今日头条和网易云音乐四款应用在payload的ASCII编码的分布情况。对于单个应用，将其所有流的所有包的负载按照字节的ASCII编码转换为0-255的数值，统计所有取值的数量，绘制散点图。
@@ -65,7 +65,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
       \caption{}
       \label{fig:payload-netease-cloud-music}
     \end{subfigure}
-    \bicaption{负载特征。(a) 饿了么，(b) 美团，(c) 今日头条，(d) 网易云音乐。}{PAYLOAD.(a)Ele , (b)Meituan , (c)Jinritoutiao , (d)Netease-cloud-music.}
+    \bicaption{流量负载字节分布。(a) 饿了么，(b) 美团，(c) 今日头条，(d) 网易云音乐。}{PAYLOAD.(a)Ele , (b)Meituan , (c)Jinritoutiao , (d)Netease-cloud-music.}
     \label{fig:payload-eda}
 \end{figure}
 
@@ -126,7 +126,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
       \caption{}
       \label{fig:oaspl_d}
     \end{subfigure}
-    \bicaption{内容类型特征。(a) 饿了么，(b) 美团，(c) 今日头条，(d) 网易云音乐。}{PAYLOAD.(a)Ele , (b)Meituan , (c)Jinritoutiao , (d)Netease-cloud-music.}
+    \bicaption{内容类型分布。(a) 饿了么，(b) 美团，(c) 今日头条，(d) 网易云音乐。}{PAYLOAD.(a)Ele , (b)Meituan , (c)Jinritoutiao , (d)Netease-cloud-music.}
     \label{fig:content-type-eda}
 \end{figure}
 为了更加进一步探索content type对于流量识别的作用，本文将其定义为CT视图。
@@ -160,7 +160,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
       \caption{}
       \label{fig:packet-size-netease-cloud-music}
     \end{subfigure}
-    \bicaption{包大小特征。(a) 饿了么，(b) 美团，(c) 今日头条，(d) 网易云音乐。}{Packet Size.(a)Ele , (b)Meituan , (c)Jinritoutiao , (d)Netease-cloud-music.}
+    \bicaption{数据包大小分布。(a) 饿了么，(b) 美团，(c) 今日头条，(d) 网易云音乐。}{Packet Size.(a)Ele , (b)Meituan , (c)Jinritoutiao , (d)Netease-cloud-music.}
     \label{fig:packet-size-eda}
 \end{figure}
 如图\ref{fig:packet-size-eda}所示，不同的应用的packet在大小上的分布存在显著的差异，为了更加进一步探索packet size对于流量识别的作用，本文将其定义为PS视图。
@@ -215,15 +215,15 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 \end{itemize}
 
 
-\subsection{识别模块}
+\subsection{应用识别}
 如公式：\ref{eqn:feature-combine}所示，将三个不同的抽象特征连接在一起以形成192维向量，然后将其输入到完全连接的层。完全连接层的输出$ x $，将用作softmax回归的输入，以识别流量。
 \begin{equation}
 \label{eqn:feature-combine}
 	\delta = \alpha \oplus \beta \oplus \gamma
 \end{equation}
-三种不同的抽象特征共同优化同一类别目标，共同计算多类交叉熵损失，并通过反向传播算法更新三个神经网络的参数\cite{rumelhart1986learning}.
+三种不同的抽象特征共同优化同一类别目标，共同计算多类交叉熵损失，并通过反向传播算法\citep{rumelhart1986learning}更新三个神经网络的参数。
 %
-从数学上讲，输出预测$ Y $是app $ a_j $的概率由公式：\ref{eqn:softmax}确定。
+从数学上讲，输出预测$ Y $是应用 $ a_j $的概率由公式：\ref{eqn:softmax}确定。
 \begin{equation}
 \label{eqn:softmax}
 p(Y=j|x,W,b)=\mathit{softmax_j}(\emph{\textbf{W}}x + \emph{\textbf{b}})
@@ -313,7 +313,14 @@ AIBMF模型使用交叉熵 \citep{Boer2005A} 作为损失函数。
 
 \section{实验评估}
 \subsection{评估标准}
-为了对AIBMF在HTTPS流量数据上的识别性能进行合理有效的定量评估，本文介绍了一些基本指标：真阳性（TP），假阴性（FN），真阴性（TN）和假阳性（ FP）。 TP是分类为应用程序$ i $的流量确切属于应用程序$ i $的数量。 FN是分类为应用程序$ i $的流数，完全属于应用程序$ j $。 TN是分类为应用程序$ j $的流数，完全属于应用程序$ i $。 FP是分类为应用程序$ j $的流数，完全属于应用程序$ j $，请见表~\ref{tab:confusion-matrix}。
+为了对AIBMF在HTTPS流量数据上的识别性能进行合理有效的定量评估，本文介绍了一些基本指标：真阳性（True Positive, TP），假阴性（False Negative, FN），真阴性（True Negnative, TN）和假阳性（False Positive, FP）,如表~\ref{tab:confusion-matrix}所示，具体含义如下：
+\begin{itemize}
+    \item TP是分类为应用程序$ i $的流量确切属于应用程序$ i $的流的数量。
+    \item FN是指属于应用程序$i$的流最终没有被识别为应用程序$i$的流的数量。
+    \item TN是指不是应用$i$的流最终没有被识别为应用$i$的流的数量。
+    \item FP是指不属于应用$i$的流最终被识别为应用$i$的流的数量。
+\end{itemize}
+
 \begin{table}[!htbp]
     \bicaption{识别结果的混淆矩阵。}{Confusion matrix of classification results.}
     \label{tab:confusion-matrix}
@@ -343,7 +350,7 @@ AIBMF模型使用交叉熵 \citep{Boer2005A} 作为损失函数。
 ACC=\frac{TP+TN}{TP+TN+FP+FN}	
 \end{equation}
 
-在测试阶段，\emph{Precision（P）}显示预测到应用程序$ i $的流量是实际应用程序$ i $，\emph{Recall（R）}显示预测正确的流量与 属于应用程序$ i $的所有流，以及HTTPS流量的综合评估索引\emph{F1}值都用作评估标准。 \emph {P}根据公式（\ref{eqn:P}）计算； \emph {R}根据公式\ref{eqn:R}计算； F1值是结合两个指标的综合评价指标，是根据公式（\ref{eqn:F1}）计算的。 为了在所有$K$个应用程序上评估本文的方法，并将平均值$ P $，$ R $，$ F_1 $ --- $ Macro \ Precision $，$ Macro \ Recall $，$ Macro \ F_1 $作为整体指标 式（\ref{eqn:macro-P}），（\ref{eqn:macro-R}），（\ref{eqn:macro-F1}）。 
+在测试阶段，\emph{Precision（P）}显示预测到应用程序$ i $的流量是实际应用程序$ i $，\emph{Recall（R）}显示预测正确的流量与属于应用程序$i$的所有流的比值，以及HTTPS流量的综合评价\emph{F1}值用作评估标准。 \emph {P}根据公式（\ref{eqn:P}）计算； \emph {R}根据公式\ref{eqn:R}计算； F1值是结合两个指标的综合评价指标，是根据公式（\ref{eqn:F1}）计算的。 为了在所有$K$个应用程序上评估本文的方法，并将平均值$ P $，$ R $，$ F_1 $ --- $ Macro \ Precision $，$ Macro \ Recall $，$ Macro \ F_1 $作为整体指标 式（\ref{eqn:macro-P}），（\ref{eqn:macro-R}），（\ref{eqn:macro-F1}）。 
 
 
 % ===========
@@ -422,7 +429,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \footnotetext[5]{https://matplotlib.org/}
 
 \subsubsection{数据集划分}
-本章针对所采集的前20个应用共计10，000多条样本进行训练和识别，将100,000+个带有标签的示例分为两个部分：训练集和测试集。为了确保随机性，对数据进行了随机操作，其中训练集占90％，测试集占10％。
+本章针对所采集的前20个应用共计10,000多条样本进行训练和识别，将100,000多个带有标签的样本分为两个部分：训练集和测试集。为了确保随机性，对数据进行了随机操作，其中训练集占90％，测试集占10％。
 
 
 \subsection{敏感性参数分析}
@@ -493,57 +500,33 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
     \footnotesize% fontsize
     \setlength{\tabcolsep}{4pt}% column separation
     \renewcommand{\arraystretch}{1.2}%row space 
-	\begin{tabular}{| c | c | c |}
+	\begin{tabular}{ccc}
 		\hline
 		\textbf{统计特征} & \textbf{含义} & \textbf{是否是HTTPS特有？}\\
 		\hline
-		\hline
 		Packet counts & Packet数量& 否\\
-		\hline
 		TTL max & TTL最大值 & 否\\
-		\hline
 		TTL min & TTL最小值 & 否\\
-		\hline
 		TTL mean & TTL平均值 & 否\\
-		\hline
 		TTL median & TTL中位数 & 否\\
-		\hline
 		TTL var & TTL方差 & 否\\
-		\hline
 		packet\_length max & packet长度最大值 & 否\\
-		\hline
 		packet\_length min & packet长度最小值 & 否\\
-		\hline
 		packet\_length mean & packet长度平均值 & 否\\
-		\hline
 		packet\_length median & packet长度中位数 & 否\\
-		\hline
 		packet\_length var & packet长度方差 & 否\\
-		\hline	
 		window max & 窗口最大值 & 否\\
-		\hline
 		window min & 窗口最小值 & 否\\
-		\hline
 		window mean & 窗口平均值 & 否\\
-		\hline
 		window median & 窗口中位数 & 否\\
-		\hline
 		window var & 窗口方差 & 否\\
-		\hline
 		session\_id\_length max & session id长度 & 否\\
-		\hline	
 		client\_extensions\_length max & client extensions长度最大值 & 是\\
-		\hline
 		client\_extensions\_length min & client extensions长度最小值 & 是\\
-		\hline
 		client\_extensions\_length mean & client extensions长度平均值 & 是\\
-		\hline
 		client\_extensions\_length median & client extensions长度中位数 & 是\\
-		\hline
 		client\_extensions\_length var & client extensions长度方差 & 是\\
-		\hline
 		client\_ciphers counts & 客户端加密组件种类 & 是\\
-		\hline
 		server\_cipher & 服务端加密组建类型 & 是\\
 		\hline
 	\end{tabular}
@@ -557,17 +540,13 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
     \footnotesize% fontsize
     \setlength{\tabcolsep}{4pt}% column separation
     \renewcommand{\arraystretch}{1.2}%row space 
-	\begin{tabular}{| c | c | c | c |}
+	\begin{tabular}{ c  c  c  c }
 		\hline
 		\textbf{机器学习算法} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
 		\hline
-		\hline
 		随机森林 & 0.8805 & 0.8172 & 0.8407 \\
-		\hline
 		支持向量机 & 0.9214 & 0.5754 & 0.6676 \\
-		\hline
 		DNN & 0.7362 & 0.6293 & 0.6562 \\
-		\hline
 		\textbf{AIBMF} & \textbf{0.918} & \textbf{0.909} & \textbf{0.913} \\
 		\hline
 	\end{tabular}
@@ -599,4 +578,4 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 
 
 \section{本章小结}
-人工定义的统计特征越复杂，流量识别任务的通用性就越差。但是，仅使用深度学习忽略协议设计的信息来处理有效负载，识别能力也受到限制。实际上，协议定义的一些有意义的信息（例如内容类型）花费很少的精力，在流量分析中很有用。因此，从多个角度分析HTTPS流量并组合不同的功能可能是将来加密流量分析中的有力选择。本章节提出了一种通过HTTPS流量进行应用程序识别的方法---AIBMF。该方法能够分析HTTPS应用流量并将HTTPS流量与特定的移动应用相关联。
+人工定义的统计特征越复杂，流量识别任务的通用性就越差。但是，仅使用深度学习忽略协议设计的信息来处理有效负载，识别能力也受到限制。实际上，协议定义的一些有意义的信息（例如内容类型）提取代价很低，在流量分析中却很有用。因此，从多个角度分析HTTPS流量并组合不同的功能可能是将来加密流量分析中的有力选择。本章节提出了一种通过HTTPS流量进行应用程序识别的方法---AIBMF。该方法能够分析HTTPS应用流量并将HTTPS流量与特定的移动应用相关联。
