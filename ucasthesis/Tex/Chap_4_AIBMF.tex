@@ -14,8 +14,8 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 
 
 
-\section{方法描述}
-本文构建的识别模型如图\ref{fig:AIBMF-Architecture}所示，由预处理，特征学习，流量识别三个步骤构成。在预处理时，从原始的流样本（pcap）文件中抽取识别视图；在特征学习时，针对识别视图使用深度学习方法提取抽象特征；在应用识别时，利用抽象特征完成精细化识别任务。
+\section{方法阐述}
+本章提出了一种基于多视图特征的移动应用识别方法---\emph{AIBMF}\footnote{Mobile \underline{A}pplication \underline{I}dentification Over HTTPS Traffic \underline{B}ased on \underline{M}ulti-view \underline{F}eatures}，该方法的架构如图\ref{fig:AIBMF-Architecture}所示，由预处理，特征学习，流量识别三个步骤构成。在预处理时，从原始的流样本（pcap）文件中抽取识别视图；在特征学习时，针对识别视图使用深度学习方法提取抽象特征；在应用识别时，利用抽象特征完成精细化识别任务。
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.80\textwidth]{AIBMF-model.pdf}
@@ -493,44 +493,50 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \subsection{基于流统计特征的方法}
 本文的研究工作还对比了机器学习的方法，首先使用特征工程的方法构建了23种特征，见表\ref{tab:statistical-feature}，其中7种特征是根据HTTPS协议定义的特征，属于HTTPS流量特有的特征，其余的16种特征是流量分析工作常用的特征。
 
-\begin{table}[!htbp]
-    \bicaption{统计特征。}{Statistical Feature.}
-    \label{tab:statistical-feature}
-    \centering
-    \footnotesize% fontsize
-    \setlength{\tabcolsep}{4pt}% column separation
-    \renewcommand{\arraystretch}{1.2}%row space 
-	\begin{tabular}{ccc}
-		\hline
-		\textbf{统计特征} & \textbf{含义} & \textbf{是否是HTTPS特有？}\\
-		\hline
-		Packet counts & Packet数量& 否\\
-		TTL max & TTL最大值 & 否\\
-		TTL min & TTL最小值 & 否\\
-		TTL mean & TTL平均值 & 否\\
-		TTL median & TTL中位数 & 否\\
-		TTL var & TTL方差 & 否\\
-		packet\_length max & packet长度最大值 & 否\\
-		packet\_length min & packet长度最小值 & 否\\
-		packet\_length mean & packet长度平均值 & 否\\
-		packet\_length median & packet长度中位数 & 否\\
-		packet\_length var & packet长度方差 & 否\\
-		window max & 窗口最大值 & 否\\
-		window min & 窗口最小值 & 否\\
-		window mean & 窗口平均值 & 否\\
-		window median & 窗口中位数 & 否\\
-		window var & 窗口方差 & 否\\
-		session\_id\_length max & session id长度 & 否\\
-		client\_extensions\_length max & client extensions长度最大值 & 是\\
-		client\_extensions\_length min & client extensions长度最小值 & 是\\
-		client\_extensions\_length mean & client extensions长度平均值 & 是\\
-		client\_extensions\_length median & client extensions长度中位数 & 是\\
-		client\_extensions\_length var & client extensions长度方差 & 是\\
-		client\_ciphers counts & 客户端加密组件种类 & 是\\
-		server\_cipher & 服务端加密组建类型 & 是\\
-		\hline
-	\end{tabular}
-\end{table}
+
+	
+\begin{longtable}{ccc}
+    \bicaption{统计特征。}{Statistical Feature.}\\
+	\hline
+	\textbf{统计特征} & \textbf{含义} & \textbf{是否是HTTPS特有？} \\
+	\hline
+	\endfirsthead
+	\multicolumn{3}{c}%
+        {\bfseries\small \tablename\ \thetable\ {续表。}}\\
+	\hline
+	\textbf{统计特征} & \textbf{含义} & \textbf{是否是HTTPS特有？} \\
+	\hline
+	\endhead
+	\hline \multicolumn{3}{r}{\textit{续表见下页}}\\
+	\endfoot
+	\hline
+	\endlastfoot
+	Packet counts & Packet数量& 否\\
+	TTL max & TTL最大值 & 否\\
+	TTL min & TTL最小值 & 否\\
+	TTL mean & TTL平均值 & 否\\
+	TTL median & TTL中位数 & 否\\
+	TTL var & TTL方差 & 否\\
+	packet\_length max & packet长度最大值 & 否\\
+	packet\_length min & packet长度最小值 & 否\\
+	packet\_length mean & packet长度平均值 & 否\\
+	packet\_length median & packet长度中位数 & 否\\
+	packet\_length var & packet长度方差 & 否\\
+	window max & 窗口最大值 & 否\\
+	window min & 窗口最小值 & 否\\
+	window mean & 窗口平均值 & 否\\
+	window median & 窗口中位数 & 否\\
+	window var & 窗口方差 & 否\\
+	session\_id\_length max & session id长度 & 否\\
+	client\_extensions\_length max & client extensions长度最大值 & 是\\
+	client\_extensions\_length min & client extensions长度最小值 & 是\\
+	client\_extensions\_length mean & client extensions长度平均值 & 是\\
+	client\_extensions\_length median & client extensions长度中位数 & 是\\
+	client\_extensions\_length var & client extensions长度方差 & 是\\
+	client\_ciphers counts & 客户端加密组件种类 & 是\\
+	server\_cipher & 服务端加密组建类型 & 是\\
+	\hline
+\end{longtable}
 针对提取的23种特征，分别使用了随机森林，支持向量机和单层神经网络进行训练和识别，和本章提出的AIBMF模型相比较，基于机器学习的方法在识别能力弱。如表\ref{tab:ml-performance}所示，AIBMF模型在三个参数上均领先于其他的识别模型。
 
 \begin{table}[!htbp]

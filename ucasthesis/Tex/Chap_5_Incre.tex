@@ -1,6 +1,6 @@
 \chapter{基于增量学习的新增移动应用识别方法}\label{chap:transfer}
 \section{引言}
-目前的加密流量识别方法具有一个主要缺点是新应用程序继续遭受\textit{灾难性遗忘}\citep{french1999catastrophic,robins1995catastrophic,kirkpatrick2017overcoming}的困扰，当逐步增加新的应用程序类别进行培训时，整体性能会急剧下降。当前已有的研究工作均是需要全部的流量数据来训练，针对新出现的应用，需要将原来的流量数据和新来的应用的流量数据合并一起重新进行训练，当应用不断出现，训练的样本数量会急剧增加，这将给流量数据的存储以及模型的训练带来巨大的压力。为了解决这个问题，提出\emph{IncreAIBMF}框架，以使用新的应用程序数据以及仅对应于旧应用程序样本的一小样本集逐步学习深度神经网络。
+目前的加密流量识别方法具有一个主要缺点是新应用程序继续遭受\textit{灾难性遗忘}\citep{french1999catastrophic,robins1995catastrophic,kirkpatrick2017overcoming}的困扰，当逐步增加新的应用程序类别进行培训时，整体性能会急剧下降。当前已有的研究工作均是需要全部的流量数据来训练，针对新出现的应用，需要将原来的流量数据和新来的应用的流量数据合并一起重新进行训练，当应用不断出现，训练的样本数量会急剧增加，这将给流量数据的存储以及模型的训练带来巨大的压力。为了解决这个问题，提出一种基于增量学习的新增移动应用识别方法---\emph{IncreAIBMF}\footnote{\underline{Incre}mental Learning for \underline{A}pplication \underline{I}dentification Over HTTPS Traffic \underline{B}ased on \underline{M}ulti-view \underline{F}eatures}，以使用新的应用程序数据以及仅对应于旧应用程序样本的一小样本集逐步学习深度神经网络。
 
 为了验证本章提出的IncreAIBMF模型的有效性，在本章将IncreAIBMF模型分别和针对AIBMF模型微调、全量训练进行比较。
 
