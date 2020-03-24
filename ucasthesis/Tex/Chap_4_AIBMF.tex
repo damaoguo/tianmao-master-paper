@@ -2,11 +2,11 @@
 HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成识别任务。而传统地机器学习方法又需要大量地特征工程来提取特征，并且这些特征很容易受到网络环境的影响而不具备鲁棒性。本章将使用深度学习方法从HTTPS流量的多视图特征出发研究识别方法。
 
 \section{引言}
-本文中的分类/识别是指将HTTPS流量关联到产生它的应用程序上，是一个流量精细化识别和分类的方法。该项工作在网络管理以及网络安全流域发挥着极为重要的作用。本文的研究工作是建立在对HTTPS流量以下三个方面的认知：
+本文中的分类/识别是指将HTTPS流量关联到产生它的应用上，是一个流量精细化识别和分类的方法。本文的研究工作是建立在对HTTPS流量以下三个方面的认知：
 
-\emph{（i）} SSL/TLS协议本质上是移动应用程序客户端和服务器之间通信的一种语言，这种语言的具体表现是数据包序列；
+\emph{（i）} SSL/TLS协议本质上是移动应用客户端和服务器之间通信的一种语言，这种语言的具体表现是数据包序列；
 
-\emph{（ii）}因为协议状态机是对网络流的总体抽象描述，所以可以从不同的协议状态信息中构造应用程序指纹。如消息类型，内容类型等协议定义的参数信息。
+\emph{（ii）}因为协议状态机是对网络流的总体抽象描述，所以可以从不同的协议状态信息中构造应用指纹。如消息类型，内容类型等协议定义的参数信息。
 
 \emph {（iii）}尽管SSL/TLS隐藏了网络流的有效负载，但仍然从加密连接中泄漏可以用于流量识别的状态信息。
 
@@ -24,22 +24,23 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 \end{figure}
 
 \subsection{数据流预处理}
-在数据集构建部分将流量数据按照流进行提取，形成的数据集中每一条流就是一个待识别的样本。 整个流程的集合可以表示为
+在数据集构建部分将流量数据按照流进行提取，形成的数据集中每一条流就是一个待识别的样本。 整个流的集合可以表示为
 \begin{equation}
     D = \{{\{f_i\}}_{i=1}^{i=N}\}_{j=1}^{j=C} 
 \end{equation}
-这里$f_i$表示第$i$条流。本章定义的视图分从流量负载，内容类型部分和数据包大小三个部分提取。
+这里$f_i$表示第$i$条流。如下从流量负载，内容类型部分和数据包大小三个部分提取原始视图。\textcolor{red}{各个字段的具体取值的含义}
 
 %------------------------------------------------------------------------
-\subsubsection{负载}
-如图\ref{fig:wireshark-payload}所示，payload部分由ASCII码构成。
+\subsubsection{负载视图}
+\textcolor{red}{图片的描述}
+如图\ref{fig:wireshark-payload}所示，负载部分由ASCII码构成。
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.35\textwidth]{Wireshark-payload.png}
 	\bicaption{流量负载}{Payload}
 	\label{fig:wireshark-payload}
 \end{figure}
-本文首先比较了饿了么、美团、今日头条和网易云音乐四款应用在payload的ASCII编码的分布情况。对于单个应用，将其所有流的所有包的负载按照字节的ASCII编码转换为0-255的数值，统计所有取值的数量，绘制散点图。
+如下首先比较了饿了么、美团、今日头条和网易云音乐四款应用在负载的ASCII编码的分布情况。对于单个应用，将其所有流的所有包的负载按照字节的ASCII编码转换为0-255的数值，统计所有取值的数量，绘制散点图。
 \begin{figure}[!htbp]
     \centering
     \begin{subfigure}[b]{0.35\textwidth}
@@ -69,10 +70,10 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
     \label{fig:payload-eda}
 \end{figure}
 
-如图\ref{fig:payload-eda}所示，图中横坐标表示的是ASCII编码的取值，纵轴为取值在这个应用所有的样本中所占的比例，可以发现针对不同的应用，负载（payload）的分布情况存在差异，为了更加进一步探索payload对于流量识别的作用，本文将其定义为PB视图。
+如图\ref{fig:payload-eda}所示，图中横坐标表示的是ASCII编码的取值，纵轴为取值在这个应用所有的样本中所占的比例，可以发现针对不同的应用，负载的分布情况存在差异，为了更加进一步探索负载对于流量识别的作用，本文将其定义为PB视图。
 %-------------------------------------------------------------------------
-\subsubsection{内容类型}
-内容类型（content type）是HTTPS协议定义的，取值范围及其意义见表\ref{tab:content-type}, 在HTTPS的通信过程中，其对于流中每一个包（packet）进行了标记。
+\subsubsection{内容类型视图}
+内容类型（content type）是SSL/TLS协议定义的，取值范围及其意义见表\ref{tab:content-type}, 在HTTPS的通信过程中，其对于流中每一个数据包进行了标记。
 \begin{table}[!htbp]
     \bicaption{内容类型。}{Content Type.}
     \label{tab:content-type}
@@ -99,8 +100,8 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
     }
 
 \end{table}
-
-本文接着比较了饿了么、美团、今日头条和网易云音乐四款应用在内容类型（content type）的取值的分布情况，如图\ref{fig:content-type-eda}。计算了不同的content type取值在不同应用上的比例，得到分布情况。
+\textcolor{red}{图片的描述}
+接着比较了饿了么、美团、今日头条和网易云音乐四款应用在内容类型（content type）的取值的分布情况，如图\ref{fig:content-type-eda}。计算了不同的content type取值在不同应用上的比例，得到分布情况。
 \begin{figure}[!htbp]
     \centering
     \begin{subfigure}[b]{0.35\textwidth}
@@ -132,9 +133,9 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 为了更加进一步探索content type对于流量识别的作用，本文将其定义为CT视图。
 
 %-----------------------------------------------------------------------
-\subsubsection{数据包大小}
-本文最后比较了饿了么、美团、今日头条和网易云音乐四款应用在包大小（packet size）上的分布情况。对于单个应用的所有样本流的所有packet的大小进行统计。
-
+\subsubsection{数据包大小视图}
+最后比较了饿了么、美团、今日头条和网易云音乐四款应用在数据包大小的分布情况。对于单个应用的所有样本流的所有数据包的大小进行统计。
+\textcolor{red}{图片的描述}
 \begin{figure}[!htbp]
     \centering
     \begin{subfigure}[b]{0.35\textwidth}
@@ -163,7 +164,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
     \bicaption{数据包大小分布。(a) 饿了么，(b) 美团，(c) 今日头条，(d) 网易云音乐。}{Packet Size.(a)Ele , (b)Meituan , (c)Jinritoutiao , (d)Netease-cloud-music.}
     \label{fig:packet-size-eda}
 \end{figure}
-如图\ref{fig:packet-size-eda}所示，不同的应用的packet在大小上的分布存在显著的差异，为了更加进一步探索packet size对于流量识别的作用，本文将其定义为PS视图。
+如图\ref{fig:packet-size-eda}所示，不同的应用的数据包在大小上的分布存在显著的差异，为了更加进一步探索数据包大小对于流量识别的作用，本文将其定义为PS视图。
 
 
 \subsubsection{视图特征矢量化}
@@ -173,7 +174,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 
 \emph{（ii）}对于CT视图，通过将值内容类型字段扩展为前M个数据包（用-1填充）来形成$ M $维矢量$ v_ {ct} $，其范围从0到255 。
 
-\emph{（iii）}对于PB视图，通过将有效载荷字节值视为相应的ASCII码，对于每一个packet取前N个字节，形成一个$ M \times N $维向量$v_{pb}$，然后进一步转换为0-255（ 用-1填充）。
+\emph{（iii）}对于PB视图，通过将有效载荷字节值视为相应的ASCII码，对于每一个数据包取前N个字节，形成一个$ M \times N $维向量$v_{pb}$，然后进一步转换为0-255（ 用-1填充）。
 
 以上涉及到的超参数M和N将再本章后面进行详细分析。
 
@@ -184,7 +185,7 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 \begin{itemize}
 	\item \textbf{PB视图特征学习} 
 	%
-	本章使用一维卷积神经网络处理 $v_{pb}$向量,如公式：\ref{eqn:1D-payload}。在处理过程中, 使用了两层卷积神经网络, 每一层卷积的卷积核数量是 64, 卷积核的大小是$1 \times 3$, 卷积操作中本章采用的是max pooling。经过处理后，原始的payload部分的转换为64维的向量 $\alpha$.
+	本章使用一维卷积神经网络处理 $v_{pb}$向量,如公式：\ref{eqn:1D-payload}。在处理过程中, 使用了两层卷积神经网络, 每一层卷积的卷积核数量是 64, 卷积核的大小是$1 \times 3$, 卷积操作中本章采用的是max pooling。经过处理后，原始的负载部分的转换为64维的向量 $\alpha$.
 	%
 	\begin{equation}
 	\label{eqn:1D-payload}
@@ -202,9 +203,9 @@ HTTPS流量经过加密之后，传统的DPI方法已经不能够有效地完成
 	
 	\item \textbf{PS视图特征学习}
 	%
-	如公式：\ref{eqn:1D-packet-size}所示，$v_{ps}$向量和处理payload部分的一样，使用一维卷积神经网络进行处理, 所不同的是输入的向量大小为packet的数目。
+	如公式：\ref{eqn:1D-packet-size}所示，$v_{ps}$向量和处理负载部分的一样，使用一维卷积神经网络进行处理, 所不同的是输入的向量大小为数据包的数目。
 	%
-	经过一维卷积神经网络的处理后, packet size 序列被转换为一个64维的向量 $\beta$.
+	经过一维卷积神经网络的处理后, 数据包大小序列被转换为一个64维的向量 $\beta$.
 	%
 	\begin{equation}
 	\label{eqn:1D-packet-size}
@@ -312,11 +313,11 @@ AIBMF模型使用交叉熵 \citep{Boer2005A} 作为损失函数。
 
 
 \section{实验评估}
-\subsection{评估标准}
+\subsection{评估指标}
 为了对AIBMF在HTTPS流量数据上的识别性能进行合理有效的定量评估，本文介绍了一些基本指标：真阳性（True Positive, TP），假阴性（False Negative, FN），真阴性（True Negnative, TN）和假阳性（False Positive, FP）,如表~\ref{tab:confusion-matrix}所示，具体含义如下：
 \begin{itemize}
-    \item TP是分类为应用程序$ i $的流量确切属于应用程序$ i $的流的数量。
-    \item FN是指属于应用程序$i$的流最终没有被识别为应用程序$i$的流的数量。
+    \item TP是分类为应用$ i $的流量确切属于应用$ i $的流的数量。
+    \item FN是指属于应用$i$的流最终没有被识别为应用$i$的流的数量。
     \item TN是指不是应用$i$的流最终没有被识别为应用$i$的流的数量。
     \item FP是指不属于应用$i$的流最终被识别为应用$i$的流的数量。
 \end{itemize}
@@ -350,7 +351,7 @@ AIBMF模型使用交叉熵 \citep{Boer2005A} 作为损失函数。
 ACC=\frac{TP+TN}{TP+TN+FP+FN}	
 \end{equation}
 
-在测试阶段，\emph{Precision（P）}显示预测到应用程序$ i $的流量是实际应用程序$ i $，\emph{Recall（R）}显示预测正确的流量与属于应用程序$i$的所有流的比值，以及HTTPS流量的综合评价\emph{F1}值用作评估标准。 \emph {P}根据公式（\ref{eqn:P}）计算； \emph {R}根据公式\ref{eqn:R}计算； F1值是结合两个指标的综合评价指标，是根据公式（\ref{eqn:F1}）计算的。 为了在所有$K$个应用程序上评估本文的方法，并将平均值$ P $，$ R $，$ F_1 $ --- $ Macro \ Precision $，$ Macro \ Recall $，$ Macro \ F_1 $作为整体指标 式（\ref{eqn:macro-P}），（\ref{eqn:macro-R}），（\ref{eqn:macro-F1}）。 
+在测试阶段，\emph{Precision（P）}显示预测到应用$ i $的流量是实际应用$ i $，\emph{Recall（R）}显示预测正确的流量与属于应用$i$的所有流的比值，以及HTTPS流量的综合评价\emph{F1}值用作评估标准。 \emph {P}根据公式（\ref{eqn:P}）计算； \emph {R}根据公式\ref{eqn:R}计算； F1值是结合两个指标的综合评价指标，是根据公式（\ref{eqn:F1}）计算的。 为了在所有$K$个应用上评估本文的方法，并将平均值$ P $，$ R $，$ F_1 $ --- $ Macro \ Precision $，$ Macro \ Recall $，$ Macro \ F_1 $作为整体指标 式（\ref{eqn:macro-P}），（\ref{eqn:macro-R}），（\ref{eqn:macro-F1}）。 
 
 
 % ===========
@@ -435,7 +436,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \subsection{敏感性参数分析}
 
 \subsubsection{参数M的确定}
-针对前20个应用100,000多个流数据，并研究了各种应用程序的数据包计数分布。如图\ref{fig:packet-count-all}所示，超过100,000个流的数据包计数的中位数为11，一个流中的数据包计数超过16只占32％，针对每一条流，取用不同的packet的数目进行对比实验,如图\ref{fig:packet-count-acc}，发现，随着packet的数目的增加，模型的识别效果也在持续增加，当packet的数目增加为16个的时候，识别的效果不再由明显的变化，但是经过分析，随着packet数目的增加，模型所需要的空间复杂度和时间复杂度都会增加。在这里，将packet的数目取为16.
+针对前20个应用100,000多个流数据，并研究了各种应用的数据包计数分布。如图\ref{fig:packet-count-all}所示，超过100,000个流的数据包计数的中位数为11，一个流中的数据包计数超过16只占32％，针对每一条流，取用不同的数据包的数目进行对比实验,如图\ref{fig:packet-count-acc}，发现，随着数据包的数目的增加，模型的识别效果也在持续增加，当数据包的数目增加为16个的时候，识别的效果不再由明显的变化，但是经过分析，随着数据包数目的增加，模型所需要的空间复杂度和时间复杂度都会增加。在这里，将数据包的数目取为16.
 
 \begin{figure}[!htbp]
     \centering
@@ -452,7 +453,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
     \end{subfigure}
     ~% add desired spacing
 
-    \bicaption{超参数M。(a)流中packet数统计 ，(b) 不同packet数量识别效果。}{Parameter M.(a)Statistics in  Packet Count, (b)Performance of Different M .}
+    \bicaption{超参数M。(a)流中数据包数统计 ，(b) 不同数据包数量识别效果。}{Parameter M.(a)Statistics in  Packet Count, (b)Performance of Different M .}
     \label{fig:oaspl}
 \end{figure}
 
@@ -468,7 +469,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \end{figure}
 
 \subsection{不同深度学习模型方法对比}
-在实验的过程种，如图\ref{fig:performance-dl}，分别比较了仅仅使用一维卷积神经网络、二维卷积神经网络处理payload视图和AIBMF模型训练的过程，对比了在识别的过程中，loss和accuracy的变化过程。发现在训练的过程中，AIBMF模型损失下降更快，即更快收敛，准确率也领先其他的深度学习模型。
+在实验的过程种，如图\ref{fig:performance-dl}，分别比较了仅仅使用一维卷积神经网络、二维卷积神经网络处理负载视图和AIBMF模型训练的过程，对比了在识别的过程中，loss和accuracy的变化过程。发现在训练的过程中，AIBMF模型损失下降更快，即更快收敛，准确率也领先其他的深度学习模型。
 \begin{figure}[!htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
@@ -491,37 +492,35 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 
 
 \subsection{基于流统计特征的方法}
-本文的研究工作还对比了机器学习的方法，首先使用特征工程的方法构建了23种特征，见表\ref{tab:statistical-feature}，其中7种特征是根据HTTPS协议定义的特征，属于HTTPS流量特有的特征，其余的16种特征是流量分析工作常用的特征。
+本文的研究工作还对比了机器学习的方法，首先使用特征工程的方法构建了23种特征，见表\ref{tab:statistical-feature}，其中7种特征是HTTPS协议相关的，其余的16种特征是流量分析工作常用的特征，属于协议无关的特征。
 
-
-	
 \begin{longtable}{ccc}
     \bicaption{统计特征。}{Statistical Feature.}\\
 	\hline
-	\textbf{统计特征} & \textbf{含义} & \textbf{是否是HTTPS特有？} \\
+	\textbf{统计特征} & \textbf{含义} & \textbf{是否协议相关？} \\
 	\hline
 	\endfirsthead
 	\multicolumn{3}{c}%
         {\bfseries\small \tablename\ \thetable\ {续表。}}\\
 	\hline
-	\textbf{统计特征} & \textbf{含义} & \textbf{是否是HTTPS特有？} \\
+	\textbf{统计特征} & \textbf{含义} & \textbf{是否协议相关？} \\
 	\hline
 	\endhead
 	\hline \multicolumn{3}{r}{\textit{续表见下页}}\\
 	\endfoot
 	\hline
 	\endlastfoot
-	Packet counts & Packet数量& 否\\
+	Packet counts & 数据包个数& 否\\
 	TTL max & TTL最大值 & 否\\
 	TTL min & TTL最小值 & 否\\
 	TTL mean & TTL平均值 & 否\\
 	TTL median & TTL中位数 & 否\\
 	TTL var & TTL方差 & 否\\
-	packet\_length max & packet长度最大值 & 否\\
-	packet\_length min & packet长度最小值 & 否\\
-	packet\_length mean & packet长度平均值 & 否\\
-	packet\_length median & packet长度中位数 & 否\\
-	packet\_length var & packet长度方差 & 否\\
+	packet\_length max & 数据包长度最大值 & 否\\
+	packet\_length min & 数据包长度最小值 & 否\\
+	packet\_length mean & 数据包长度平均值 & 否\\
+	packet\_length median & 数据包长度中位数 & 否\\
+	packet\_length var & 数据包长度方差 & 否\\
 	window max & 窗口最大值 & 否\\
 	window min & 窗口最小值 & 否\\
 	window mean & 窗口平均值 & 否\\
@@ -536,6 +535,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 	client\_ciphers counts & 客户端加密组件种类 & 是\\
 	server\_cipher & 服务端加密组建类型 & 是\\
 	\hline
+	\label{tab:statistical-feature}
 \end{longtable}
 针对提取的23种特征，分别使用了随机森林，支持向量机和单层神经网络进行训练和识别，和本章提出的AIBMF模型相比较，基于机器学习的方法在识别能力弱。如表\ref{tab:ml-performance}所示，AIBMF模型在三个参数上均领先于其他的识别模型。
 
@@ -548,7 +548,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
     \renewcommand{\arraystretch}{1.2}%row space 
 	\begin{tabular}{ c  c  c  c }
 		\hline
-		\textbf{机器学习算法} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+		\textbf{机器学习算法} & \textbf{宏精度} & \textbf{宏召回率} & \textbf{宏F1} \\
 		\hline
 		随机森林 & 0.8805 & 0.8172 & 0.8407 \\
 		支持向量机 & 0.9214 & 0.5754 & 0.6676 \\
@@ -569,7 +569,7 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 \end{figure}
 
 
-如图\ref{fig:AIBMF-confusematrix}，针对20个移动应用1万条测试样本，绘制混淆矩阵来观察识别的效果。整体上，识别的效果非常好，其中大多数的错误是由于不同的应用之间可能共享服务所致，尤其针对那些由同一个公司开发的应用而言，识别能力存在一定的混淆。有一些应用将其API提供给了其他的应用作为公共接口，如百度地图，这给AIBMF模型的识别能力带来了一定的影响。另外在实验中，QQ软件的识别效果最差。 可能的原因是QQ使用的通信协议主要是UDP，并补充了TCP协议。第三章捕获的流量主要从Qzone捕获，该流量混合了许多其他应用程序的流量。
+如图\ref{fig:AIBMF-confusematrix}，针对20个移动应用1万条测试样本，绘制混淆矩阵来观察识别的效果。整体上，识别的效果非常好，其中大多数的错误是由于不同的应用之间可能共享服务所致，尤其针对那些由同一个公司开发的应用而言，识别能力存在一定的混淆。有一些应用将其API提供给了其他的应用作为公共接口，如百度地图，这给AIBMF模型的识别能力带来了一定的影响。另外在实验中，QQ软件的识别效果最差。 可能的原因是QQ使用的通信协议主要是UDP，并补充了TCP协议。第三章捕获的流量主要从Qzone捕获，该流量混合了许多其他应用的流量。
 
 
 
@@ -584,4 +584,4 @@ ACC=\frac{TP+TN}{TP+TN+FP+FN}
 
 
 \section{本章小结}
-人工定义的统计特征越复杂，流量识别任务的通用性就越差。但是，仅使用深度学习忽略协议设计的信息来处理有效负载，识别能力也受到限制。实际上，协议定义的一些有意义的信息（例如内容类型）提取代价很低，在流量分析中却很有用。因此，从多个角度分析HTTPS流量并组合不同的功能可能是将来加密流量分析中的有力选择。本章节提出了一种通过HTTPS流量进行应用程序识别的方法---AIBMF。该方法能够分析HTTPS应用流量并将HTTPS流量与特定的移动应用相关联。
+人工定义的统计特征越复杂，流量识别任务的通用性就越差。但是，仅使用深度学习忽略协议设计的信息来处理有效负载，识别能力也受到限制。实际上，协议定义的一些有意义的信息（例如内容类型）提取代价很低，在流量分析中却很有用。因此，从多个角度分析HTTPS流量并组合不同的功能可能是将来加密流量分析中的有力选择。本章节提出了一种通过HTTPS流量进行应用识别的方法---AIBMF。该方法能够分析HTTPS应用流量并将HTTPS流量与特定的移动应用相关联。
