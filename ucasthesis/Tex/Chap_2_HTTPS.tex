@@ -3,7 +3,7 @@
 
 \section{HTTPS加密技术介绍}
 \subsection{HTTPS加密理论基础}
-HTTPS (Secure Hypertext Transfer Protocol)安全超文本传输协议，是一个安全通信通道，它基于HTTP开发用于在客户计算机和服务器之间交换信息。它使用安全套接字层(SSL)进行信息交换，简单来说它是HTTP的安全版,是使用TLS/SSL加密的HTTP协议。HTTP协议采用明文传输信息，存在信息窃听、信息篡改和信息劫持的风险，而协议TLS/SSL具有身份验证、信息加密和完整性校验的功能，可以避免此类问题发生。它是介于TCP和HTTP之间的一层安全协议，不影响原有的TCP协议和HTTP协议，所以使用HTTPS基本上不需要对HTTP页面进行太多的改造。HTTPS，HTTP以及TLS/SSL的关系如图\ref{fig:https-http}，在本章中对TLS/SSL协议的分析即为针对HTTPS协议的分析。
+HTTPS (Secure Hypertext Transfer Protocol)安全超文本传输协议，是一个安全通信通道，是HTTP的安全版,是使用SSL/TLS加密的HTTP协议。HTTP协议采用明文传输信息，存在信息窃听、信息篡改和信息劫持的风险，而协议SSS/TLSL具有身份验证、信息加密和完整性校验的功能，可以避免此类问题发生。SSL/TLS是介于TCP和HTTP之间的一层安全协议，不影响原有的TCP协议和HTTP协议，所以使用HTTPS基本上不需要对HTTP页面进行太多的改造。HTTPS，HTTP以及TLS/SSL的关系如图\ref{fig:https-http}，在本章中对SSL/TLS协议的分析即为针对HTTPS协议的分析。
 
 \begin{figure}[!htbp]
 	\centering
@@ -12,11 +12,11 @@ HTTPS (Secure Hypertext Transfer Protocol)安全超文本传输协议，是一�
 	\label{fig:https-http}
 \end{figure}
 
-HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称加密、对称加密以及散列算法。非对称加密主要用于密钥协商的阶段，加密的核心原理是最大素数求解，因此非对称加密和解密的过程比较困难。对称加密重要用于密钥协商好之后的加密通信，这个密钥主要是客户端发起的（ 即客户端产生的Pre-master，于是，客户端和服务端之间的通信是一对一的加密通信），在这个过程中，多次使用了hash算法，hash算法将不同长度的信息计算为等长的信息，这个过程是不可逆的，目的是为了验证数据的完整性，对称加密过程相对于非对称加密要简单，在HTTPS握手过程中首先使用的非对称加密协商出了对称加密的私钥。针对三类算法的介绍如下：
+HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称加密、对称加密以及散列算法。非对称加密主要用于密钥协商的阶段，加密的核心原理是最大素数求解，因此非对称加密和解密的过程比较困难。对称加密重要用于密钥协商好之后的加密通信，这个密钥主要是客户端发起的（ 即客户端产生的Pre-master，于是，客户端和服务端之间的通信是一对一的加密通信），在这个过程中，多次使用了hash算法，hash算法将不同长度的信息计算为等长的信息，hash过程是不可逆的，目的是为了验证数据的完整性。对称加密过程相对于非对称加密要简单，在HTTPS握手过程中首先使用的非对称加密协商出了对称加密的私钥。针对三类算法的介绍如下：
 \begin{itemize}
-    \item 非对称加密：即常见的 RSA 算法，还包括 ECC、DH 等算法\citep{结城浩2015图解密码技术}，算法特点是，密钥成对出现，一般称为公钥(公开)和私钥(保密)，公钥加密的信息只能私钥解开，私钥加密的信息只能公钥解开。因此掌握公钥的不同客户端之间不能互相解密信息，只能和掌握私钥的服务器进行加密通信，服务器可以实现1对多的通信，客户端也可以用来验证掌握私钥的服务器身份。非对称加密的特点是信息传输1对多，服务器只需要维持一个私钥就能够和多个客户端进行加密通信，但服务器发出的信息能够被所有的客户端解密，且该算法的计算复杂，加密速度慢。它需要两个密钥，一个是公开密钥，另一个是私有密钥；公钥用作加密，私钥则用作解密。使用公钥把明文加密后所得的密文，只能用相对应的私钥才能解密并得到原本的明文，最初用来加密的公钥不能用作解密。由于加密和解密需要两个不同的密钥，故被称为非对称加密；不同于加密和解密都使用同一个密钥的对称加密。公钥可以公开，可任意向外发布；私钥不可以公开，
+    \item 非对称加密：即常见的 RSA 算法，还包括 ECC、DH 等算法\citep{结城浩2015图解密码技术}，算法特点是，密钥成对出现，一般称为公钥(公开)和私钥(保密)，公钥加密的信息只能私钥解开，私钥加密的信息只能公钥解开。因此掌握公钥的不同客户端之间不能互相解密信息，只能和掌握私钥的服务器进行加密通信，服务器可以实现1对多的通信，客户端也可以用来验证掌握私钥的服务器身份。非对称加密的特点是信息传输1对多，服务器只需要维持一个私钥就能够和多个客户端进行加密通信，但服务器发出的信息能够被所有的客户端解密。该算法的计算复杂，加密速度慢。它需要两个密钥，一个是公开密钥，另一个是私有密钥；公钥用作加密，私钥则用作解密。使用公钥把明文加密后所得的密文，只能用相对应的私钥才能解密并得到原本的明文，最初用来加密的公钥不能用作解密。由于加密和解密需要两个不同的密钥，故被称为非对称加密；不同于加密和解密都使用同一个密钥的对称加密。公钥可以公开，可任意向外发布；私钥不可以公开，
     
-    \item 对称加密：常见的有AES-CBC、DES、3DES、AES-GCM等\citep{结城浩2015图解密码技术}，相同的密钥可以用于信息的加密和解密，掌握密钥才能获取信息，能够防止信息窃听，通信方式是1对1;对称加密的优势是信息传输1对1，需要共享相同的密码，密码的安全是保证信息安全的基础，服务器和 N 个客户端通信，需要维持 N 个密码记录，且缺少修改密码的机制。
+    \item 对称加密：常见的有AES-CBC、DES、3DES、AES-GCM等\citep{结城浩2015图解密码技术}，相同的密钥可以用于信息的加密和解密，掌握密钥才能获取信息，能够防止信息窃听，通信方式是1对1;对称加密的优势是信息传输1对1且加密解密计算速度快。对称加密需要共享相同的密码，密码的安全是保证信息安全的基础，服务器和 N 个客户端通信，需要维持 N 个密码记录，且缺少修改密码的机制。
     
     \item 散列算法：常见的有MD5、SHA1、SHA256\citep{结城浩2015图解密码技术}，该类函数特点是函数单向不可逆、对输入非常敏感、输出长度固定和输入的长度无关，针对数据的任何修改都会改变散列函数的结果，这种性质称为抗碰撞性(collision resistance)，用于防止信息篡改并验证数据的完整性;在信息传输过程中，散列函数不能单独实现信息防篡改，因为明文传输，中间人可以修改信息之后重新计算信息摘要，因此需要对传输的信息以及信息摘要进行加密。
 
@@ -33,7 +33,7 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 \end{itemize}
 
 \subsection{HTTPS握手过程}
-在HTTPS承载数据时候，通信实体通过握手过程来认证对方的身份，协商加密算法以及交换密钥信息，新词握手阶段是整个协议的安全技术，图\ref{fig:https-handshake}表示的是HTTPS的握手过程。
+在HTTPS承载数据时候，通信实体通过握手过程来认证对方的身份，协商加密算法以及交换密钥信息，握手阶段是整个协议的安全的基础，图\ref{fig:https-handshake}表示的是HTTPS的握手过程，主要包含7个步骤，详细介绍如下：
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.90\textwidth]{HTTPS-handshake.pdf}
@@ -46,7 +46,7 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 	\item \textbf{client hello：}客户端首先主动发起请求，以明文传输请求信息：包括版本信息，加密套件候选列表，压缩算法候选列表，随机数，扩展字段信息。相关信息如下：
 	
 	\begin{itemize}
-	    \item 版本信息：SSL 1.0没用公开使用；SSL 2.0于1995发布，2011年被弃用（参考RFC 6176）；SSL 3.0于1996年发布，2011年被废弃（参考RFC 7568）；TLS 1.0于1999年发布，计划2020年弃用，TLS 1.1	于2006年发布，计划2020年弃用\citet{bright2018apple}；TLS 1.2于2008年发布；TLS 1.3于2018年发布。	
+	    \item 版本信息：SSL 1.0没用公开使用；SSL 2.0于1995发布，2011年被弃用（参考RFC 6176）；SSL 3.0于1996年发布，2011年被废弃（参考RFC 7568）；TLS 1.0于1999年发布，计划2020年弃用，TLS 1.1	于2006年发布，计划2020年弃用\citep{bright2018apple}；TLS 1.2于2008年发布；TLS 1.3于2018年发布。	
 	    \item 客户端的加密套件ciphersuites列表：每个加密套件对应着四个主要的功能组合---认证算法AU（身份验证）、密钥交换算法keyExchange密钥协商、对称加密算法Enc信息加密、和信息摘要Mac信息完整性校验。
 	    \item 支持的压缩算法列表：用于后续的压缩计算\citep{hollenbeck2004transport}。
 	    \item 随机数：用于后续的密钥生成。
@@ -55,9 +55,9 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 	
 	\item \textbf{server hello + server certificate + server hello done：}
 	\begin{itemize}
-	    \item server hello服务器返回协商的信息，主要和client hello比较类似，区别在于服务器端对于cipher suite进行了选择，压缩算法进行了选择；
-	    \item server certificate 服务器端配置对应的证书链，用于身份验证和密钥交换；
-	    \item server hello done，通知客户端server hello信息发送结束。这个过程也是通过明文进行传输的，通过抓包，可以获取到加密套件cipher suite.server hello done通知客户端srver hello信息发送结束。
+	    \item server hello：服务器返回协商的信息，主要和client hello比较类似，区别在于服务器端对于cipher suite进行了选择，压缩算法进行了选择；
+	    \item server certificate：服务器端配置对应的证书链，用于身份验证和密钥交换；
+	    \item server hello done：通知客户端server hello信息发送结束。这个过程也是通过明文进行传输的，通过抓包，可以获取到加密套件cipher suite.server hello done通知客户端srver hello信息发送结束。
 	\end{itemize}
 	
 	\item \textbf{客户端验证证书的合法性：}证书是第三方机构提供的，采用证书的原因在于公开加密还存在一些问题就是无法证明公开秘钥的正确性，为了解决这个问题，HTTPS采取了有数字证实认证机构和其相关机构颁发的公开秘钥证书。在客户端：如浏览器中保存了相关的证书信息，如果证书通过才会进行后续的通信，否则根据错误的信息提示操作。合法性的检验包括：证书链的可信性，证书是否被吊销，有效期以及域名。
@@ -67,10 +67,13 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 		enc\_key=Fuc(random\_C,random\_S,Pre\-master)
 	\end{equation}
 	
-	\item \textbf{change cipher spec + encrypted handshake messege:}服务器用私钥解密加密的Pre-master，基于之前的random\_C和random\_S计算得到协商密钥, 计算之前所有接受信息的hash值，然后解密客户端发送的encrypted handshake messege，验证数据和密钥的正确性。之后，change cipher spec，验证通过以后，服务器也要发送change cipher spec以告知客户端后期的通信都是采用协商的密钥与算法进行通信。然后是encrypted handshake messege阶段，服务器也将结合当前通信参数信息生成一段数据并采用协商密钥session secret与算法加密发送给客户端。
-	\item \textbf{握手结束：}客户端计算接收到的数据的hash值，采用协商好的密钥解密服务器发送过来的encrypted handshake messege验证服务器发送的数据和密钥，验证通过则握手结束。
+	\item \textbf{change cipher spec + encrypted handshake message:}服务器用私钥解密加密的Pre-master，基于之前的random\_C和random\_S计算得到协商密钥, 计算之前所有接受信息的hash值，然后解密客户端发送的encrypted handshake message，验证数据和密钥的正确性。之后，change cipher spec，验证通过以后，服务器也要发送change cipher spec以告知客户端后期的通信都是采用协商的密钥与算法进行通信。然后是encrypted handshake message阶段，服务器也将结合当前通信参数信息生成一段数据并采用协商密钥session secret与算法加密发送给客户端。
+	\item \textbf{握手结束：}客户端计算接收到的数据的hash值，采用协商好的密钥解密服务器发送过来的encrypted handshake message验证服务器发送的数据和密钥，验证通过则握手结束。
 	\item \textbf{加密通信:}开始使用协商的密钥与算法进行加密通信。
 \end{itemize}
+
+综上，HTTPS握手过程中存在明文传输的过程，在这些过程中会泄露出可以用于流量识别任务的信息。
+
 
 \section{流量识别相关概念}
 流量识别主要是指在网络的出入口按照不同的粒度识别不同应用的流量。下面介绍在流量识别领域的一些相关概念：
@@ -78,13 +81,13 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
     \item 数据流：一般使用五元组\textit{[源IP, 源端口, 目的IP, 目的端口, 协议类型]}来定义数据流，一条数据流由多个数据包构成。
     \item 流特征：数据流层面定义的特征，主要由流的连接时间、流的总字节数等的统计量计算得出，基于这些特征使用机器学习算法可以用于流量识别工作。
     \item 数据包特征：数据包层面的特征，如数据包的大小、方向、到达时间间隔等数值及其统计量，这些特征也被广泛用于基于机器学习的流量识别工作中。
-    \item 流量识别：根据输出的形式，流量识别可以分为协议识别、应用识别、异常流量识别等。根据识别的对象可以分为流级、主机集、会话级等。
+    \item 流量识别：根据输出的形式，流量识别可以分为协议识别、应用识别、异常流量识别等。根据识别的对象可以分为流级、主机级、会话级等。
 \end{itemize}
 
 \section{相关机器学习/深度学习技术}
 \subsection{常用的机器学习算法}
 \begin{itemize}
-    \item \textbf{随机森林：}在机器学习中，随机森林是一个包含多个决策树的分类器最早由\citep{breiman2001random}提出。随机森林是以决策树为基础的一种更高级的算法，并且其输出的类别是由个别树输出的类别的众数而定。目前，针对各个主流语言都有随机森林的实现\footnote{http://www.stat.berkeley.edu/~breiman/RandomForests/cc\_software.htm}\footnote{http://www.alglib.net/dataanalysis/decisionforest.php}\footnote{http://cran.r-project.org/web/packages/randomForest/index.html}\footnote{https://code.google.com/p/randomforest-matlab}\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html}。
+    \item \textbf{随机森林：}在机器学习中，随机森林是一个包含多个决策树的分类器最早由\citep{breiman2001random}提出。随机森林是以决策树为基础的一种更高级的算法，并且其输出的类别是由个别树输出的类别的众数而定。目前，针对各个主流语言都有随机森林的实现\footnote{http://www.stat.berkeley.edu/~breiman/RandomForests/cc\_software.htm}$^{,}$\footnote{http://www.alglib.net/dataanalysis/decisionforest.php}$^{,}$\footnote{http://cran.r-project.org/web/packages/randomForest/index.html}$^{,}$\footnote{https://code.google.com/p/randomforest-matlab}$^{,}$\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html}。
     
     \item \textbf{支持向量机：}在机器学习中，支持向量机(support vector machine, SVM)是在分类与回归分析中分析数据的监督式学习模型与相关的学习算法。给定一组训练实例，每个训练实例被标记为属于两个类别中的一个或另一个，SVM训练算法创建一个将新的实例分配给两个类别之一的模型，使其成为非概率二元线性分类器。对于支持向量机来说，数据点被视为 p 维向量。
     
@@ -92,22 +95,22 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 
 
 \subsection{常用深度学习算法}
-深度学习算法尝试通过使用多层层次结构来学习（多个级别的）表示形式。近年来，其在图像处理\citep{krizhevsky2012imagenet, taigman2014deepface}，语音识别\citep{ping2017deep,xiong2016achieving}，自然语言处理\citep{gehring2017convolutional,zhang2015character}等领域均取得了良好的效果。近年来人工智能的热潮在很大程度上就是由深度学习的发展所推动的。下面主要介绍卷积神经网络和循环神经网络，本文基于这两个深度学习结构设计了特征提取和识别模型。
+深度学习是广义的机器学习的一个子领域，深度学习相关的算法一般使用深层神经网络实现，通过多层的特征学习逐步获得原始数据的高层特征表示，并进一步完成识别任务。近年来，其在图像处理\citep{krizhevsky2012imagenet, taigman2014deepface}，语音识别\citep{ping2017deep,xiong2016achieving}，自然语言处理\citep{gehring2017convolutional,zhang2015character}等领域均取得了良好的效果，近年来人工智能的热潮在很大程度上就是由深度学习的发展所推动的。下面主要介绍卷积神经网络和循环神经网络，本文基于这两个深度学习结构设计了特征提取和识别模型。
 \begin{itemize}
-    \item \textbf{卷积神经网络}卷积神经网路（Convolutional Neural Network, CNN）是一种前馈神经网络，在图像和语音识别方面能够给出更好的结果,它的人工神经元可以响应一部分覆盖范围内的周围单元，对于大型图像处理有出色表现。卷积神经网路由一个或多个卷积层和顶端的全连通层（对应经典的神经网路）组成，同时也包括关联权重和池化层（pooling layer）。典型的卷积网络包含三个阶段\citep{goodfellow2016deep}。
+    \item \textbf{卷积神经网络：}卷积神经网路（Convolutional Neural Network, CNN）是一种前馈神经网络，在图像和语音识别方面能够得到很好的结果。卷积神经网络的人工神经元可以响应一部分覆盖范围内的周围单元，对于大型图像处理有出色表现。其结构由一个或多个卷积层和顶端的全连通层（对应经典的神经网路）组成，同时也包括关联权重和池化层（pooling layer）。一个典型的卷积操作包含三个阶段\citep{goodfellow2016deep}。
     \begin{itemize}
-        \item 在第一阶段，该层并行执行几个卷积以产生一组线性激活。
-        \item 在第二阶段，每个线性激活都是通过非线性激活函数进行的。
-        \item 在第三阶段，使用池化操作进一步修改图层的输出。合并功能使用某个位置处相邻输出的统计特性来替换该位置处的网络输出
+        \item 在第一阶段，行执行卷积以产生一组线性输出，通常为卷积核和输入的点乘后求和操作。
+        \item 在第二阶段，将上一阶段的线性输出输入给非线性激活函数，得到非线性输出。
+        \item 在第三阶段，使用池化操作进一步修改图层的输出。合并功能使用某个位置处相邻输出的统计特性来替换该位置处的网络输出。
     \end{itemize}
     
-    对于时间序列数据，它可以被认为是以一定时间间隔采样的一维网格，对于图像数据，其可以被认为是二维像素网格。卷积神经网络表示网络采用称为卷积的数学运算,如图\ref{fig:CNN_2D}是二维卷积神经网络的结构图，二位卷积神经网络用于学习空间特征，尤其在图像领域取得了优秀的效果, 对于二维图像,输入为I，二维内核K, 卷积的计算过程如公式\ref{eqn:cnn-operation}：
+    对于时间序列数据，卷积可以被认为是以一定时间间隔采样的一维网格，对于图像数据，其可以被认为是二维像素网格。如图\ref{fig:CNN_2D}是二维卷积神经网络的结构图，二位卷积神经网络用于学习空间特征，尤其在图像领域取得了优秀的效果, 对于二维图像,输入为I，二维内核K, 卷积的计算过程如公式\ref{eqn:cnn-operation}。
     \begin{equation}
     \label{eqn:cnn-operation}
         S(i,j)=(I*K)(i,j)=\sum_{m}\sum_{n}I(m,n)K(i-m,j-n)
     \end{equation}
     
-    如图\ref{fig:CNN_1D}是一维卷积神经网络的结构图，一维卷积神经网络常用于学习序列特征，在很多场景中其性能已经得到了验证：\citet{kim2014convolutional}使用一维卷积神经网络完成了句子分类任务。 
+    如图\ref{fig:CNN_1D}是一维卷积神经网络的结构图，一维卷积神经网络常用于学习序列特征，在很多场景中其性能已经得到了验证，如\citet{kim2014convolutional}首次使用一维卷积神经网络完成了句子分类任务，并取得优秀的结果。 
     \begin{figure}[!htbp]
         \centering
         \begin{subfigure}[b]{0.45\textwidth}
@@ -128,12 +131,9 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
         \label{fig:CNN}
     \end{figure}
     
-    
-    
-    
-    \item \textbf{循环神经网络} 
+    \item \textbf{循环神经网络：} 
     如图\ref{fig:simple-rnn}所示为循环神经网络(RNN)隐藏层层级展开图。 
-    $t-1, t, t+1$表示时间序列, $X$表示输入的样本。 $S_t$表示样本在时间$t$处的的记忆,$S_t = f(W*St-1 +U*X_t)$，$o_t$表示输出向量，$o_t=g(Vs_t)$，其中$W$表示输入的权重,其中$f$可以是$tanh,relu,sigmoid$等激活函数，$g$通常是$softmax$，当然也可以是其他激活函数。这里的$W,U,V$在每个时刻都是相等的(权重共享)。$U$表示此刻输入的样本的权重,$V$表示输出的样本权重.单纯的RNN因为无法处理随着递归，权重指数级爆炸或梯度消失问题，难以捕捉长期时间关联；而结合长短神经记忆(LSTM)可以很好解决这个问题\citep{hochreiter1997long}。
+    $t-1, t, t+1$表示时间序列, $X$表示输入的样本。 $h^{t}$表示样本在时间$t$处的的记忆,$h^{(t)} = f(W \times h^{(t-1)}+U \times  X^{(t)})$，$o^{t}$表示输出向量，$o^{(t)}=g(V \times h^{(t)})$，其中$W$表示输入的权重,其中$f$可以是$tanh,relu,sigmoid$等激活函数，$g$通常是$softmax$，当然也可以是其他激活函数。这里的$W,U,V$在每个时刻都是相等的(权重共享)。$U$表示此刻输入的样本的权重,$V$表示输出的样本权重。简单的循环神经网络无法处理随着递归，权重指数级爆炸或梯度消失问题，难以捕捉长期时间关联；而结合长短神经记忆(LSTM)可以很好解决这个问题\citep{hochreiter1997long}。
     
     如图\ref{fig:lstm}，LSTM可以通过“门”结构来去除或者增加“细胞状态”的信息,实现了对重要内容的保留和对不重要内容的去除.通过Sigmoid层输出一个0到1之间的概率值，描述每个部分有多少量可以通过，0表示“不允许任务变量通过”，1表示“运行所有变量通过 ”。用于遗忘的门叫做"遗忘门"（见图\ref{fig:simple-rnn}的$f$），用于信息增加的叫做"信息增加门"，（见图\ref{fig:simple-rnn}的$i$），最后是用于输出的"输出门"（见图\ref{fig:simple-rnn}的$o$）。
     \begin{itemize}
@@ -161,17 +161,17 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
     \end{figure}
     
     
-    \item \textbf{Embedding方法}
-    Embedding在数学上表示一个映射：$f:X \rightarrow Y$  ， 也就是一个函数。其中该函数满足两个性质：injective （单射的）：即单射函数，每个X只有唯一的Y对应;structure-preserving（结构保存）：比如在X所属的空间上  ，那么映射后在Y所属空间上同理  。那么对于word embedding, 就是找到一个映射(函数)将单词(word)映射到另外一个空间(其中这个映射具有injective和structure-preserving的特点), 生成在一个新的空间上的表达。
+    \item \textbf{Embedding方法：}
+    Embedding 是一个将离散变量转为连续低维向量表示的一个方式,在数学上表示一个映射：$f:X \rightarrow Y$  ， 也就是一个函数。其中该函数满足单射和结构保存两个性质,即每个X只有唯一的Y对应且在X所属的空间上且比如在$X$所属的空间上$X1 < X2$,那么映射后在$Y$所属空间上同理 $Y1 < Y2$。Embedding不仅能够有效降低变量的表示维度，同时还可以学习变量的上下文信息。
     
     
 \end{itemize}
 
 
 \subsection{增量学习方法}
-增量学习是一种机器学习方法\citep{Geng2009}，其中，每当出现新示例并根据新示例调整所学内容时，学习过程就会被触发。增量学习与传统机器学习最显着的区别在于，它不假定在学习过程开始之前就可以提供足够的训练集，但是随着时间的流逝，会出现新增的训练样本。增量学习能够不丢失先前学习的知识，不断改进学习模型的能力。
+增量学习是一种机器学习方法\citep{Geng2009}，每当出现新示例并根据新示例调整所学内容时，学习过程就会被触发。增量学习与传统机器学习最显着的区别在于，它不假定在学习过程开始之前就可以提供足够的训练集，即训练集样本的类别会持续增加。增量学习能够不丢失先前学习的知识，不断改进学习模型的能力。
 
-增量学习已经被用于处理针对诸如图像分类，解决图像类别增加带来的\emph{灾难性遗忘}问题。灾难遗忘是指在新增类别上训练的模型在旧类别数据上的性能急剧下降\citep{li2017learning,rebuffi2017icarl,shmelkov2017incremental}。一些研究通过随机或根据相关性度量\citep{hinton2015distilling,rebuffi2017icarl}选择保留了属于先前任务的一小部分数据，并在处理新问题时使用它们来保留旧任务的准确性。
+增量学习已经被用于处理针对诸如图像分类等开集问题上，解决图像类别增加带来的\emph{灾难性遗忘}问题。灾难遗忘是指在新增类别上训练的模型在旧类别数据上的性能急剧下降的现象\citep{li2017learning,rebuffi2017icarl,shmelkov2017incremental}。为了克服灾难遗忘问题，一些研究通过选择保留了属于先前任务的一小部分数据，并在处理新问题时使用它们来保留旧任务的准确性\citep{hinton2015distilling,rebuffi2017icarl}，这种迭代训练的过程是一种典型的增量学习方法。
 
 \subsection{激活函数}在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数。常见的激活函数包括Sigmoid(见公式：\ref{eqn:Sigmoid})、tanh(见公式：\ref{eqn:tanh})、ReLU(见公式：\ref{eqn:ReLU})、LeakyReLU(见公式：\ref{eqn:LeakyReLU})、ELU(见公式：\ref{eqn:ELU})等，这些非线性的函数使得神经网络具有更强的特征建模能力。
 

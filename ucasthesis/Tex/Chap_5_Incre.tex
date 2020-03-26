@@ -1,14 +1,11 @@
 \chapter{基于增量学习的新增移动应用识别方法}\label{chap:transfer}
 \section{引言}
-目前的加密流量识别方法具有一个主要缺点是新应用继续遭受\textit{灾难性遗忘}\citep{french1999catastrophic,robins1995catastrophic,kirkpatrick2017overcoming}的困扰，当逐步增加新的应用类别进行培训时，整体性能会急剧下降。当前已有的研究工作均是需要全部的流量数据来训练，针对新出现的应用，需要将原来的流量数据和新来的应用的流量数据合并一起重新进行训练，当应用不断出现，训练的样本数量会急剧增加，这将给流量数据的存储以及模型的训练带来巨大的压力。为了解决这个问题，提出一种基于增量学习的新增移动应用识别方法---\emph{IncreAIBMF}\footnote{\underline{Incre}mental Learning for \underline{A}pplication \underline{I}dentification Over HTTPS Traffic \underline{B}ased on \underline{M}ulti-view \underline{F}eatures}，以使用新的应用数据以及仅对应于旧应用样本的一小样本集逐步学习深度神经网络。
-
-为了验证本章提出的IncreAIBMF模型的有效性，在本章将IncreAIBMF模型分别和针对AIBMF模型微调、全量训练进行比较。
-
+目前的加密流量识别方法具有一个主要缺点是新应用继续遭受\textit{灾难性遗忘}\citep{french1999catastrophic,robins1995catastrophic,kirkpatrick2017overcoming}的困扰，当逐步增加新的应用类别进行培训时，整体性能会急剧下降。当前已有的研究工作均是需要全部的流量数据来训练，针对新出现的应用，需要将原来的流量数据和新来的应用的流量数据合并一起重新进行训练，当应用不断出现，训练的样本数量会急剧增加，这将给流量数据的存储以及模型的训练带来巨大的压力。为了解决这个问题，本文提出一种基于增量学习的新增移动应用识别方法---\emph{IncreAIBMF}\footnote{\underline{Incre}mental Learning for \underline{A}pplication \underline{I}dentification Over HTTPS Traffic \underline{B}ased on \underline{M}ulti-view \underline{F}eatures}，使用新增的应用流量数据以及旧应用代表性流量样本，结合旧类别识别模型逐步学习深度神经网络。为了验证本章提出的IncreAIBMF模型的有效性，在本章将IncreAIBMF模型分别和针对AIBMF模型微调、全量训练进行比较。
 
 
 \section{方法阐述}
 
-如图\ref{fig:IncreAIBMF-architecture}所示，IncreAIBMF由三个步骤构成：训练集构建，训练，代表性流量样本更新。
+如图\ref{fig:IncreAIBMF-architecture}所示，IncreAIBMF由三个步骤构成：训练集构建，训练，代表性流量样本更新，分别介绍如下：
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.95\textwidth]{IncreAIBMF.pdf}
@@ -16,13 +13,13 @@
 	\label{fig:IncreAIBMF-architecture}
 \end{figure}
 
-分别介绍如下：
+
 \subsection{构建训练集}
-此阶段准备训练数据以用于下一个训练阶段。训练集由旧类的代表性样本的一部分（代表存储器中存储的旧类的示例）和新增的应用的流量样本组成。由于本章提出的IncreAIBMF方法使用了两个损失函数，即分类损失和精馏损失，因此每个样本都需要两个标签，与这两个损失相关联。为了进行分类，使用one-hot向量来指示应用出现在所有应用类中。对于精馏，使用每个识别模块使用旧的应用类生成的精馏标签。因此，每个样品的蒸馏标签与具有旧应用类的识别模块一样多。此时，两个标识模块将在旧应用上运行，一个标识模块将处理新应用。对样品进行评估时，将使用旧应用的两个识别模块生成的精馏标签用于精馏，将使用三个识别模块生成的精馏标签用于分类。
+训练集的构建是为下一个训练阶段准备训练集。训练集由旧应用类别的一部分即代表性流量样本和新增的应用的流量样本组成。由于本章提出的IncreAIBMF方法使用了两个损失函数，即分类损失和精馏损失，因此每个样本都需要两个标签，与这两个损失相关联。为了进行分类，使用one-hot向量来指示应用出现在所有应用类中；对于精馏，使用每个识别模块使用旧的应用类生成的精馏标签，精馏标签是通过将训练集使用旧模型计算出的概率值，每一个标签是一个向量。
 
 
 \subsection{训练过程}
-训练阶段将带有相应标签的增强训练集作为交叉蒸馏损失计算的输入，并更新整个网络体系结构的所有参数。 交叉蒸馏损失函数L定义如公式：（\ref{eqn:cdl}）所示。
+训练阶段将带有相应标签的训练集作为交叉精馏损失计算的输入，并更新整个网络体系结构的所有参数。交叉精馏损失函数L定义如公式\ref{eqn:cdl}所示。
 \begin{equation}
 	\label{eqn:cdl}
 	L(\omega)=L_{C}(\omega)+\lambda\sum_{f=1}^{F} L_{D_{f}}(\omega)
@@ -32,7 +29,7 @@
 %
 $ L_{D_{f}} $是分类层$ f $的蒸馏损失，$ F $是旧应用的分类层总数。
 %
-$ \lambda $是指交叉蒸馏损失中蒸馏损失的比率。 在训练过程中，本章将其设置为0.3。
+$ \lambda $是指交叉蒸馏损失中蒸馏损失的比率，在训练过程中，本章将其设置为0.3。
 %
 交叉熵损失$ L_{C}(\omega)$由下式给出：
 %
@@ -40,7 +37,7 @@ $ \lambda $是指交叉蒸馏损失中蒸馏损失的比率。 在训练过程�
 	L_{C}(\omega)=-\frac{1}{N} \sum_{i=1}^{N} \sum_{j=1}^{C} p_{i j} \log q_{i j}
 \end{equation}
 %
-其中$ qi $是通过对样本$ i $的分类层的logit应用softmax函数获得的分数，$ pi $是样本$ i $的基本事实，$ N $和$ C $表示 样本数和类别。
+其中$ qi $是通过对样本$ i $的分类层的logit应用softmax函数计算得到的值，$ pi $是样本$ i $的概率，$ N $和$ C $表示 样本数和类别。
 %
 精馏损失 $L_{D}(\omega)$ 定义为:
 %
@@ -48,15 +45,13 @@ $ \lambda $是指交叉蒸馏损失中蒸馏损失的比率。 在训练过程�
 	L_{D}(\omega)=-\frac{1}{N} \sum_{i=1}^{N} \sum_{j=1}^{C} { pdist }_{i j} \log {qd i s t}_{i j}
 \end{equation}
 %
-其中$ pdisti $和$ qdisti $分别是$ pi $和$ qi $的修改版本。
+其中$ pdisti $和$ qdisti $分别是$ pi $和$ qi $的变形。
 
 \subsection{代表性流样本更新}
-此阶段的目标是更新内存中的样本，并确保训练集的大小不会急剧增加。也就是说，在更新的内存中，本章将内存大小固定为$ K $个流量（本文中$ K = 100,000 $），并且与每个应用类别相对应的样本数为$ \frac{100,000}{C} $，此处$ C $表示应用的类别。
-
-然后，采用两个操作：
+此阶段的目标是更新内存中的样本，并确保训练集的大小不会急剧增加。也就是说，在更新的内存中，本章将内存大小固定为$ K $个流量样本（本文中$ K = 100,000 $），并且与每个应用类别相对应的样本数为$ \frac{100,000}{C} $，此处$ C $表示应用的类别。然后，采用两个操作：
 
 \begin{itemize}
-    \item 选择要存储的新样本：执行herding采样\citep{welling2009herding}，该策略根据与该类别的平均样本的距离生成一类样本的排序列表；给定样本的排序列表，选择列表中的前$ n $个样本。这些样本根据平均值最能代表该类别。
+    \item 选择要存储的新样本：执行herding采样\citep{welling2009herding}，该策略根据与该类别的平均样本的距离生成一类样本的排序列表；给定样本的排序列表，选择列表中的前$n$个样本。这些样本根据平均值最能代表该类别。
     \item 删除剩余的样本：由于样本存储在排序列表中，因此此操作很简单。存储单元仅需要从每个类别的样本集的末尾删除样本。请注意，执行此操作后，删除的样本将不再使用。 
 \end{itemize}
 
@@ -74,7 +69,7 @@ $ \lambda $是指交叉蒸馏损失中蒸馏损失的比率。 在训练过程�
 \end{figure}
 
 \subsection{增量学习效果}
-本章使用第四章所训练的AIBMF模型筛选出原始的代表性空间，并将该空间的大小设置为10条样本，筛选的方法为通过该模型计算出全连接层的向量，计算出所有样本计算的全连接层向量的中心点，保留前$100000/K$的距离中心点最近的样本，在这里100000表示的是代表性空间的大小，$K$代表的是类别数目，如一开始$K=20$，则在构建代表性空间的时候，每一个应用被保留的样本的数量将会$\leq 5000$，即每一个应用距离中心点的前5000个样本会被保留，不够5000的将会被全部保留。本章使用的评估指标和实验环境与第四章相同。
+本章使用第四章所训练的AIBMF模型筛选出原始的代表性空间，并将该空间的大小设置为10条样本，筛选的方法为通过该模型计算出全连接层的向量，计算出所有样本计算的全连接层向量的中心点，保留前$100000/K$的距离中心点最近的样本，在这里100000表示的是代表性空间的大小，$K$代表的是类别数目，如一开始$K=20$，则在构建代表性空间的时候，每一个应用被保留的样本的数量将会$\leq5000$，即每一个应用距离中心点的前5000个样本会被保留，不够5000的将会被全部保留。本章使用的评估指标和实验环境与第四章相同。
 
 
 为了验证基于增量学习的模型IncreAIBMF模型在所有50个应用20多万条流的样本上识别效果，本章首先使用第四章所述的AIBMF模型对50个应用一次性进行训练，其中18条流用于训练，2万多条流用于验证。
@@ -90,7 +85,7 @@ $ \lambda $是指交叉蒸馏损失中蒸馏损失的比率。 在训练过程�
 图\ref{fig:AIBMF-IncreAIBMF}是AIBMF和IncreAIBMF模型在识别效果上的对比，共包含了精度（Mpre）、宏$F_1$值（MF1）和宏召回率（Mrec）三个标准。
 \begin{itemize}
     \item 图\ref{fig:AIBMF-performance}是AIBMF在第四章的20个应用的数据集上，每次增加5个应用，将新旧应用数据一起训练的识别效果变化，AIBMF模型并没有因为识别类别的增加而出现识别能力骤降的问题，可见AIBMF在应用类别增加的时候具备鲁棒性。本章提出的IncreAIBMF模型是在AIBMF模型上就训练过程进行了改进，在这里，一次性训练全部的数据确立了AIBMF相关模型识别能力的上界（up bound）。
-    \item 图\ref{fig:IncreAIBMF-performance}是IncreAIBMF模型在应用类别增加的时候的识别效果变化，和AIBMF相比，识别性能的差距很微弱，即IncreAIBMF模型保持了AIBMF的识别性能。
+    \item 图\ref{fig:IncreAIBMF-performance}是IncreAIBMF模型在应用类别增加的时候的识别效果变化，和AIBMF相比，识别性能的差距很微弱，即使当应用的数量增加到50个时，IncreAIBMF在宏精度、宏F1值和宏召回率分别取得了87.3\%，87.8\%，88.9\%，即IncreAIBMF模型保持了AIBMF的识别性能。
 \end{itemize}
 
 \begin{figure}[!htbp]
@@ -119,8 +114,6 @@ $ \lambda $是指交叉蒸馏损失中蒸馏损失的比率。 在训练过程�
 	\bicaption{IncreAIBM 识别混淆矩阵}{IncreAIBM confuse matrix}
 	\label{fig:IncreAIBM-confuse-matrix}
 \end{figure}
-
-
 
 
 \section{本章小结}

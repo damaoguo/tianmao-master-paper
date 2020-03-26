@@ -2,10 +2,11 @@
 在基于HTTPS流量的移动应用识别技术研究中，需要大量的、有标记的数据的支持，所谓的标记就是产生流量的应用的应用名，而不是使用的协议类别等标签。然而，当前所公布的开源数据较少，数据量有限，流量数据标记较为粗糙，不满足本文的研究工作的需要。本章详细地描述了移动应用HTTPS流量数据地采集和处理方法，构建了一个覆盖11种应用类别、涉及50个移动应用、共计约20多万条HTTPS加密网络数据流的有标记数据集。
 
 \section{引言}
+
+
 本章首先本文调研了当前已经公开的流量数据集，总结这些公开数据集的来源、规模、协议、用途以及获取方式。现有的公开并被多项研究工作使用的数据集如下：
 \begin{itemize}
-    \item \citep{draper2016characterization}发布了VPN-nonVPN dataset (ISCXVPN2016)数据集\footnote{https://www.unb.ca/cic/datasets/vpn.html}，其中包括7种常规加密流量和7种协议封装流量。该项工作捕获了一个常规会话和一个通过VPN的会话，因此，共有14种流量类别：VOIP，VPN-VOIP，P2P，VPN-P2P等。数据内容包括：
-    请见表~\ref{tab:sample}。
+    \item \citep{draper2016characterization}发布了VPN-nonVPN dataset (ISCXVPN2016)数据集\footnote{https://www.unb.ca/cic/datasets/vpn.html}，其中包括7种常规加密流量和7种协议封装流量。该项工作捕获的流量包含常规会话和通过VPN的会话，共有14种流量类别，如VOIP，VPN-VOIP，P2P，VPN-P2P等，数据集内容包括见表~\ref{tab:sample}。
     \begin{table}[!htbp]
         \bicaption{ISCXVPN2016 数据集。}{ISCXVPN2016 Dataset.}
         \label{tab:sample}
@@ -29,7 +30,7 @@
         \end{tabular}
     \end{table}
     
-    \item Intrusion detection evaluation dataset (ISCXIDS2012) \footnote{https://www.unb.ca/cic/datasets/ids.html}：该数据集包括标记的网络跟踪，完整数据包有效负载（pcap格式），以及相关的配置文件，供研究人员公开使用。如表\ref{tab:ISCXIDS2012}所示，该数据集由7天的网络活动（正常和恶意）组成：
+    \item Intrusion detection evaluation dataset (ISCXIDS2012) \footnote{https://www.unb.ca/cic/datasets/ids.html}：该数据集包括标记的网络跟踪、完整数据包有效负载（pcap格式）以及相关的配置文件，供研究人员公开使用。如表\ref{tab:ISCXIDS2012}所示，该数据集由7天的网络活动（正常和恶意）组成。该数据集合主要针对恶意流量的分析，包含了HTTP，SSH等协议诸如DDOS，Brute Force等恶意行为，因此该数据集在本文研究的任务重合度有限。
      \begin{table}[!htbp]
         \bicaption{ISCXIDS2012数据集。}{ISCXIDS2012 Dataset.}
         \label{tab:ISCXIDS2012}
@@ -51,17 +52,17 @@
         \hline
         \end{tabular}
     \end{table}
-    该数据集合主要针对恶意流量的分析，包含了HTTP，SSH等协议诸如DDOS，Brute Force等恶意行为，因此该数据集在本文研究的任务重合度有限。
     
-    \item \citep{bujlow2015independent}提出数据集Independent Comparison of Popular DPI Tools for Traffic Classification" dataset\footnote{https://cba.upc.edu/monitoring/traffic-classification}，这个数据集包含767,690个流，这些流占53.31GB的纯数据包数据。存在759,720个数据流的应用程序名称（占所有流的98.96％），占数据量的51.93GB（97.41％）。数据集由一个pcap跟踪和一个INFO文件组成。INFO文件中的每一行对应于pcap跟踪中的流，并描述如下：
+    
+    \item \citep{bujlow2015independent}提出数据集Independent Comparison of Popular DPI Tools for Traffic Classification" dataset\footnote{https://cba.upc.edu/monitoring/traffic-classification}，这个数据集包含767,690个流，这些流占53.31GB的纯数据包数据。存在759,720个数据流的应用程序名称（占所有流的98.96％），占数据量的51.93GB（97.41％）。数据集由一个pcap跟踪和一个INFO文件组成，其中INFO文件中的每一行对应于pcap跟踪中的流，并描述如下：
     \begin{lstlisting}
      flow_id + "#" + start_time + "#" + end_time + "#" + local_ip + "#" + remote_ip + "#" + local_port + "#" + remote_port + "#" + transport_protocol + "#" + operating_system + "#" + process_name + "#" + HTTP Url + "#" + HTTP Referer + "#" + HTTP Content-type +"#"
     \end{lstlisting}
-    本数据集数据规模较大，但是数据是已经预处理，对于新的识别问题存在局限。
+    本数据集数据规模较大，但是数据是已经预处理，对于研究新的识别方法的帮助有限。
     
     \item DARPA99 traces\footnote{https://www.ll.mit.edu/r-d/datasets}:该ARPA99跟踪是来自MIT Lincoln实验室1999年的模拟网络的数据包。这些数据包中提供了所有网络数据，其标签是不同的攻击行为，因此该数据集不符合本文的研究场景。
     
-    \item MAWILab\footnote{http://mawi.wide.ad.jp/mawi/}：\citep{mawilab}发布了MAWILab数据集，可帮助研究人员评估流量异常检测方法。它由一组用于定位MAWI存档中异常流量的标签（样本点B和F）组成。使用基于图形的高级方法获得标签，该方法比较并组合了不同且独立的异常检测器。 数据集每天更新，以包括来自即将到来的应用程序和异常的新流量。该数据集是用于评估异常流量检测方法的，不符合本文的研究场景。
+    \item MAWILab\footnote{http://mawi.wide.ad.jp/mawi/}：\citep{mawilab}发布了MAWILab数据集，可帮助研究人员评估流量异常检测方法。它由一组用于定位MAWI存档中异常流量的标签组成。使用基于图形的高级方法获得标签，该方法比较并组合了不同且独立的异常检测器。数据集每天更新，以包括来自即将到来的应用程序和异常的新流量，用于评估异常流量检测方法的，因此不符合本文的研究场景。
     
     \item NLANR AMP Data\footnote{https://labs.ripe.net/datarepository/data-sets/nlanr-amp-data}：此数据是NLANR研究小组收集的一组活动测量（ping /traceroute）。 数据由多达130个有利点的网格中的测量组成，并且这些测量在1998年至2006年之间进行。该数据可用于Internet的纵向研究。RIPE数据存储库中的可用数据是NLANR网站上可用的原始数据的重新制作版本。该数据集包括的是\emph{ping/traceroute}和相关的流量，不符合本文的研究场景所需。
     
@@ -125,14 +126,14 @@ foreach($f in gci 1_Pcap *.pcap)
 原始的流量数据经过处理以后，一个原始的pacp文件将会按照流拆分为新的pcap小文件，文件存储的目录结构如图\ref{fig:file-tree}所示。
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.80\textwidth]{File-tree.pdf}
+	\includegraphics[width=0.45\textwidth]{File-tree.pdf}
 	\bicaption{流数据文件存储目录}{Traffic Flow File Tree}
 	\label{fig:file-tree}
 \end{figure}
 
-\textcolor{red}{数据集描述衔接}共采集了旅行交通、社交、影音视听、时尚购物新闻资讯、居家生活、聊天、图书阅读、金融理财、实用工具、游戏共计11种类型，50个应用的流量，使用sliptcap切分后得到20万多万条流量样本。
+下表展示了所构建的数据集的信息，共采集了旅行交通、社交、影音视听、时尚购物新闻资讯、居家生活、聊天、图书阅读、金融理财、实用工具、游戏共计11种类型，50个应用的流量，使用sliptcap切分后得到20万多万条流量样本。
 
-\begin{longtable}{c|c|c|c}
+\begin{longtable}{cccc}
     \bicaption{移动应用HTTPS流量数据集}{mobile apps HTTPS Traffic Dataset}\\
 	\hline
 	\textbf{应用名称} & \textbf{开发商} & \textbf{应用类别} & \textbf{流数量} \\
