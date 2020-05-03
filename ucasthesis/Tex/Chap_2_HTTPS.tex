@@ -1,5 +1,5 @@
 \chapter{相关概念及技术}\label{chap:https}
-本章详细介绍了论文所涉及到的理论知识，首先介绍HTTPS协议相关基础知识，然后针对本文中涉及到的机器学习、深度学习、增量学习方法总结。
+本章详细介绍了论文所涉及到的理论知识，首先介绍了HTTPS加密协议和流量识别的基础概念，然后对所涉及到的机器学习、深度学习以及增量学习等技术进行了简要介绍。
 
 \section{HTTPS加密技术介绍}
 \subsection{HTTPS加密理论基础}
@@ -8,17 +8,17 @@ HTTPS (Secure Hypertext Transfer Protocol)安全超文本传输协议，是一�
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.45\textwidth]{HTTPS-HTTP.pdf}
-	\bicaption{HTTPS,HTTPS和TLS/SSL的关系 }{Relationship between HTTPS, HTTPS and TLS/SSL}
+	\bicaption{HTTPS,HTTPS和TLS/SSL的关系。}{Relationship between HTTPS, HTTPS and TLS/SSL.}
 	\label{fig:https-http}
 \end{figure}
 
-HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称加密、对称加密以及散列算法。非对称加密主要用于密钥协商的阶段，加密的核心原理是最大素数求解，因此非对称加密和解密的过程比较困难。对称加密重要用于密钥协商好之后的加密通信，这个密钥主要是客户端发起的（ 即客户端产生的Pre-master，于是，客户端和服务端之间的通信是一对一的加密通信），在这个过程中，多次使用了hash算法，hash算法将不同长度的信息计算为等长的信息，hash过程是不可逆的，目的是为了验证数据的完整性。对称加密过程相对于非对称加密要简单，在HTTPS握手过程中首先使用的非对称加密协商出了对称加密的私钥。针对三类算法的介绍如下：
+HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称加密、对称加密以及散列算法。非对称加密主要用于密钥协商的阶段，加密的核心原理是最大素数求解，因此非对称加密和解密的过程比较困难；对称加密重要用于密钥协商好之后的加密通信，这个密钥主要是客户端发起的（ 即客户端产生Pre-master，客户端和服务端之间的通信是一对一的加密通信）；散列算法（hash）将不同长度的信息计算为等长的信息，hash过程是不可逆的，目的是为了验证数据的完整性。对称加密过程相对于非对称加密要简单，在HTTPS握手过程中首先使用的非对称加密协商出了对称加密的私钥。针对三类算法的介绍如下：
 \begin{itemize}
-    \item 非对称加密：即常见的 RSA 算法，还包括 ECC、DH 等算法\citep{结城浩2015图解密码技术}，算法特点是，密钥成对出现，一般称为公钥(公开)和私钥(保密)，公钥加密的信息只能私钥解开，私钥加密的信息只能公钥解开。因此掌握公钥的不同客户端之间不能互相解密信息，只能和掌握私钥的服务器进行加密通信，服务器可以实现1对多的通信，客户端也可以用来验证掌握私钥的服务器身份。非对称加密的特点是信息传输1对多，服务器只需要维持一个私钥就能够和多个客户端进行加密通信，但服务器发出的信息能够被所有的客户端解密。该算法的计算复杂，加密速度慢。它需要两个密钥，一个是公开密钥，另一个是私有密钥；公钥用作加密，私钥则用作解密。使用公钥把明文加密后所得的密文，只能用相对应的私钥才能解密并得到原本的明文，最初用来加密的公钥不能用作解密。由于加密和解密需要两个不同的密钥，故被称为非对称加密；不同于加密和解密都使用同一个密钥的对称加密。公钥可以公开，可任意向外发布；私钥不可以公开，
+    \item 非对称加密：即常见的 RSA 算法，还包括 ECC、DH 等算法\citep{结城浩2015图解密码技术}，算法特点是，密钥成对出现，一般称为公钥(公开)和私钥(保密)，公钥加密的信息只能私钥解开，私钥加密的信息只能公钥解开。因此掌握公钥的不同客户端之间不能互相解密信息，只能和掌握私钥的服务器进行加密通信，服务器可以实现1对多的通信，客户端也可以用来验证掌握私钥的服务器身份。非对称加密的特点是信息传输1对多，服务器只需要维持一个私钥就能够和多个客户端进行加密通信，但服务器发出的信息能够被所有的客户端解密。该算法的计算复杂，加密速度慢。它需要两个密钥，一个是公开密钥，另一个是私有密钥；公钥用作加密，私钥则用作解密。使用公钥把明文加密后所得的密文，只能用相对应的私钥才能解密并得到原本的明文，最初用来加密的公钥不能用作解密。由于加密和解密需要两个不同的密钥，故被称为非对称加密；不同于加密和解密都使用同一个密钥的对称加密。公钥可以公开，私钥不可以公开。
     
-    \item 对称加密：常见的有AES-CBC、DES、3DES、AES-GCM等\citep{结城浩2015图解密码技术}，相同的密钥可以用于信息的加密和解密，掌握密钥才能获取信息，能够防止信息窃听，通信方式是1对1;对称加密的优势是信息传输1对1且加密解密计算速度快。对称加密需要共享相同的密码，密码的安全是保证信息安全的基础，服务器和 N 个客户端通信，需要维持 N 个密码记录，且缺少修改密码的机制。
+    \item 对称加密：常见的有AES-CBC、DES、3DES、AES-GCM等\citep{结城浩2015图解密码技术}，相同的密钥可以用于信息的加密和解密，掌握密钥才能获取信息，能够防止信息窃听，通信方式是1对1;对称加密的优势是信息传输1对1且加密解密计算速度快。对称加密需要共享相同的密码，密码的安全是保证信息安全的基础，服务器和 N 个客户端通信，需要维持 N 个密码记录。
     
-    \item 散列算法：常见的有MD5、SHA1、SHA256\citep{结城浩2015图解密码技术}，该类函数特点是函数单向不可逆、对输入非常敏感、输出长度固定和输入的长度无关，针对数据的任何修改都会改变散列函数的结果，这种性质称为抗碰撞性(collision resistance)，用于防止信息篡改并验证数据的完整性;在信息传输过程中，散列函数不能单独实现信息防篡改，因为明文传输，中间人可以修改信息之后重新计算信息摘要，因此需要对传输的信息以及信息摘要进行加密。
+    \item 散列算法：常见的有MD5、SHA1、SHA256\citep{结城浩2015图解密码技术}，该类函数特点是函数单向不可逆、对输入非常敏感、输出长度固定和输入的长度无关，针对数据的任何修改都会改变散列函数的结果，这种性质称为抗碰撞性(collision resistance)，用于防止信息篡改并验证数据的完整性。在信息传输过程中，散列函数不能单独实现信息防篡改，因为明文传输，中间人可以修改信息之后重新计算信息摘要，因此需要对传输的信息以及信息摘要进行加密。
 
 \end{itemize}
 
@@ -37,30 +37,30 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.90\textwidth]{HTTPS-handshake.pdf}
-	\bicaption{HTTTPS握手过程}{HTTPS handshake}
+	\bicaption{HTTTPS握手过程。}{HTTPS handshake.}
 	\label{fig:https-handshake}
 \end{figure}
 
 \begin{itemize}
     % https://segmentfault.com/a/1190000016636897
-	\item \textbf{client hello：}客户端首先主动发起请求，以明文传输请求信息：包括版本信息，加密套件候选列表，压缩算法候选列表，随机数，扩展字段信息。相关信息如下：
+	\item \textbf{client hello：}客户端首先主动发起请求，以明文传输请求信息：包括版本信息、加密套件候选列表、压缩算法候选列表、随机数以及扩展字段信息等。相关信息如下：
 	
 	\begin{itemize}
 	    \item 版本信息：SSL 1.0没用公开使用；SSL 2.0于1995发布，2011年被弃用（参考RFC 6176）；SSL 3.0于1996年发布，2011年被废弃（参考RFC 7568）；TLS 1.0于1999年发布，计划2020年弃用，TLS 1.1	于2006年发布，计划2020年弃用\citep{bright2018apple}；TLS 1.2于2008年发布；TLS 1.3于2018年发布。	
 	    \item 客户端的加密套件ciphersuites列表：每个加密套件对应着四个主要的功能组合---认证算法AU（身份验证）、密钥交换算法keyExchange密钥协商、对称加密算法Enc信息加密、和信息摘要Mac信息完整性校验。
 	    \item 支持的压缩算法列表：用于后续的压缩计算\citep{hollenbeck2004transport}。
 	    \item 随机数：用于后续的密钥生成。
-	    \item 扩展字段信息：TLS/SSL扩展信息包括了server\_name, max\_fragment\_length, client\_certificate\_url, trusted\_ca\_keys,  truncated\_hmac,   status\_request等信息\citep{blake2003transport, eastlake2011transport}。其中SNI(Server Name Indication)定义在RFC 4366\citep{blake2003transport}中，是一项用于改善SSL/TLS的技术，在SSL3.0/TLS1.0中被启用,其在流量的精细化识别的工业应用中很常见。它允许客户端在发起SSL握手请求时(具体说来，是客户端发出SSL请求中的ClientHello阶段)，就提交请求的Host信息，使得服务器能够切换到正确的域并返回相应的证书。早期的SSL2.0根据经典的公钥基础设施PKI(Public Key Infrastructure)设计，它默认认为：一台服务器(或者说一个IP)只会提供一个服务，所以在SSL握手时，服务器端可以确信客户端申请的是哪张证书。在HTTP协议中，请求的域名作为主机头(Host)放在HTTP Header中，所以服务器端知道应该把请求引向哪个域名，但是早期的SSL做不到这一点，因为在SSL握手的过程中，根本不会有Host的信息，所以服务器端通常返回的是配置中的第一个可用证书。因而一些较老的环境，可能会产生多域名分别配好了证书，但返回的始终是同一个。既然问题的原因是在SSL握手时缺少主机头信息，那么补上就是了，即添加扩展。
+	    \item 扩展字段信息：TLS/SSL扩展信息包括了server\_name、 max\_fragment\_length、 client\_certificate\_url、 trusted\_ca\_keys、  truncated\_hmac和status\_request等信息\citep{blake2003transport, eastlake2011transport}。其中SNI(Server Name Indication)定义在RFC 4366\citep{blake2003transport}中，是一项用于改善SSL/TLS的技术，在SSL3.0/TLS1.0中被启用,其在流量的精细化识别的工业应用中很常见。它允许客户端在发起SSL握手请求时(具体说来，是客户端发出SSL请求中的ClientHello阶段)，就提交请求的Host信息，使得服务器能够切换到正确的域并返回相应的证书。早期的SSL2.0根据经典的公钥基础设施PKI(Public Key Infrastructure)设计，它默认认为：一台服务器(或者说一个IP)只会提供一个服务，所以在SSL握手时，服务器端可以确认客户端申请的是哪张证书。在HTTP协议中，请求的域名作为主机头(Host)放在HTTP Header中，所以服务器端知道应该把请求引向哪个域名，但是早期的SSL在握手的过程中，根本不会有Host的信息，所以服务器端通常返回的是配置中的第一个可用证书。因而一些较老的环境，可能会产生多域名分别配好了证书，但返回的始终是同一个。既然问题的原因是在SSL握手时缺少主机头信息，需要添加扩展。
 	\end{itemize}
 	
 	\item \textbf{server hello + server certificate + server hello done：}
 	\begin{itemize}
-	    \item server hello：服务器返回协商的信息，主要和client hello比较类似，区别在于服务器端对于cipher suite进行了选择，压缩算法进行了选择；
-	    \item server certificate：服务器端配置对应的证书链，用于身份验证和密钥交换；
+	    \item server hello：服务器返回协商的信息，主要和client hello比较类似，区别在于服务器端对于cipher suite进行了选择，压缩算法进行了选择。
+	    \item server certificate：服务器端配置对应的证书链，用于身份验证和密钥交换。
 	    \item server hello done：通知客户端server hello信息发送结束。这个过程也是通过明文进行传输的，通过抓包，可以获取到加密套件cipher suite.server hello done通知客户端srver hello信息发送结束。
 	\end{itemize}
 	
-	\item \textbf{客户端验证证书的合法性：}证书是第三方机构提供的，采用证书的原因在于公开加密还存在一些问题就是无法证明公开秘钥的正确性，为了解决这个问题，HTTPS采取了有数字证实认证机构和其相关机构颁发的公开秘钥证书。在客户端：如浏览器中保存了相关的证书信息，如果证书通过才会进行后续的通信，否则根据错误的信息提示操作。合法性的检验包括：证书链的可信性，证书是否被吊销，有效期以及域名。
+	\item \textbf{客户端验证证书的合法性：}证书是第三方机构提供的，采用证书的原因在于公开加密还存在一些问题就是无法证明公开秘钥的正确性，为了解决这个问题，HTTPS采取了有数字证实认证机构和其相关机构颁发的公开秘钥证书。在客户端：如浏览器中保存了相关的证书信息，如果证书通过才会进行后续的通信，否则根据错误的信息提示操作。合法性的检验包括：证书链的可信性、证书是否被吊销、有效期以及域名。
 	
 	\item \textbf{client key exchange + change cipher spec:}合法性验证通过后客户端计算随机产生Pre-master，使用公钥加密，发送给服务器，此时此刻，客户端实际已经计算出协商密钥了，用到的信息是之前产生的。通过计算协商密钥，change\_cipher\_spec客户端通知服务器后续的通信都是通过协商密钥对称加密的方式进行。encrypted handshake messge,结合之前使用到的所有通信参数的hash值与其他的相关信息生成一段数据，采用协商密钥session secret与算法进行加密，然后发送服务器用于数据与握手验证。
 	\begin{equation}
@@ -89,13 +89,13 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 \begin{itemize}
     \item \textbf{随机森林：}在机器学习中，随机森林是一个包含多个决策树的分类器最早由\citep{breiman2001random}提出。随机森林是以决策树为基础的一种更高级的算法，并且其输出的类别是由个别树输出的类别的众数而定。目前，针对各个主流语言都有随机森林的实现\footnote{http://www.stat.berkeley.edu/~breiman/RandomForests/cc\_software.htm}$^{,}$\footnote{http://www.alglib.net/dataanalysis/decisionforest.php}$^{,}$\footnote{http://cran.r-project.org/web/packages/randomForest/index.html}$^{,}$\footnote{https://code.google.com/p/randomforest-matlab}$^{,}$\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html}。
     
-    \item \textbf{支持向量机：}在机器学习中，支持向量机(support vector machine, SVM)是在分类与回归分析中分析数据的监督式学习模型与相关的学习算法。给定一组训练实例，每个训练实例被标记为属于两个类别中的一个或另一个，SVM训练算法创建一个将新的实例分配给两个类别之一的模型，使其成为非概率二元线性分类器。对于支持向量机来说，数据点被视为 p 维向量。
+    \item \textbf{支持向量机：}在机器学习中，支持向量机(support vector machine, SVM)是在分类与回归分析中分析数据的监督式学习模型与相关的学习算法。给定一组训练实例，每个训练实例被标记为属于两个类别中的一个或另一个，SVM训练算法创建一个将新的实例分配给两个类别之一的模型，使其成为非概率二元线性分类器。
     
 \end{itemize}
 
 
 \subsection{常用深度学习算法}
-深度学习是广义的机器学习的一个子领域，深度学习相关的算法一般使用深层神经网络实现，通过多层的特征学习逐步获得原始数据的高层特征表示，并进一步完成识别任务。近年来，其在图像处理\citep{krizhevsky2012imagenet, taigman2014deepface}，语音识别\citep{ping2017deep,xiong2016achieving}，自然语言处理\citep{gehring2017convolutional,zhang2015character}等领域均取得了良好的效果，近年来人工智能的热潮在很大程度上就是由深度学习的发展所推动的。下面主要介绍卷积神经网络和循环神经网络，本文基于这两个深度学习结构设计了特征提取和识别模型。
+深度学习是广义的机器学习的一个子领域，深度学习相关的算法一般使用深层神经网络实现，通过多层的特征学习逐步获得原始数据的高层特征表示，并进一步完成识别任务。近年来，其在图像处理\citep{krizhevsky2012imagenet, taigman2014deepface}、语音识别\citep{ping2017deep,xiong2016achieving}、自然语言处理\citep{gehring2017convolutional,zhang2015character}等领域均取得了良好的效果，近年来人工智能的热潮在很大程度上就是由深度学习的发展所推动的。下面主要介绍卷积神经网络和循环神经网络，本文基于这两个深度学习结构设计了特征提取和识别模型。
 \begin{itemize}
     \item \textbf{卷积神经网络：}卷积神经网路（Convolutional Neural Network, CNN）是一种前馈神经网络，在图像和语音识别方面能够得到很好的结果。卷积神经网络的人工神经元可以响应一部分覆盖范围内的周围单元，对于大型图像处理有出色表现。其结构由一个或多个卷积层和顶端的全连通层（对应经典的神经网路）组成，同时也包括关联权重和池化层（pooling layer）。一个典型的卷积操作包含三个阶段\citep{goodfellow2016deep}。
     \begin{itemize}
@@ -139,7 +139,7 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
     \begin{itemize}
         \item 第一步就是决定细胞状态需（见图\ref{fig:simple-rnn}的$f$）要丢弃哪些信息。这部分操作是通过一个称为忘记门的sigmoid单元来处理的。它通过查看和信息来输出一个0-1之间的向量，该向量里面的0-1值表示细胞状态中的哪些信息保留或丢弃多少。0表示不保留，1表示都保留。
         \item 第二步是决定给细胞状态添加哪些新的信息。这一步又分为两个步骤，首先，利用和通过一个称为输入门的操作来决定更新哪些信息。然后利用和通过一个tanh层得到新的候选细胞信息，这些信息可能会被更新到细胞信息中。
-        \item 第三步将更新旧的细胞信息$C_{t-1}$，变为新的细胞信息$C_{t}$。更新的规则就是通过忘记门选择忘记旧细胞信息的一部分，通过输入门选择添加候选细胞信息$C_{t}$的一部分得到新的细胞信息$C_{t}$。更新完细胞状态后需要根据输入的和来判断输出细胞的哪些状态特征，这里需要将输入经过一个称为输出门的sigmoid层得到判断条件，然后将细胞状态经过tanh层得到一个-1~1之间值的向量，该向量与输出门得到的判断条件相乘就得到了最终该RNN单元的输出。
+        \item 第三步将更新旧的细胞信息$C_{t-1}$，变为新的细胞信息$C_{t}$。更新的规则就是通过忘记门选择忘记旧细胞信息的一部分，通过输入门选择添加候选细胞信息$C_{t}$的一部分得到新的细胞信息$C_{t}$。更新完细胞状态后需要根据输入的和来判断输出细胞的哪些状态特征，这里需要将输入经过一个称为输出门的sigmoid层得到判断条件，然后将细胞状态经过tanh层得到一个-1\~1之间值的向量，该向量与输出门得到的判断条件相乘就得到了最终该RNN单元的输出。
     \end{itemize}
     
     \begin{figure}[!htbp]
@@ -173,7 +173,7 @@ HTTPS加密通信功能实现主要是依赖于三类基本的算法：非对称
 
 增量学习已经被用于处理针对诸如图像分类等开集问题上，解决图像类别增加带来的\emph{灾难性遗忘}问题。灾难遗忘是指在新增类别上训练的模型在旧类别数据上的性能急剧下降的现象\citep{li2017learning,rebuffi2017icarl,shmelkov2017incremental}。为了克服灾难遗忘问题，一些研究通过选择保留了属于先前任务的一小部分数据，并在处理新问题时使用它们来保留旧任务的准确性\citep{hinton2015distilling,rebuffi2017icarl}，这种迭代训练的过程是一种典型的增量学习方法。
 
-\subsection{激活函数}在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数。常见的激活函数包括Sigmoid(见公式：\ref{eqn:Sigmoid})、tanh(见公式：\ref{eqn:tanh})、ReLU(见公式：\ref{eqn:ReLU})、LeakyReLU(见公式：\ref{eqn:LeakyReLU})、ELU(见公式：\ref{eqn:ELU})等，这些非线性的函数使得神经网络具有更强的特征建模能力。
+\subsection{常用激活函数}在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数。常见的激活函数包括Sigmoid(见公式：\ref{eqn:Sigmoid})、tanh(见公式：\ref{eqn:tanh})、ReLU(见公式：\ref{eqn:ReLU})、LeakyReLU(见公式：\ref{eqn:LeakyReLU})、ELU(见公式：\ref{eqn:ELU})等，这些非线性的函数使得神经网络具有更强的特征建模能力。
 
 \begin{subequations}
 	\begin{equation}

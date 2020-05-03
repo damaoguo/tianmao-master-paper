@@ -1,15 +1,15 @@
 \chapter{基于增量学习的新增移动应用识别方法}\label{chap:transfer}
 \section{引言}
-目前的加密流量识别方法具有一个主要缺点是新应用继续遭受\textit{灾难性遗忘}\citep{french1999catastrophic,robins1995catastrophic,kirkpatrick2017overcoming}的困扰，当逐步增加新的应用类别进行培训时，整体性能会急剧下降。当前已有的研究工作均是需要全部的流量数据来训练，针对新出现的应用，需要将原来的流量数据和新来的应用的流量数据合并一起重新进行训练，当应用不断出现，训练的样本数量会急剧增加，这将给流量数据的存储以及模型的训练带来巨大的压力。为了解决这个问题，本文提出一种基于增量学习的新增移动应用识别方法---\emph{IncreAIBMF}\footnote{\underline{Incre}mental Learning for \underline{A}pplication \underline{I}dentification Over HTTPS Traffic \underline{B}ased on \underline{M}ulti-view \underline{F}eatures}，使用新增的应用流量数据以及旧应用代表性流量样本，结合旧类别识别模型逐步学习深度神经网络。为了验证本章提出的IncreAIBMF模型的有效性，在本章将IncreAIBMF模型分别和针对AIBMF模型微调、全量训练进行比较。
+目前移动应用识别方法存在一个主要缺点是新应用继续遭受\textit{灾难性遗忘}\citep{french1999catastrophic,robins1995catastrophic,kirkpatrick2017overcoming}的困扰，当逐步增加新的应用类别进行训练的时，整体性能会急剧下降。当前已有的研究工作均是需要全部的流量数据来训练，针对新出现的应用，需要将原来的流量数据和新来的应用的流量数据合并一起重新进行训练，当应用不断出现，训练的样本数量会急剧增加，这将给流量数据的存储以及模型的训练带来巨大的压力。因此，本章将在第四章所构建的移动应用识别模型基础上，借助增量学习思想解决新增移动应用的识别问题。
 
 
 \section{方法阐述}
-
-如图\ref{fig:IncreAIBMF-architecture}所示，IncreAIBMF由三个步骤构成：训练集构建，训练，代表性流量样本更新，分别介绍如下：
+本章提出一种基于增量学习的新增移动应用识别方法---\emph{IncreAIBMF}\footnote{\underline{Incre}mental Learning for \underline{A}pplication \underline{I}dentification Over HTTPS Traffic \underline{B}ased on \underline{M}ulti-view \underline{F}eatures}，使用新增的应用流量数据以及旧应用代表性流量样本，结合旧类别识别模型逐步学习深度神经网络。为了验证本章提出的IncreAIBMF模型的有效性，在本章将IncreAIBMF模型分别和针对AIBMF模型微调、全量训练进行比较。
+如图\ref{fig:IncreAIBMF-architecture}所示，IncreAIBMF由三个步骤构成：训练集构建、训练和代表性流量样本更新，分别介绍如下：
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.95\textwidth]{IncreAIBMF.pdf}
-	\bicaption{IncreAIBMF架构}{IncreAIBMF architecture}
+	\bicaption{IncreAIBMF架构。}{IncreAIBMF architecture.}
 	\label{fig:IncreAIBMF-architecture}
 \end{figure}
 
@@ -58,18 +58,18 @@ $ \lambda $是指交叉蒸馏损失中蒸馏损失的比率，在训练过程中
 
 \section{实验评估}
 
-\subsection{微调效果}
-面对越来越多的应用，常用的方法之一是微调。微调方法是指基于训练后的模型添加少量任务特定的参数。例如，对于分类问题，将softmax网络层添加到模型中，然后对新类进行重新训练以进行微调。对于新收集的30个应用的流量，本文首先使用微调的想法，冻结在20个旧应用上训练的AIBMF网络模型的参数以进行特征提取，并且仅修改完全连接的层数。在每个训练步骤添加$L \in \emph{[5,10,15,20,25,30]}$个应用。如图\ref {fig:AIBMF-Fine-tuning}所示，新模型无法完成旧类别和新类别中的识别任务，本文将这种糟糕的表现归因于灾难性的遗忘。在真实的应用环境中，应用不断出现，原始模型的数量要远远少于新增数据的数量，另外实验结果表明，微调的方法并不能够很好处理本研究课题面对的新增应用数量巨大带来的问题。
+\subsection{AIBMF模型微调识别效果}
+面对越来越多的应用，常用的方法之一是微调。微调方法是指基于训练后的模型添加少量任务特定的参数。例如，对于分类问题，将softmax网络层添加到模型中，然后对新类进行重新训练以进行微调。对于新收集的30个应用的流量，本文首先使用微调的想法，冻结在20个旧应用上训练的AIBMF网络模型的参数以进行特征提取，并且仅修改完全连接的层数。在每个训练步骤添加$L \in \emph{[5,10,15,20,25,30]}$个应用。如图\ref {fig:AIBMF-Fine-tuning}所示，新模型无法完成旧类别和新类别中的识别任务，本文将这种糟糕的表现归因于灾难遗忘问题。在真实的应用环境中，应用不断出现，原始模型的数量要远远少于新增数据的数量，另外实验结果表明，微调的方法并不能够很好处理本研究课题面对的新应用剧增带来的问题。
 
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.45\textwidth]{AIBMF-Fine-tuning.pdf}
-	\bicaption{AIBMF微调识别效果}{AIBMF Fine tuning}
+	\bicaption{AIBMF微调识别效果。}{AIBMF Fine-tuning Performance.}
 	\label{fig:AIBMF-Fine-tuning}
 \end{figure}
 
-\subsection{增量学习效果}
-本章使用第四章所训练的AIBMF模型筛选出原始的代表性空间，并将该空间的大小设置为10条样本，筛选的方法为通过该模型计算出全连接层的向量，计算出所有样本计算的全连接层向量的中心点，保留前$100000/K$的距离中心点最近的样本，在这里100000表示的是代表性空间的大小，$K$代表的是类别数目，如一开始$K=20$，则在构建代表性空间的时候，每一个应用被保留的样本的数量将会$\leq5000$，即每一个应用距离中心点的前5000个样本会被保留，不够5000的将会被全部保留。本章使用的评估指标和实验环境与第四章相同。
+\subsection{IncreAIBMF模型识别效果}
+本章使用第四章所训练的AIBMF模型筛选出原始的代表性空间，并将该空间的大小设置为10条样本，筛选的方法为通过该模型计算出全连接层的向量，计算出所有样本计算的全连接层向量的中心点，保留前$\frac{100000}{K}$的距离中心点最近的样本，在这里100000表示的是代表性空间的大小，$K$代表的是类别数目，如一开始$K=20$，则在构建代表性空间的时候，每一个应用被保留的样本的数量将会$\leq5000$，即每一个应用距离中心点的前5000个样本会被保留，不够5000的将会被全部保留。本章使用的评估指标和实验环境与第四章相同。
 
 
 为了验证基于增量学习的模型IncreAIBMF模型在所有50个应用20多万条流的样本上识别效果，本章首先使用第四章所述的AIBMF模型对50个应用一次性进行训练，其中18条流用于训练，2万多条流用于验证。
@@ -78,7 +78,7 @@ $ \lambda $是指交叉蒸馏损失中蒸馏损失的比率，在训练过程中
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.45\textwidth]{Time-cost-incre.eps}
-	\bicaption{AIBMF和IncreAIBM时间消耗对比 }{Time cost comparation between AIBMF and IncreAIBMF}
+	\bicaption{AIBMF和IncreAIBM时间消耗对比。}{Time cost comparation between AIBMF and IncreAIBMF.}
 	\label{fig:Time-cost}
 \end{figure}
 
@@ -111,10 +111,10 @@ $ \lambda $是指交叉蒸馏损失中蒸馏损失的比率，在训练过程中
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=0.65\textwidth]{Incre-confuse-matrix.pdf}
-	\bicaption{IncreAIBM 识别混淆矩阵}{IncreAIBM confuse matrix}
+	\bicaption{IncreAIBM 识别混淆矩阵。}{IncreAIBM confuse matrix.}
 	\label{fig:IncreAIBM-confuse-matrix}
 \end{figure}
 
 
 \section{本章小结}
-这一部分提出了IncreAIBMF模型，通过使用增量学习改进第四章提出的AIBMF模型，有效处理新增应用的流量数据的识别，使识别模型能够有效克服灾难遗忘问题，在新增应用的识别任务上，能够有效节约时间和空间，更加高效完成识别任务。
+本章提出一种基于增量学习的新增移动应用识别方法，称之为IncreAIBMF模型。通过使用增量学习改进第四章提出的AIBMF模型，有效处理新增应用的流量数据的识别，使识别模型能够有效克服灾难遗忘问题，在新增应用的识别任务上，能够有效节约时间和空间，更加高效完成识别任务。
